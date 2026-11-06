@@ -2,680 +2,1017 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>NoRestrictions AI — دردشة</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0d10">
+<title>NoRestrictions AI</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+
 <style>
-  :root{
-    --bg:#0b0d10; --panel:#12151a; --line:#1f242c; --text:#e8eaed; --muted:#8a919c;
-    --accent:#3ee6a8; --accent-ink:#04140d; --user:#1c3b30; --ai:#161a20; --err:#ff7a7a;
+:root {
+  --bg:#0b0d10;
+  --panel:#12151a;
+  --line:#252b33;
+  --text:#e8eaed;
+  --muted:#8a919c;
+  --accent:#3ee6a8;
+  --user:#1c3b30;
+  --ai:#171c23;
+  --error:#ff7777;
+}
+
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html,body {
+  width:100%;
+  height:100%;
+}
+
+body {
+  font-family:"IBM Plex Sans Arabic",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden;
+}
+
+.app {
+  width:100%;
+  max-width:900px;
+  height:100dvh;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  background:var(--panel);
+  border-inline:1px solid var(--line);
+}
+
+header {
+  min-height:65px;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border-bottom:1px solid var(--line);
+}
+
+.brand {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.dot {
+  width:9px;
+  height:9px;
+  background:var(--accent);
+  border-radius:50%;
+  box-shadow:0 0 10px var(--accent);
+}
+
+.actions {
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+button {
+  font-family:inherit;
+  cursor:pointer;
+}
+
+.ghost {
+  background:transparent;
+  border:1px solid var(--line);
+  color:var(--muted);
+  border-radius:8px;
+  padding:7px 11px;
+  font-size:13px;
+}
+
+.ghost:hover {
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+main {
+  flex:1;
+  overflow-y:auto;
+  padding:20px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  scroll-behavior:smooth;
+}
+
+.empty {
+  margin:auto;
+  text-align:center;
+  color:var(--muted);
+  max-width:450px;
+  line-height:1.8;
+}
+
+.empty h2 {
+  color:var(--text);
+  margin-bottom:8px;
+}
+
+.chips {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin-top:18px;
+}
+
+.chip {
+  background:var(--ai);
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:20px;
+  padding:8px 12px;
+  font-size:13px;
+}
+
+.chip:hover {
+  border-color:var(--accent);
+}
+
+.msg {
+  max-width:85%;
+  padding:11px 15px;
+  border-radius:14px;
+  line-height:1.8;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+.msg.user {
+  align-self:flex-start;
+  background:var(--user);
+  border-start-start-radius:4px;
+}
+
+.msg.ai {
+  align-self:flex-end;
+  background:var(--ai);
+  border:1px solid var(--line);
+  border-start-end-radius:4px;
+}
+
+.msg.error {
+  align-self:center;
+  color:var(--error);
+  background:transparent;
+  text-align:center;
+  font-size:13px;
+}
+
+.msg a {
+  color:var(--accent);
+  overflow-wrap:anywhere;
+}
+
+.codebox {
+  direction:ltr;
+  text-align:left;
+  margin:10px 0;
+  background:#080b0e;
+  border:1px solid var(--line);
+  border-radius:9px;
+  overflow:hidden;
+}
+
+.codebar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:7px 10px;
+  background:#1b2027;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.copy {
+  background:transparent;
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:5px;
+  padding:3px 9px;
+}
+
+pre {
+  padding:13px;
+  overflow-x:auto;
+  white-space:pre;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.typing {
+  color:var(--muted);
+  font-size:13px;
+}
+
+.typing span {
+  display:inline-block;
+  width:6px;
+  height:6px;
+  background:var(--muted);
+  border-radius:50%;
+  margin:0 3px;
+  animation:blink 1s infinite;
+}
+
+.typing span:nth-child(2) {
+  animation-delay:.2s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay:.4s;
+}
+
+@keyframes blink {
+  0%,100% {opacity:.2}
+  50% {opacity:1}
+}
+
+footer {
+  border-top:1px solid var(--line);
+  padding:12px;
+  padding-bottom:calc(12px + env(safe-area-inset-bottom));
+}
+
+form {
+  display:flex;
+  align-items:flex-end;
+  gap:9px;
+}
+
+textarea {
+  flex:1;
+  min-width:0;
+  min-height:48px;
+  max-height:150px;
+  resize:none;
+  outline:none;
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:12px;
+  color:var(--text);
+  padding:12px;
+  font:inherit;
+}
+
+textarea:focus {
+  border-color:var(--accent);
+}
+
+.send {
+  height:48px;
+  padding:0 19px;
+  border:0;
+  border-radius:11px;
+  background:var(--accent);
+  color:#06150e;
+  font-weight:700;
+}
+
+.send:disabled {
+  opacity:.4;
+  cursor:not-allowed;
+}
+
+.stop {
+  height:48px;
+  padding:0 13px;
+  border:0;
+  border-radius:10px;
+  background:#d94d4d;
+  color:white;
+}
+
+.hidden {
+  display:none !important;
+}
+
+.modal {
+  position:fixed;
+  inset:0;
+  background:#000a;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+  z-index:10;
+}
+
+.modal.show {
+  display:flex;
+}
+
+.sheet {
+  width:100%;
+  max-width:430px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:20px;
+  line-height:1.8;
+}
+
+.sheet h3 {
+  margin-bottom:10px;
+}
+
+.sheet p {
+  color:var(--muted);
+  font-size:14px;
+}
+
+.status {
+  margin-top:13px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  font-size:13px;
+}
+
+@media(max-width:600px) {
+  header {
+    padding:10px;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;justify-content:center;height:100dvh;overflow:hidden}
-  .app{width:100%;max-width:860px;display:flex;flex-direction:column;height:100%;border-inline:1px solid var(--line);background:var(--panel)}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem}
-  .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
-  .model{font-size:.75rem;color:var(--muted);font-weight:500;border:1px solid var(--line);padding:2px 8px;border-radius:999px}
-  .ghost{background:none;border:1px solid var(--line);color:var(--muted);padding:7px 12px;border-radius:8px;cursor:pointer;font:inherit;font-size:.85rem}
-  .ghost:hover{color:var(--accent);border-color:var(--accent)}
-  main{flex:1;overflow-y:auto;padding:22px 18px;display:flex;flex-direction:column;gap:14px}
-  .empty{margin:auto;text-align:center;color:var(--muted);max-width:420px}
-  .empty h2{color:var(--text);font-size:1.4rem;margin-bottom:8px}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
-  .chip{border:1px solid var(--line);background:var(--ai);color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:.85rem}
-  .chip:hover{border-color:var(--accent)}
-  .msg{max-width:82%;padding:11px 15px;border-radius:14px;line-height:1.75;white-space:pre-wrap;word-wrap:break-word;font-size:.97rem}
-  .msg.user{align-self:flex-start;background:var(--user);border-start-start-radius:4px}
-  .msg.ai{align-self:flex-end;background:var(--ai);border:1px solid var(--line);border-start-end-radius:4px}
-  .msg.err{align-self:center;color:var(--err);background:none;font-size:.88rem;text-align:center}
-  .codebox{direction:ltr;text-align:left;margin:10px 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#0a0c0f;white-space:normal}
-  .codebar{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#1a1f26;border-bottom:1px solid var(--line);font-size:.75rem;color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace}
-  .copy{background:none;border:1px solid var(--line);color:var(--text);border-radius:6px;padding:3px 10px;cursor:pointer;font:inherit;font-size:.75rem}
-  .copy:hover{border-color:var(--accent);color:var(--accent)}
-  .copy.ok{color:var(--accent);border-color:var(--accent)}
-  .codebox pre{margin:0;padding:12px 14px;overflow-x:auto;white-space:pre;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.86rem;line-height:1.6;color:#d7e1ea}
-  .msg code.inline{direction:ltr;unicode-bidi:isolate;background:#0a0c0f;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em}
-  .msg.ai:has(.codebox){max-width:94%}
-  .msg a{color:var(--accent);text-decoration:underline;text-underline-offset:3px;word-break:break-all}
-  .msg .h{display:block;font-weight:700;font-size:1.05em;margin-top:4px}
-  .openbtn{display:inline-flex;align-items:center;gap:8px;margin:6px 0;padding:9px 14px;border-radius:10px;background:var(--accent);color:var(--accent-ink)!important;text-decoration:none!important;font-weight:700;word-break:normal;white-space:normal}
-  .openbtn small{font-weight:500;opacity:.75;direction:ltr;unicode-bidi:isolate}
-  .sources{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-size:.82rem;color:var(--muted);white-space:normal;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .sources a{border:1px solid var(--line);border-radius:999px;padding:2px 10px;text-decoration:none;color:var(--text);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;word-break:normal}
-  .sources a:hover{border-color:var(--accent);color:var(--accent)}
-  .status{font-size:.8rem;color:var(--muted);margin-inline-start:6px}
-  .typing span{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:var(--muted);animation:b 1.2s infinite}
-  .typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
-  @keyframes b{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
-  form{display:flex;gap:10px;align-items:flex-end;padding:14px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
-  textarea{flex:1;resize:none;max-height:180px;min-height:48px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:1rem;outline:none}
-  textarea:focus{border-color:var(--accent)}
-  .send{height:48px;padding:0 20px;border:none;border-radius:12px;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;cursor:pointer}
-  .send:disabled{opacity:.4;cursor:not-allowed}
-  .hdr-actions{display:flex;gap:8px;align-items:center}
-  .devbtn{display:inline-flex;align-items:center;gap:7px}
-  .sdot{width:8px;height:8px;border-radius:50%;background:#555}
-  .sdot.on{background:var(--accent);box-shadow:0 0 8px var(--accent)}
-  .sdot.off{background:var(--err)}
-  .runbtn{background:var(--accent);color:var(--accent-ink);border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font:inherit;font-size:.75rem;font-weight:700}
-  .runbtn:disabled{opacity:.5;cursor:wait}
-  .autobtn.on{border-color:var(--accent);color:var(--accent)}
-  .stopbtn{background:var(--err);color:#fff;border:none;border-radius:10px;padding:0 14px;cursor:pointer;font:inherit;font-weight:700}
-  .codebar .acts{display:flex;gap:6px}
-  .runout{border-top:1px dashed var(--line);padding:10px 14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem;color:var(--muted);white-space:pre-wrap;max-height:260px;overflow:auto}
-  .runout.ok{color:#bfe9d6}.runout.bad{color:var(--err)}
-  .msg.user.tool{background:#11201b;border:1px dashed #2a4a3e;max-width:94%;font-size:.85rem}
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
-  .modal.show{display:flex}
-  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:560px;width:100%;max-height:90dvh;overflow:auto;padding:18px;line-height:1.7}
-  .sheet h3{font-size:1.1rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
-  .sheet h4{margin:14px 0 4px;font-size:.95rem;color:var(--accent)}
-  .sheet p,.sheet li{font-size:.88rem;color:var(--muted)}
-  .sheet ol{padding-inline-start:20px}
-  .sheet .codebox pre{white-space:pre-wrap;word-break:break-all}
-  .devstate{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-size:.88rem;margin:8px 0}
-  .warn{font-size:.8rem;color:#e6c86e;margin-top:10px}
-  .tabs{display:flex;gap:6px;margin-top:12px}
-  .tab{flex:1;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:7px;cursor:pointer;font:inherit;font-size:.85rem}
-  .tab.on{border-color:var(--accent);color:var(--accent)}
-  .dl{display:inline-block;margin:6px 0;padding:7px 14px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:700;text-decoration:none;font-size:.85rem}
-  .botrow{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-size:.88rem;margin:6px 0}
-  .botrow .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .botrow small{color:var(--muted)}
-  .field{display:block;width:100%;margin:6px 0;background:#0e1418;border:1px solid var(--line);color:inherit;border-radius:8px;padding:8px 10px;font:inherit;font-size:.85rem}
-  @media (max-width:600px){.msg{max-width:94%}.model{display:none}}
+
+  .brand {
+    font-size:13px;
+  }
+
+  .ghost {
+    padding:6px 8px;
+    font-size:11px;
+  }
+
+  .msg {
+    max-width:95%;
+  }
+
+  main {
+    padding:14px 10px;
+  }
+}
 </style>
 </head>
+
 <body>
+
 <div class="app">
-  <header>
-    <div class="brand"><span class="dot"></span>NoRestrictions AI <span class="model">notrack-uncensored</span></div>
-    <div class="hdr-actions">
-      <button class="ghost autobtn" id="autoBtn" type="button" title="تنفيذ أوامر الهاتف تلقائياً بدون ضغط زر">⚡ تلقائي</button>
-      <button class="ghost" id="botBtn" type="button">🤖 البوتات</button>
-      <button class="ghost devbtn" id="devBtn" type="button"><span class="sdot" id="devDot"></span>📱 اتصال</button>
-      <button class="ghost" id="newChat" type="button">محادثة جديدة</button>
-    </div>
-  </header>
-  <main id="chat"></main>
 
-  <div class="modal" id="devModal">
-    <div class="sheet">
-      <h3>📱 ربط الهاتف (Termux / Pydroid) <button class="ghost" id="devClose" type="button">إغلاق</button></h3>
-      <p>بعد الربط تستطيع أن تطلب من المساعد تنفيذ أوامر على هاتفك، مثل: «اعرض الملفات في التنزيلات» أو «ثبّت python» أو «كم نسبة البطارية؟». في وضع «⚡ تلقائي» تُنفَّذ الأوامر فوراً بدون ضغط أي زر، ويمكنك إيقافها بزر «⏹ إيقاف».</p>
-      <div class="devstate"><span class="sdot" id="devDot2"></span><span id="devText">جارٍ التحقق…</span></div>
-      <div class="tabs">
-        <button class="tab on" data-tab="termux" type="button">Termux</button>
-        <button class="tab" data-tab="pydroid" type="button">Pydroid 3</button>
-      </div>
-      <div id="tab-termux">
-        <ol>
-          <li>افتح Termux والصق هذا الأمر (يثبّت بايثون ويشغّل الوكيل):</li>
-        </ol>
-        <div id="termuxCmd"></div>
-        <p>اختياري: لأوامر البطارية والإشعارات والحافظة ثبّت تطبيق <b>Termux:API</b> ثم <code class="inline">pkg install termux-api -y</code>. وللوصول لملفات الهاتف شغّل <code class="inline">termux-setup-storage</code>.</p>
-        <a class="dl" href="https://f-droid.org/packages/com.termux/" target="_blank" rel="noopener">تحميل Termux</a>
-        <a class="dl" href="https://f-droid.org/packages/com.termux.api/" target="_blank" rel="noopener">تحميل Termux:API</a>
-      </div>
-      <div id="tab-pydroid" hidden>
-        <ol>
-          <li>افتح Pydroid 3 وثبّت مكتبة requests إن لم تكن مثبتة.</li>
-          <li>نزّل ملف agent.py ثم شغّله باستخدام مفتاح الجهاز المعروض في الأسفل.</li>
-        </ol>
-        <a class="dl" id="agentDownload" href="/agent.py" download>تحميل agent.py</a>
-        <p>انسخ أمر التشغيل الظاهر أدناه إلى الطرفية داخل Pydroid.</p>
-        <div id="pydroidCmd"></div>
-      </div>
-      <p class="warn">⚠️ المفتاح يعطي التحكم بالجهاز: لا تشاركه مع أحد. اترك نافذة Termux/Pydroid مفتوحة أثناء الاستخدام، وأوقفها بـ Ctrl+C.</p>
-      <div class="devstate">
-        <span>مفتاح الجهاز:</span>
-        <code id="deviceKeyText" class="inline"></code>
-        <button class="copy" id="copyKey" type="button">نسخ</button>
-      </div>
-      <button class="ghost" id="devReset" type="button">إعادة ربط الجهاز</button>
-    </div>
+<header>
+  <div class="brand">
+    <span class="dot"></span>
+    NoRestrictions AI
   </div>
 
-  <div class="modal" id="botModal">
-    <div class="sheet">
-      <h3>🤖 إدارة البوتات <button class="ghost" id="botClose" type="button">إغلاق</button></h3>
-      <p>أضف بوت تيليجرام أو ديسكورد لإدارته من خلال المحادثة.</p>
-      <div class="tabs">
-        <button class="tab bt on" data-p="telegram" type="button">Telegram</button>
-        <button class="tab bt" data-p="discord" type="button">Discord</button>
-      </div>
-      <div id="botList"></div>
-      <label for="botToken">Token</label>
-      <input class="field" id="botToken" type="password" autocomplete="off" placeholder="الصق توكن البوت هنا">
-      <label for="botId1" id="botId1Label">Chat ID (اختياري)</label>
-      <input class="field" id="botId1" autocomplete="off" placeholder="Chat ID أو Guild ID">
-      <label for="botId2" id="botId2Label" hidden>Channel ID</label>
-      <input class="field" id="botId2" autocomplete="off" placeholder="Channel ID" hidden>
-      <button class="send" id="botAdd" type="button">إضافة البوت</button>
-      <p id="botMsg"></p>
-    </div>
+  <div class="actions">
+    <button class="ghost" id="connectionBtn">اتصال</button>
+    <button class="ghost" id="newChat">محادثة جديدة</button>
   </div>
+</header>
 
+<main id="chat">
+</main>
+
+<footer>
   <form id="form">
-    <textarea id="input" rows="1" placeholder="اكتب رسالتك هنا..." autocomplete="off"></textarea>
-    <button class="send" id="sendBtn" type="submit">إرسال</button>
-    <button class="stopbtn" id="stopBtn" type="button" hidden>⏹ إيقاف</button>
+    <textarea
+      id="input"
+      rows="1"
+      placeholder="اكتب رسالتك هنا..."
+      autocomplete="off"
+    ></textarea>
+
+    <button class="stop hidden" id="stopBtn" type="button">
+      إيقاف
+    </button>
+
+    <button class="send" id="sendBtn" type="submit">
+      إرسال
+    </button>
   </form>
+</footer>
+
+</div>
+
+<div class="modal" id="connectionModal">
+  <div class="sheet">
+    <h3>حالة الاتصال</h3>
+    <p>
+      فحص الاتصال بخادم NoRestrictions AI.
+    </p>
+    <div class="status" id="connectionStatus">
+      لم يتم الفحص بعد.
+    </div>
+    <br>
+    <button class="ghost" id="checkConnection">فحص الاتصال</button>
+    <button class="ghost" id="closeModal">إغلاق</button>
+  </div>
 </div>
 
 <script>
-'use strict';
+"use strict";
 
-const $ = id => document.getElementById(id);
-const chat = $('chat'), form = $('form'), input = $('input');
-const sendBtn = $('sendBtn'), stopBtn = $('stopBtn');
+/* إعدادات الخادم */
 
-const DKEY = 'nr-device-key';
-const AKEY = 'nr-auto-run';
-const HKEY = 'nr-chat-history';
-const BKEY = 'nr-bots';
+const API_URL =
+"https://norestrictions-api.sdrhaldwane.workers.dev/api/chat";
+
+const HISTORY_KEY = "nr-chat-history";
+
+/* عناصر الصفحة */
+
+const chat = document.getElementById("chat");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("sendBtn");
+const stopBtn = document.getElementById("stopBtn");
+
+/* حالة التطبيق */
 
 let history = [];
-try { history = JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch {}
-let autoRun = localStorage.getItem(AKEY) === '1';
-let busy = false, stopped = false, autoChain = 0;
-let currentJob = null;
-let botPlatform = 'telegram';
+let busy = false;
+let activeController = null;
+let activeRequestId = 0;
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const safeUrl = s => {
-  try {
-    const u = new URL(s);
-    return ['http:', 'https:'].includes(u.protocol) ? u.href : null;
-  } catch { return null; }
-};
-const OPEN_RE = /(?:افتح|ادخل|اذهب إلى|روح إلى)\s+(https?:\/\/[^\s]+)/i;
-const TG_TOKEN_RE = /\b\d{5,12}:[A-Za-z0-9_-]{20,}\b/g;
-const DC_TOKEN_RE = /[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{20,}/g;
+/* تحميل المحادثات */
 
-function save(){
-  try { localStorage.setItem(HKEY, JSON.stringify(history.slice(-80))); } catch {}
-}
-function deviceKey(){
-  let k = localStorage.getItem(DKEY);
-  if (!k) {
-    const a = new Uint8Array(32);
-    crypto.getRandomValues(a);
-    k = Array.from(a, b => b.toString(16).padStart(2,'0')).join('');
-    localStorage.setItem(DKEY, k);
+try {
+  const saved = JSON.parse(
+    localStorage.getItem(HISTORY_KEY) || "[]"
+  );
+
+  if (Array.isArray(saved)) {
+    history = saved;
   }
-  return k;
-}
-function hasKey(){ return !!localStorage.getItem(DKEY); }
-
-function paintAuto(){
-  $('autoBtn').classList.toggle('on', autoRun);
-  $('autoBtn').textContent = autoRun ? '⚡ تلقائي: ON' : '⚡ تلقائي';
-}
-
-function setDeviceStatus(online, text){
-  $('devDot').className = 'sdot ' + (online ? 'on' : 'off');
-  $('devDot2').className = 'sdot ' + (online ? 'on' : 'off');
-  $('devText').textContent = text || (online ? 'الهاتف متصل' : 'الهاتف غير متصل');
-}
-
-let device = { online:false, paired:false, kind:null, info:null };
-
-async function refreshDevice(){
-  if (!hasKey()) {
-    device = { online:false, paired:false, kind:null, info:null };
-    setDeviceStatus(false, 'لم يتم ربط الهاتف بعد');
-    return;
-  }
-  try {
-    const r = await fetch('/api/device/status', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({key:deviceKey()})
-    });
-    const j = await r.json();
-    device = {
-      online:!!j.online,
-      paired:!!j.paired,
-      kind:j.kind || null,
-      info:j.info || null
-    };
-    setDeviceStatus(device.online, j.online ? 'الهاتف متصل' : 'الهاتف غير متصل');
-  } catch {
-    device.online = false;
-    setDeviceStatus(false, 'تعذر التحقق من اتصال الهاتف');
-  }
-}
-
-function openDeviceModal(){
-  const k = deviceKey();
-  $('deviceKeyText').textContent = k;
-  const origin = location.origin;
-  const cmd = `pkg install python curl -y && curl -sLO ${origin}/agent.py && NR_SERVER=${origin} python agent.py ${k}`;
-  $('termuxCmd').innerHTML = '';
-  const box = document.createElement('div');
-  box.className = 'codebox';
-  const pre = document.createElement('pre');
-  pre.textContent = cmd;
-  const bar = document.createElement('div');
-  bar.className = 'codebar';
-  const label = document.createElement('span');
-  label.textContent = 'Termux command';
-  const copy = document.createElement('button');
-  copy.className = 'copy';
-  copy.textContent = 'نسخ الأمر';
-  copy.onclick = async () => {
-    await navigator.clipboard.writeText(cmd);
-    copy.textContent = 'تم النسخ';
-    setTimeout(() => copy.textContent = 'نسخ الأمر', 1500);
-  };
-  bar.append(label, copy);
-  box.append(bar, pre);
-  $('termuxCmd').append(box);
-
-  const pCmd = `python agent.py ${k}`;
-  $('pydroidCmd').innerHTML = '';
-  const pbox = document.createElement('div');
-  pbox.className = 'codebox';
-  const ppre = document.createElement('pre');
-  ppre.textContent = pCmd;
-  const pbar = document.createElement('div');
-  pbar.className = 'codebar';
-  const pcopy = document.createElement('button');
-  pcopy.className = 'copy';
-  pcopy.textContent = 'نسخ الأمر';
-  pcopy.onclick = async () => {
-    await navigator.clipboard.writeText(pCmd);
-    pcopy.textContent = 'تم النسخ';
-    setTimeout(() => pcopy.textContent = 'نسخ الأمر', 1500);
-  };
-  pbar.append(pcopy);
-  pbox.append(pbar, ppre);
-  $('pydroidCmd').append(pbox);
-
-  $('agentDownload').href = origin + '/agent.py';
-  $('devModal').classList.add('show');
-  refreshDevice();
-}
-
-$('copyKey').onclick = async () => {
-  await navigator.clipboard.writeText(deviceKey());
-  $('copyKey').textContent = 'تم النسخ';
-  setTimeout(() => $('copyKey').textContent = 'نسخ', 1500);
-};
-
-function bubble(type, text, sources){
-  const el = document.createElement('div');
-  el.className = 'msg ' + type;
-  if (type === 'ai') renderRich(el, text || '', false);
-  else el.textContent = text || '';
-  if (Array.isArray(sources) && sources.length) {
-    const s = document.createElement('div');
-    s.className = 'sources';
-    s.append('المصادر:');
-    sources.forEach(x => {
-      const u = safeUrl(x.url || x);
-      if (!u) return;
-      const a = document.createElement('a');
-      a.href = u;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.textContent = x.title || u;
-      s.append(a);
-    });
-    el.append(s);
-  }
-  chat.append(el);
-  chat.scrollTop = chat.scrollHeight;
-  return el;
-}
-
-function addInline(el, text){
-  const urlRe = /(https?:\/\/[^\s<]+)/g;
-  let last = 0, m;
-  while ((m = urlRe.exec(text))) {
-    if (m.index > last) el.append(document.createTextNode(text.slice(last, m.index)));
-    const u = safeUrl(m[0].replace(/[),.،]+$/,''));
-    if (u) {
-      const a = document.createElement('a');
-      a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      a.textContent = u;
-      el.append(a);
-    } else el.append(document.createTextNode(m[0]));
-    last = urlRe.lastIndex;
-  }
-  if (last < text.length) el.append(document.createTextNode(text.slice(last)));
-}
-
-function codeBox(lang, code, runnable){
-  const box = document.createElement('div');
-  box.className = 'codebox';
-  const bar = document.createElement('div');
-  bar.className = 'codebar';
-  const label = document.createElement('span');
-  label.textContent = lang || 'code';
-  const acts = document.createElement('div');
-  acts.className = 'acts';
-  const btn = document.createElement('button');
-  btn.className = 'copy';
-  btn.textContent = 'نسخ';
-  btn.onclick = async () => {
-    await navigator.clipboard.writeText(code);
-    btn.textContent = 'تم النسخ';
-    btn.classList.add('ok');
-    setTimeout(() => { btn.textContent = 'نسخ'; btn.classList.remove('ok'); }, 1500);
-  };
-  const pre = document.createElement('pre');
-  pre.textContent = code;
-
-  if (runnable && lang && /^(python|py|bash|sh|javascript|js)$/i.test(lang)) {
-    const run = document.createElement('button');
-    run.className = 'runbtn';
-    run.textContent = '▶ تنفيذ على البوت';
-    const out = document.createElement('div');
-    out.hidden = true;
-    run.onclick = () => {
-      const a = run.dataset.auto === '1';
-      delete run.dataset.auto;
-      runHostBot(code, out, run, a);
-    };
-    acts.append(run);
-    box.append(out);
-  }
-  acts.append(btn);
-  bar.append(label, acts);
-  box.append(bar, pre);
-  return box;
-}
-
-function renderRich(el, text, runnable){
-  const re = /```([\w+#.-]*)[^\n]*\n?([\s\S]*?)(?:```|$)/g;
-  let last = 0, m;
-  while ((m = re.exec(text))) {
-    if (m.index > last) addInline(el, text.slice(last, m.index).replace(/\n+$/, ''));
-    el.appendChild(codeBox(m[1], m[2].replace(/\n$/, ''), runnable));
-    last = re.lastIndex;
-    if (m[0] === '') re.lastIndex++;
-  }
-  if (last < text.length) addInline(el, text.slice(last).replace(/^\n+/, ''));
-}
-
-function renderEmpty(){
-  chat.innerHTML = `<div class="empty"><h2>أهلاً 👋</h2><p>اسأل أي شيء. يستطيع البحث في الإنترنت، قراءة أي رابط ترسله، فتح المواقع لك، وتنفيذ أوامر على هاتفك بعد ربطه بـ Termux أو Pydroid (زر 📱 بالأعلى).</p>
-  <div class="chips">
-    <button class="chip" type="button">ابحث لي عن آخر أخبار التقنية اليوم</button>
-    <button class="chip" type="button">دخلني على يوتيوب</button>
-    <button class="chip" type="button">لخص لي هذه الصفحة: https://ar.wikipedia.org/wiki/ذكاء_اصطناعي</button>
-    <button class="chip" type="button">ساعدني في كتابة كود</button>
-    <button class="chip" type="button">اعرض لي الملفات في هاتفي ومعلومات الجهاز</button>
-  </div></div>`;
-  chat.querySelectorAll('.chip').forEach(c => c.onclick = () => {
-    input.value = c.textContent;
-    form.requestSubmit();
-  });
-}
-
-function render(){
-  chat.innerHTML = '';
-  if (!history.length) return renderEmpty();
-  history.forEach(m => bubble(m.role === 'user' ? 'user' : 'ai', m.content, m.sources));
-}
-
-let chatAbort = null;
-
-async function streamChat(payload, onEvent){
-  chatAbort = new AbortController();
-  const res = await fetch('https://norestrictions-api.sdrhaldwane.workers.dev/api/chat', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(payload),
-    signal:chatAbort.signal
-  });
-  const type = res.headers.get('content-type') || '';
-  if (!res.ok || !/ndjson/.test(type) || !res.body) {
-    const d = await res.json().catch(() => ({}));
-    if (res.ok && d.reply) return onEvent({t:'done', reply:d.reply, sources:d.sources});
-    throw Object.assign(new Error(d.error || ('خطأ ' + res.status)), {final:true});
-  }
-  const reader = res.body.getReader(), dec = new TextDecoder();
-  let buf = '', finished = false;
-  for (;;) {
-    const {value, done} = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, {stream:true});
-    let nl;
-    while ((nl = buf.indexOf('\n')) >= 0) {
-      const line = buf.slice(0,nl).trim();
-      buf = buf.slice(nl+1);
-      if (!line) continue;
-      let ev;
-      try { ev = JSON.parse(line); } catch { continue; }
-      if (ev.t === 'done' || ev.t === 'error') finished = true;
-      onEvent(ev);
-    }
-  }
-  if (!finished) throw new Error('انقطع الاتصال قبل اكتمال الرد.');
-}
-
-async function send(text, fromTool){
-  if (busy) return;
-  if (!fromTool) { autoChain = 0; stopped = false; }
-  busy = true;
-  sendBtn.disabled = true;
-  stopBtn.hidden = false;
-  if (!history.length) chat.innerHTML = '';
-  history.push({role:'user', content:text});
-  save();
-  bubble('user', text);
-  const typing = bubble('ai', '');
-  typing.classList.add('typing');
-
-  const setStatus = t => {
-    typing.innerHTML = '<span></span><span></span><span></span>' + (t ? '<em class="status"></em>' : '');
-    if (t) typing.querySelector('.status').textContent = t;
-  };
-  setStatus(/https?:\/\//.test(text) ? 'يقرأ الروابط…' : '');
-
-  if (hasKey()) await refreshDevice();
-
-  const payload = {
-    messages:history.map(m => ({role:m.role, content:m.content})),
-    device:device.online
-      ? {online:true, kind:device.kind, info:device.info, auto:autoRun}
-      : {online:false, paired:!!device.paired},
-    bots:botsForPrompt(),
-    auto:autoRun
-  };
-
-  let live = null, acc = '', pending = false;
-  const paint = () => {
-    pending = false;
-    if (!live) return;
-    live.innerHTML = '';
-    renderRich(live, acc.replace(/<<\s*(FETCH|SEARCH)\s*:[^>\n]*>?>?/gi, ''), false);
-    chat.scrollTop = chat.scrollHeight;
-  };
-
-  try {
-    let final = null;
-    for (let attempt = 0; attempt < 2 && !final; attempt++) {
-      try {
-        await streamChat(payload, ev => {
-          if (ev.t === 'status') {
-            if (!acc) setStatus(ev.text);
-          } else if (ev.t === 'delta') {
-            if (!live) {
-              typing.classList.remove('typing');
-              typing.innerHTML = '';
-              live = typing;
-            }
-            acc += ev.text;
-            if (!pending) {
-              pending = true;
-              requestAnimationFrame(paint);
-            }
-          } else if (ev.t === 'reset') {
-            acc = '';
-            live = null;
-            typing.classList.add('typing');
-            setStatus('يبحث ويقرأ…');
-          } else if (ev.t === 'done') {
-            final = ev;
-          } else if (ev.t === 'error') {
-            throw Object.assign(new Error(ev.error), {final:true});
-          }
-        });
-      } catch (e) {
-        if (e.final || e.name === 'AbortError' || acc || attempt) throw e;
-        setStatus('إعادة الاتصال…');
-        await sleep(800);
-      }
-    }
-
-    if (!final || !final.reply) throw new Error('لم يصل رد، حاول مرة أخرى.');
-    typing.remove();
-    const sources = Array.isArray(final.sources) ? final.sources : [];
-    history.push({role:'assistant', content:final.reply, sources});
-    save();
-    const aiEl = bubble('ai', final.reply, sources);
-    setTimeout(() => maybeAutoRun(aiEl), 0);
-    const open = final.reply.match(OPEN_RE);
-    if (open && safeUrl(open[1])) {
-      try { window.open(safeUrl(open[1]), '_blank', 'noopener'); } catch {}
-    }
-  } catch (e) {
-    typing.remove();
-    history.pop();
-    save();
-    if (e.name === 'AbortError') bubble('err', '⏹ تم إيقاف الرد.');
-    else bubble('err', '⚠️ ' + (/Failed to fetch|NetworkError|Load failed|network/i.test(e.message) ? 'انقطع الاتصال بالإنترنت، حاول مرة أخرى.' : e.message));
-    endAuto();
-    if (!fromTool) input.value = text;
-  } finally {
-    chatAbort = null;
-    busy = false;
-    sendBtn.disabled = false;
-    stopBtn.hidden = true;
-    input.focus();
-  }
-}
-
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  let text = input.value.trim();
-  if (!text || busy) return;
-  input.value = '';
-  input.style.height = '';
-  if (TG_TOKEN_RE.test(text) || DC_TOKEN_RE.test(text)) {
-    TG_TOKEN_RE.lastIndex = DC_TOKEN_RE.lastIndex = 0;
-    sendBtn.disabled = true;
-    text = await captureTokens(text);
-    sendBtn.disabled = false;
-  }
-  TG_TOKEN_RE.lastIndex = DC_TOKEN_RE.lastIndex = 0;
-  send(text);
-});
-
-input.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
-    e.preventDefault();
-    form.requestSubmit();
-  }
-});
-input.addEventListener('input', () => {
-  input.style.height = 'auto';
-  input.style.height = Math.min(input.scrollHeight, 180) + 'px';
-});
-
-document.getElementById('newChat').onclick = () => {
+} catch {
   history = [];
-  save();
-  render();
-  input.focus();
-};
-document.getElementById('devBtn').onclick = openDeviceModal;
-document.getElementById('autoBtn').onclick = () => {
-  autoRun = !autoRun;
-  localStorage.setItem(AKEY, autoRun ? '1' : '0');
-  paintAuto();
-};
-stopBtn.onclick = () => {
-  stopped = true;
-  if (currentJob) cancelJob(currentJob);
-  if (chatAbort) chatAbort.abort();
-  endAuto();
-};
-document.getElementById('devClose').onclick = () => $('devModal').classList.remove('show');
-document.getElementById('devModal').addEventListener('click', e => {
-  if (e.target.id === 'devModal') e.target.classList.remove('show');
-});
+}
 
-document.querySelectorAll('.tab[data-tab]').forEach(t => t.onclick = () => {
-  document.querySelectorAll('.tab[data-tab]').forEach(x => x.classList.toggle('on', x === t));
-  $('tab-termux').hidden = t.dataset.tab !== 'termux';
-  $('tab-pydroid').hidden = t.dataset.tab !== 'pydroid';
-});
+/* حفظ المحادثات */
 
-document.getElementById('devReset').onclick = async () => {
-  if (!confirm('سيتم فصل الجهاز الحالي وإنشاء مفتاح جديد. متابعة؟')) return;
-  if (hasKey()) {
-    try {
-      await fetch('/api/device/unpair', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({key:deviceKey()})
-      });
-    } catch {}
+function saveHistory() {
+  try {
+    localStorage.setItem(
+      HISTORY_KEY,
+      JSON.stringify(history.slice(-40))
+    );
+  } catch (error) {
+    console.error("History save error:", error);
   }
-  localStorage.removeItem(DKEY);
-  openDeviceModal();
-};
+}
 
-document.getElementById('botBtn').onclick = () => {
-  paintBots();
-  $('botModal').classList.add('show');
-};
-document.getElementById('botClose').onclick = () => $('botModal').classList.remove('show');
-document.getElementById('botModal').addEventListener('click', e => {
-  if (e.target.id === 'botModal') e.target.classList.remove('show');
-});
-document.querySelectorAll('.bt').forEach(t => t.onclick = () => setBotPlatform(t.dataset.p));
+/* تنظيف النصوص وعرضها بأمان */
 
-document.getElementById('botAdd').onclick = async () => {
-  const token = $('botToken').value.trim();
-  const id1 = $('botId1').value.trim();
-  const id2 = $('botId2').value.trim();
-  const msg = $('botMsg');
-  if (!token) {
-    msg.textContent = 'الصق التوكن أولاً';
+function createMessage(role, content) {
+  const element = document.createElement("div");
+
+  element.className =
+    role === "user" ? "msg user" : "msg ai";
+
+  renderContent(element, content);
+
+  chat.appendChild(element);
+  scrollBottom();
+
+  return element;
+}
+
+/* تحويل النص والروابط وأكواد البرمجة */
+
+function renderContent(element, content) {
+  element.replaceChildren();
+
+  const text = String(content || "");
+
+  const regex = /```([\w+#.-]*)\s*\n([\s\S]*?)```/g;
+
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+
+    if (match.index > lastIndex) {
+      addTextWithLinks(
+        element,
+        text.slice(lastIndex, match.index)
+      );
+    }
+
+    const box = document.createElement("div");
+    box.className = "codebox";
+
+    const bar = document.createElement("div");
+    bar.className = "codebar";
+
+    const label = document.createElement("span");
+    label.textContent = match[1] || "Code";
+
+    const copy = document.createElement("button");
+    copy.className = "copy";
+    copy.textContent = "نسخ";
+
+    const code = match[2];
+
+    copy.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(code);
+        copy.textContent = "تم النسخ";
+
+        setTimeout(() => {
+          copy.textContent = "نسخ";
+        }, 1500);
+      } catch {
+        copy.textContent = "تعذر النسخ";
+      }
+    };
+
+    bar.append(label, copy);
+
+    const pre = document.createElement("pre");
+    pre.textContent = code;
+
+    box.append(bar, pre);
+    element.appendChild(box);
+
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    addTextWithLinks(
+      element,
+      text.slice(lastIndex)
+    );
+  }
+}
+
+/* إظهار الروابط كرابط قابل للضغط */
+
+function addTextWithLinks(element, text) {
+  const regex = /(https?:\/\/[^\s<]+)/g;
+
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+
+    if (match.index > lastIndex) {
+      element.appendChild(
+        document.createTextNode(
+          text.slice(lastIndex, match.index)
+        )
+      );
+    }
+
+    let url = match[0].replace(/[),.،]+$/, "");
+
+    try {
+      const parsed = new URL(url);
+
+      if (
+        parsed.protocol === "https:" ||
+        parsed.protocol === "http:"
+      ) {
+        const link = document.createElement("a");
+
+        link.href = parsed.href;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = url;
+
+        element.appendChild(link);
+      } else {
+        element.appendChild(
+          document.createTextNode(url)
+        );
+      }
+    } catch {
+      element.appendChild(
+        document.createTextNode(url)
+      );
+    }
+
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    element.appendChild(
+      document.createTextNode(
+        text.slice(lastIndex)
+      )
+    );
+  }
+}
+
+/* التمرير إلى آخر رسالة */
+
+function scrollBottom() {
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* الشاشة الرئيسية */
+
+function renderEmpty() {
+  chat.innerHTML = `
+    <div class="empty">
+      <h2>أهلاً بك في NoRestrictions AI</h2>
+
+      <p>
+        اكتب سؤالك وسيجيبك الذكاء الاصطناعي.
+      </p>
+
+      <div class="chips">
+        <button class="chip">اشرح لي الذكاء الاصطناعي</button>
+        <button class="chip">ساعدني في البرمجة</button>
+        <button class="chip">ما آخر أخبار التقنية؟</button>
+      </div>
+    </div>
+  `;
+
+  chat.querySelectorAll(".chip").forEach(button => {
+    button.addEventListener("click", () => {
+      input.value = button.textContent;
+      form.requestSubmit();
+    });
+  });
+}
+
+/* إعادة عرض المحادثة */
+
+function renderHistory() {
+  chat.innerHTML = "";
+
+  if (!history.length) {
+    renderEmpty();
     return;
   }
-  msg.textContent = '⏳ جارٍ التحقق…';
-  try {
-    const b = await addBot(botPlatform, token,
-      botPlatform === 'telegram' ? {chatId:id1} : {guildId:id1, channelId:id2});
-    msg.textContent = '✓ تمت إضافة ' + b.name;
-    $('botToken').value = $('botId1').value = $('botId2').value = '';
-  } catch (err) {
-    msg.textContent = '⚠️ ' + err.message;
-  }
-};
 
-paintBots();
-paintAuto();
-render();
-refreshDevice();
-setInterval(() => {
-  if (!document.hidden) refreshDevice();
-}, 10000);
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) refreshDevice();
+  history.forEach(message => {
+    createMessage(
+      message.role,
+      message.content
+    );
+  });
+}
+
+/* إظهار حالة الكتابة */
+
+function showTyping() {
+  const element = document.createElement("div");
+
+  element.className = "msg ai typing";
+
+  element.innerHTML =
+    '<span></span><span></span><span></span>';
+
+  chat.appendChild(element);
+
+  scrollBottom();
+
+  return element;
+}
+
+/* معالجة أخطاء الخادم */
+
+async function readServerResponse(response) {
+  const contentType =
+    response.headers.get("content-type") || "";
+
+  if (!contentType.includes("application/json")) {
+    const body = await response.text();
+
+    throw new Error(
+      "الخادم لم يرجع JSON. تحقق من عنوان API وإعدادات Cloudflare. " +
+      body.slice(0, 180)
+    );
+  }
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.error || "حدث خطأ HTTP " + response.status
+    );
+  }
+
+  if (
+    typeof data.reply !== "string" ||
+    !data.reply.trim()
+  ) {
+    throw new Error(
+      "الخادم لم يرجع إجابة صحيحة."
+    );
+  }
+
+  return data;
+}
+
+/* إرسال الرسالة */
+
+async function sendMessage(text) {
+  if (busy || !text.trim()) return;
+
+  busy = true;
+
+  const requestId = ++activeRequestId;
+
+  activeController = new AbortController();
+
+  sendBtn.disabled = true;
+  stopBtn.classList.remove("hidden");
+
+  if (!history.length) {
+    chat.innerHTML = "";
+  }
+
+  history.push({
+    role: "user",
+    content: text
+  });
+
+  saveHistory();
+
+  createMessage("user", text);
+
+  const typing = showTyping();
+
+  try {
+
+    const messages = history
+      .filter(message =>
+        message &&
+        (
+          message.role === "user" ||
+          message.role === "assistant"
+        ) &&
+        typeof message.content === "string"
+      )
+      .slice(-20);
+
+    /*
+      هذا هو تنسيق الطلب الذي يستقبله Worker
+      الموجود في مشروعك.
+    */
+
+    const response = await fetch(API_URL, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        messages: messages
+      }),
+
+      signal: activeController.signal,
+
+      cache: "no-store"
+    });
+
+    /*
+      إيقاف أي نتيجة قديمة إذا تم إلغاء الطلب.
+    */
+
+    if (requestId !== activeRequestId) {
+      typing.remove();
+      return;
+    }
+
+    const data = await readServerResponse(response);
+
+    if (requestId !== activeRequestId) {
+      typing.remove();
+      return;
+    }
+
+    typing.remove();
+
+    history.push({
+      role: "assistant",
+      content: data.reply
+    });
+
+    saveHistory();
+
+    createMessage(
+      "assistant",
+      data.reply
+    );
+
+  } catch (error) {
+
+    typing.remove();
+
+    if (
+      error.name === "AbortError" ||
+      requestId !== activeRequestId
+    ) {
+      return;
+    }
+
+    /*
+      حذف رسالة المستخدم التي لم تحصل على رد.
+    */
+
+    if (
+      history.length &&
+      history[history.length - 1].role === "user"
+    ) {
+      history.pop();
+      saveHistory();
+    }
+
+    createError(error.message);
+
+  } finally {
+
+    if (requestId === activeRequestId) {
+      busy = false;
+      activeController = null;
+
+      sendBtn.disabled = false;
+      stopBtn.classList.add("hidden");
+    }
+  }
+}
+
+/* إظهار رسالة الخطأ */
+
+function createError(message) {
+  const element = document.createElement("div");
+
+  element.className = "msg error";
+
+  element.textContent = "⚠️ " + message;
+
+  chat.appendChild(element);
+
+  scrollBottom();
+}
+
+/* إرسال النموذج */
+
+form.addEventListener("submit", event => {
+  event.preventDefault();
+
+  const text = input.value.trim();
+
+  if (!text || busy) return;
+
+  input.value = "";
+  input.style.height = "48px";
+
+  sendMessage(text);
 });
+
+/* إرسال بزر Enter */
+
+input.addEventListener("keydown", event => {
+  if (
+    event.key === "Enter" &&
+    !event.shiftKey &&
+    !event.isComposing
+  ) {
+    event.preventDefault();
+    form.requestSubmit();
+  }
+});
+
+/* تكبير مربع الكتابة */
+
+input.addEventListener("input", () => {
+  input.style.height = "auto";
+
+  input.style.height =
+    Math.min(input.scrollHeight, 150) + "px";
+});
+
+/* إلغاء الطلب */
+
+stopBtn.addEventListener("click", () => {
+
+  if (!busy) return;
+
+  /*
+    تغيير رقم الطلب يمنع قبول أي نتيجة قديمة.
+  */
+
+  activeRequestId++;
+
+  if (activeController) {
+    activeController.abort();
+  }
+
+  activeController = null;
+  busy = false;
+
+  sendBtn.disabled = false;
+  stopBtn.classList.add("hidden");
+
+  createError("تم إيقاف الطلب.");
+
+});
+
+/* محادثة جديدة */
+
+document.getElementById("newChat")
+.addEventListener("click", () => {
+
+  if (busy && activeController) {
+    activeRequestId++;
+    activeController.abort();
+  }
+
+  busy = false;
+  activeController = null;
+
+  sendBtn.disabled = false;
+  stopBtn.classList.add("hidden");
+
+  history = [];
+
+  saveHistory();
+
+  renderEmpty();
+
+  input.focus();
+});
+
+/* نافذة الاتصال */
+
+const modal =
+  document.getElementById("connectionModal");
+
+document.getElementById("connectionBtn")
+.addEventListener("click", () => {
+  modal.classList.add("show");
+});
+
+document.getElementById("closeModal")
+.addEventListener("click", () => {
+  modal.classList.remove("show");
+});
+
+/* فحص Cloudflare */
+
+async function checkConnection() {
+  const status =
+    document.getElementById("connectionStatus");
+
+  status.textContent = "⏳ جارٍ فحص الاتصال...";
+
+  try {
+
+    const response = await fetch(API_URL, {
+      method: "OPTIONS",
+      cache: "no-store"
+    });
+
+    if (
+      response.ok ||
+      response.status === 204
+    ) {
+      status.textContent =
+        "✓ الخادم يستجيب لطلب الفحص.";
+    } else {
+      status.textContent =
+        "⚠️ استجابة الخادم: HTTP " +
+        response.status;
+    }
+
+  } catch (error) {
+
+    status.textContent =
+      "⚠️ تعذر الاتصال. تحقق من الإنترنت وإعدادات Cloudflare.";
+
+  }
+}
+
+document.getElementById("checkConnection")
+.addEventListener("click", checkConnection);
+
+/* بدء الموقع */
+
+renderHistory();
+
 </script>
+
 </body>
 </html>
