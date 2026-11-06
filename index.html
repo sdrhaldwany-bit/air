@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NoRestrictions AI — دردشة</title>
+<meta name="theme-color" content="#0b0d10">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#12151a; --line:#1f242c; --text:#e8eaed; --muted:#8a919c;
+    --accent:#3ee6a8; --accent-ink:#04140d; --user:#1c3b30; --ai:#161a20; --err:#ff7a7a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;justify-content:center;height:100dvh;overflow:hidden}
+  .app{width:100%;max-width:860px;display:flex;flex-direction:column;height:100%;border-inline:1px solid var(--line);background:var(--panel)}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+  .model{font-size:.75rem;color:var(--muted);font-weight:500;border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+  .ghost{background:none;border:1px solid var(--line);color:var(--muted);padding:7px 12px;border-radius:8px;cursor:pointer;font:inherit;font-size:.85rem}
+  .ghost:hover{color:var(--accent);border-color:var(--accent)}
+  main{flex:1;overflow-y:auto;padding:22px 18px;display:flex;flex-direction:column;gap:14px}
+  .empty{margin:auto;text-align:center;color:var(--muted);max-width:420px}
+  .empty h2{color:var(--text);font-size:1.4rem;margin-bottom:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+  .chip{border:1px solid var(--line);background:var(--ai);color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:.85rem}
+  .chip:hover{border-color:var(--accent)}
+  .msg{max-width:82%;padding:11px 15px;border-radius:14px;line-height:1.75;white-space:pre-wrap;word-wrap:break-word;font-size:.97rem}
+  .msg.user{align-self:flex-start;background:var(--user);border-start-start-radius:4px}
+  .msg.ai{align-self:flex-end;background:var(--ai);border:1px solid var(--line);border-start-end-radius:4px}
+  .msg.err{align-self:center;color:var(--err);background:none;font-size:.88rem;text-align:center}
+  .codebox{direction:ltr;text-align:left;margin:10px 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#0a0c0f;white-space:normal}
+  .codebar{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#1a1f26;border-bottom:1px solid var(--line);font-size:.75rem;color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace}
+  .copy{background:none;border:1px solid var(--line);color:var(--text);border-radius:6px;padding:3px 10px;cursor:pointer;font:inherit;font-size:.75rem}
+  .copy:hover{border-color:var(--accent);color:var(--accent)}
+  .copy.ok{color:var(--accent);border-color:var(--accent)}
+  .codebox pre{margin:0;padding:12px 14px;overflow-x:auto;white-space:pre;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.86rem;line-height:1.6;color:#d7e1ea}
+  .msg code.inline{direction:ltr;unicode-bidi:isolate;background:#0a0c0f;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em}
+  .msg.ai:has(.codebox){max-width:94%}
+  .msg a{color:var(--accent);text-decoration:underline;text-underline-offset:3px;word-break:break-all}
+  .msg .h{display:block;font-weight:700;font-size:1.05em;margin-top:4px}
+  .openbtn{display:inline-flex;align-items:center;gap:8px;margin:6px 0;padding:9px 14px;border-radius:10px;background:var(--accent);color:var(--accent-ink)!important;text-decoration:none!important;font-weight:700;word-break:normal;white-space:normal}
+  .openbtn small{font-weight:500;opacity:.75;direction:ltr;unicode-bidi:isolate}
+  .sources{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-size:.82rem;color:var(--muted);white-space:normal;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .sources a{border:1px solid var(--line);border-radius:999px;padding:2px 10px;text-decoration:none;color:var(--text);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;word-break:normal}
+  .sources a:hover{border-color:var(--accent);color:var(--accent)}
+  .status{font-size:.8rem;color:var(--muted);margin-inline-start:6px}
+  .typing span{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:var(--muted);animation:b 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+  @keyframes b{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+  form{display:flex;gap:10px;align-items:flex-end;padding:14px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+  textarea{flex:1;resize:none;max-height:180px;min-height:48px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:1rem;outline:none}
+  textarea:focus{border-color:var(--accent)}
+  .send{height:48px;padding:0 20px;border:none;border-radius:12px;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;cursor:pointer}
+  .send:disabled{opacity:.4;cursor:not-allowed}
+  .hdr-actions{display:flex;gap:8px;align-items:center}
+  .devbtn{display:inline-flex;align-items:center;gap:7px}
+  .sdot{width:8px;height:8px;border-radius:50%;background:#555}
+  .sdot.on{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .sdot.off{background:var(--err)}
+  .runbtn{background:var(--accent);color:var(--accent-ink);border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font:inherit;font-size:.75rem;font-weight:700}
+  .runbtn:disabled{opacity:.5;cursor:wait}
+  .autobtn.on{border-color:var(--accent);color:var(--accent)}
+  .stopbtn{background:var(--err);color:#fff;border:none;border-radius:10px;padding:0 14px;cursor:pointer;font:inherit;font-weight:700}
+  .codebar .acts{display:flex;gap:6px}
+  .runout{border-top:1px dashed var(--line);padding:10px 14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem;color:var(--muted);white-space:pre-wrap;max-height:260px;overflow:auto}
+  .runout.ok{color:#bfe9d6}.runout.bad{color:var(--err)}
+  .msg.user.tool{background:#11201b;border:1px dashed #2a4a3e;max-width:94%;font-size:.85rem}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+  .modal.show{display:flex}
+  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:560px;width:100%;max-height:90dvh;overflow:auto;padding:18px;line-height:1.7}
+  .sheet h3{font-size:1.1rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+  .sheet h4{margin:14px 0 4px;font-size:.95rem;color:var(--accent)}
+  .sheet p,.sheet li{font-size:.88rem;color:var(--muted)}
+  .sheet ol{padding-inline-start:20px}
+  .sheet .codebox pre{white-space:pre-wrap;word-break:break-all}
+  .devstate{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-size:.88rem;margin:8px 0}
+  .warn{font-size:.8rem;color:#e6c86e;margin-top:10px}
+  .tabs{display:flex;gap:6px;margin-top:12px}
+  .tab{flex:1;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:7px;cursor:pointer;font:inherit;font-size:.85rem}
+  .tab.on{border-color:var(--accent);color:var(--accent)}
+  .dl{display:inline-block;margin:6px 0;padding:7px 14px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:700;text-decoration:none;font-size:.85rem}
+  .botrow{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-size:.88rem;margin:6px 0}
+  .botrow .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .botrow small{color:var(--muted)}
+  .field{display:block;width:100%;margin:6px 0;background:#0e1418;border:1px solid var(--line);color:inherit;border-radius:8px;padding:8px 10px;font:inherit;font-size:.85rem}
+  @media (max-width:600px){.msg{max-width:94%}.model{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><span class="dot"></span>NoRestrictions AI <span class="model">notrack-uncensored</span></div>
+    <div class="hdr-actions">
+      <button class="ghost autobtn" id="autoBtn" type="button" title="تنفيذ أوامر الهاتف تلقائياً بدون ضغط زر">⚡ تلقائي</button>
+      <button class="ghost" id="botBtn" type="button">🤖 البوتات</button>
+      <button class="ghost devbtn" id="devBtn" type="button"><span class="sdot" id="devDot"></span>📱 ربط الجهاز</button>
+      <button class="ghost" id="newChat" type="button">محادثة جديدة</button>
+    </div>
+  </header>
+  <main id="chat"></main>
+  <div class="modal" id="devModal">
+    <div class="sheet">
+      <h3>📱 ربط الهاتف (Termux / Pydroid) <button class="ghost" id="devClose" type="button">إغلاق</button></h3>
+      <p>بعد الربط تستطيع أن تطلب من المساعد تنفيذ أوامر على هاتفك، مثل: «اعرض الملفات في التنزيلات» أو «ثبّت python» أو «كم نسبة البطارية؟». في وضع «⚡ تلقائي» تُنفَّذ الأوامر فوراً بدون ضغط أي زر، ويمكنك إيقافها بزر «⏹ إيقاف».</p>
+      <div class="devstate"><span class="sdot" id="devDot2"></span><span id="devText">جارٍ التحقق…</span></div>
+      <div class="tabs"><button class="tab on" data-tab="termux" type="button">Termux</button><button class="tab" data-tab="pydroid" type="button">Pydroid 3</button></div>
+      <div id="tab-termux">
+        <ol>
+          <li>افتح Termux والصق هذا الأمر (يثبّت بايثون ويشغّل الوكيل):</li>
+        </ol>
+        <div id="termuxCmd"></div>
+        <p>اختياري: لأوامر البطارية والإشعارات والحافظة ثبّت تطبيق <b>Termux:API</b> ثم <code class="inline">pkg install termux-api -y</code>. وللوصول لملفات الهاتف شغّل <code class="inline">termux-setup-storage</code>.</p>
+        <p>المرات القادمة يكفي: <code class="inline">python agent.py</code> — وإذا كان عندك نسخة قديمة من الوكيل أعد لصق الأمر أعلاه مرة واحدة لتحميل النسخة الجديدة الأسرع.</p>
+        <p>⚠️ حتى تصل الأوامر بدون أن تفتح Termux كل مرة: إعدادات الهاتف ← التطبيقات ← Termux ← البطارية ← <b>غير مقيّد</b>، ولا تسحب إشعار Termux. أما إدارة بوتات تيليجرام وديسكورد فلا تحتاج الهاتف أبداً.</p>
+      </div>
+      <div id="tab-pydroid" hidden>
+        <ol>
+          <li>نزّل ملف الوكيل وافتحه في Pydroid 3:</li>
+        </ol>
+        <a class="dl" href="/agent.py" download="agent.py">⬇️ تنزيل agent.py</a>
+        <ol start="2"><li>اضغط ▶ تشغيل، وعندما يطلب «الصق مفتاح الجهاز» الصق هذا المفتاح:</li></ol>
+        <div id="keyBox"></div>
+      </div>
+      <p class="warn">⚠️ المفتاح يعطي التحكم بالجهاز: لا تشاركه مع أحد. اترك نافذة Termux/Pydroid مفتوحة أثناء الاستخدام، وأوقفها بـ Ctrl+C.</p>
+      <p style="margin-top:10px"><button class="ghost" id="devReset" type="button">إنشاء مفتاح جديد (فصل الجهاز الحالي)</button></p>
+    </div>
+  </div>
+  <div class="modal" id="botModal">
+    <div class="sheet">
+      <h3>🤖 بوتات تيليجرام وديسكورد <button class="ghost" id="botClose" type="button">إغلاق</button></h3>
+      <p>أضف توكن البوت (والآيدي إن وجد)، وبعدها اطلب من المساعد أي شيء: «أرسل رسالة للقروب»، «اعرض آخر الرسائل»، «احظر هذا العضو»، «أنشئ قناة جديدة»، «سوّ للبوت أوامر»، أو «شغّل البوت على هاتفي يرد على الناس تلقائياً». تقدر أيضاً تلصق التوكن مباشرة في المحادثة ويُحفظ تلقائياً.</p>
+      <div id="botList"></div>
+      <h4>إضافة بوت</h4>
+      <div class="tabs"><button class="tab bt on" data-p="telegram" type="button">تيليجرام</button><button class="tab bt" data-p="discord" type="button">ديسكورد</button></div>
+      <input class="field" id="botToken" placeholder="توكن البوت" autocomplete="off" spellcheck="false">
+      <input class="field" id="botId1" placeholder="آيدي المحادثة/القروب chat_id (اختياري)" autocomplete="off">
+      <input class="field" id="botId2" placeholder="آيدي القناة channel_id (اختياري)" autocomplete="off" hidden>
+      <button class="dl" id="botAdd" type="button" style="border:none;cursor:pointer;font:inherit;font-weight:700">➕ إضافة والتحقق</button>
+      <span id="botMsg" style="font-size:.85rem;margin-inline-start:8px"></span>
+      <p class="warn">⚠️ التوكن يُحفظ في هذا المتصفح فقط ولا يُرسل لنموذج الذكاء الاصطناعي. لا تشاركه مع أحد. لديسكورد: فعّل Message Content Intent من بوابة المطورين حتى يقرأ البوت محتوى الرسائل.</p>
+    </div>
+  </div>
+  <form id="form">
+    <textarea id="input" rows="1" placeholder="اكتب رسالتك… (Enter للإرسال، Shift+Enter لسطر جديد)" autofocus></textarea>
+    <button class="stopbtn" id="stopBtn" type="button" hidden>⏹ إيقاف</button>
+    <button class="send" id="send" type="submit">إرسال</button>
+  </form>
+</div>
+<script>
+const chat = document.getElementById('chat');
+const form = document.getElementById('form');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+const KEY = 'nr-chat-history';
+let history = [];
+try { history = JSON.parse(localStorage.getItem(KEY)) || []; } catch {}
+let busy = false;
+const AKEY = 'nr-auto-run';
+let autoRun = localStorage.getItem(AKEY) !== '0';   // on by default
+const AUTO_LIMIT = 25;                              // max chained commands per user message
+let autoChain = 0, stopped = false;
+const stopBtn = document.getElementById('stopBtn');
+function paintAuto(){
+  const b = document.getElementById('autoBtn');
+  b.classList.toggle('on', autoRun);
+  b.textContent = autoRun ? '⚡ تلقائي: مفعّل' : '⚡ تلقائي: متوقف';
+}
+
+const DKEY = 'nr-device-key';
+let device = { online: false };
+function deviceKey(){
+  let k = localStorage.getItem(DKEY);
+  if (!/^[a-f0-9]{64}$/.test(k || '')) {
+    const b = new Uint8Array(32); crypto.getRandomValues(b);
+    k = Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+    localStorage.setItem(DKEY, k);
+  }
+  return k;
+}
+function hasKey(){ return /^[a-f0-9]{64}$/.test(localStorage.getItem(DKEY) || ''); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function refreshDevice(){
+  if (!hasKey()) { device = { online: false }; paintDevice(); return; }
+  try {
+    const r = await fetch('/api/device/status?key=' + deviceKey(), { cache: 'no-store', signal: AbortSignal.timeout(4000) });
+    const d = await r.json();
+    device = r.ok ? d : { online: false };
+  } catch { device = { online: false }; }
+  paintDevice();
+}
+function paintDevice(){
+  const cls = 'sdot ' + (device.online ? 'on' : (device.paired ? 'off' : ''));
+  document.getElementById('devDot').className = cls;
+  document.getElementById('devDot2').className = cls;
+  document.getElementById('devText').textContent = device.online
+    ? 'متصل ✓ — ' + (device.info || device.kind)
+    : device.paired ? 'غير متصل — شغّل agent.py على الهاتف' : 'لم يتم الربط بعد — اتبع الخطوات بالأسفل';
+}
+
+function openDeviceModal(){
+  const k = deviceKey();
+  const origin = location.origin;
+  const tc = document.getElementById('termuxCmd'); tc.innerHTML = '';
+  tc.appendChild(codeBox('bash', `pkg install python curl -y && curl -sLO ${origin}/agent.py && NR_SERVER=${origin} python agent.py ${k}`));
+  const kb = document.getElementById('keyBox'); kb.innerHTML = '';
+  kb.appendChild(codeBox('key', k));
+  document.getElementById('devModal').classList.add('show');
+  refreshDevice();
+}
+
+/* ---------------- Telegram / Discord bots ---------------- */
+const BKEY = 'nr-bots';
+let bots = [];
+try { bots = JSON.parse(localStorage.getItem(BKEY)) || []; } catch {}
+if (!Array.isArray(bots)) bots = [];
+const saveBots = () => localStorage.setItem(BKEY, JSON.stringify(bots));
+const TG_TOKEN_RE = /\b\d{5,15}:[A-Za-z0-9_-]{30,60}\b/g;
+const DC_TOKEN_RE = /\b[A-Za-z0-9_-]{23,30}\.[A-Za-z0-9_-]{5,8}\.[A-Za-z0-9_-]{25,45}\b/g;
+let botPlatform = 'telegram';
+
+async function botCall(platform, token, req){
+  const r = await jfetch('/api/bot', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ platform, token, ...req }) }, 2);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || ('خطأ ' + r.status));
+  return j;
+}
+// Checks a token with getMe / users/@me and saves (or updates) the bot.
+async function addBot(platform, token, ids = {}){
+  const r = platform === 'telegram'
+    ? await botCall('telegram', token, { method: 'getMe', params: {} })
+    : await botCall('discord', token, { method: 'GET', path: '/users/@me' });
+  let me; try { me = JSON.parse(r.output); } catch {}
+  if (platform === 'telegram') me = me && me.result;
+  if (!r.ok || !me || !me.id) throw new Error('التوكن غير صحيح أو ملغي');
+  const name = String(me.username || me.first_name || ('bot' + me.id)).replace(/[^\w.-]/g, '').slice(0, 40) || ('bot' + me.id);
+  const bot = { platform, token, name, botId: String(me.id), ...Object.fromEntries(Object.entries(ids).filter(([, v]) => v)) };
+  const i = bots.findIndex(b => b.token === token || (b.platform === platform && b.name === name));
+  if (i >= 0) bots[i] = { ...bots[i], ...bot }; else bots.push(bot);
+  saveBots(); paintBots();
+  return bot;
+}
+function botsForPrompt(){
+  return bots.map(({ platform, name, botId, chatId, guildId, channelId }) => ({ platform, name, botId, chatId, guildId, channelId }));
+}
+function findBot(platform, name){
+  const list = bots.filter(b => b.platform === platform);
+  if (name) { const n = String(name).replace(/^@/, '').toLowerCase(); return list.find(b => b.name.toLowerCase() === n) || null; }
+  return list.length === 1 ? list[0] : null;
+}
+// Pasted tokens are saved locally and replaced with a placeholder so the model never sees them.
+async function captureTokens(text){
+  const found = [...new Set(text.match(TG_TOKEN_RE) || [])].map(t => ['telegram', t])
+    .concat([...new Set(text.match(DC_TOKEN_RE) || [])].map(t => ['discord', t]));
+  for (const [platform, token] of found) {
+    let note;
+    try { const b = await addBot(platform, token); note = `[توكن بوت ${platform === 'telegram' ? 'تيليجرام' : 'ديسكورد'} "${b.name}" — تم حفظه وإضافته ✓]`; }
+    catch (e) { note = `[توكن ${platform === 'telegram' ? 'تيليجرام' : 'ديسكورد'} — فشل التحقق: ${e.message}]`; }
+    text = text.split(token).join(note);
+  }
+  return text;
+}
+function injectTokens(code){
+  return code.replace(/\{\{\s*TOKEN\s*:\s*@?([\w.-]+)\s*\}\}/g, (m, n) => {
+    const b = bots.find(x => x.name.toLowerCase() === n.toLowerCase());
+    return b ? b.token : m;
+  });
+}
+function redactTokens(text){
+  let t = String(text);
+  bots.forEach(b => { if (b.token) t = t.split(b.token).join(`{{TOKEN:${b.name}}}`); });
+  return t;
+}
+function paintBots(){
+  const list = document.getElementById('botList'); list.innerHTML = '';
+  if (!bots.length) { list.innerHTML = '<p>لا توجد بوتات مضافة بعد.</p>'; }
+  bots.forEach((b, i) => {
+    const row = document.createElement('div'); row.className = 'botrow';
+    const g = document.createElement('div'); g.className = 'grow';
+    g.textContent = (b.platform === 'telegram' ? '✈️ ' : '🎮 ') + b.name + ' ';
+    const sm = document.createElement('small');
+    sm.textContent = [b.chatId && 'chat: ' + b.chatId, b.guildId && 'server: ' + b.guildId, b.channelId && 'channel: ' + b.channelId].filter(Boolean).join(' · ');
+    g.appendChild(sm);
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'ghost'; del.textContent = 'حذف';
+    del.onclick = () => { if (confirm('حذف البوت ' + b.name + '؟')) { bots.splice(i, 1); saveBots(); paintBots(); } };
+    row.append(g, del); list.appendChild(row);
+  });
+  const btn = document.getElementById('botBtn');
+  btn.textContent = bots.length ? `🤖 البوتات (${bots.length})` : '🤖 البوتات';
+}
+function setBotPlatform(p){
+  botPlatform = p;
+  document.querySelectorAll('.bt').forEach(x => x.classList.toggle('on', x.dataset.p === p));
+  document.getElementById('botId1').placeholder = p === 'telegram' ? 'آيدي المحادثة/القروب chat_id (اختياري)' : 'آيدي السيرفر guild_id (اختياري)';
+  document.getElementById('botId2').hidden = p === 'telegram';
+}
+async function runBot(platform, code, out, btn, auto){
+  btn.disabled = true; btn.textContent = '⏳ جارٍ التنفيذ…';
+  out.className = 'runout'; out.hidden = false; out.textContent = 'يرسل الطلب إلى ' + (platform === 'telegram' ? 'تيليجرام' : 'ديسكورد') + '…';
+  let res, req;
+  try {
+    try { req = JSON.parse(code); } catch { throw new Error('صيغة JSON غير صحيحة في الكتلة'); }
+    const bot = findBot(platform, req.bot);
+    if (!bot) throw new Error(req.bot ? `البوت "${req.bot}" غير مضاف. أضفه من زر 🤖 البوتات.` : 'حدد اسم البوت في الحقل "bot".');
+    res = platform === 'telegram'
+      ? await botCall('telegram', bot.token, { method: req.method, params: req.params || {} })
+      : await botCall('discord', bot.token, { method: req.method || 'GET', path: req.path, body: req.body, reason: req.reason });
+  } catch (e) {
+    res = { ok: false, status: 0, output: e.message };
+  }
+  const output = redactTokens(res.output);
+  out.className = 'runout ' + (res.ok ? 'ok' : 'bad');
+  out.textContent = output + (res.status ? '\n— HTTP ' + res.status : '');
+  btn.disabled = false; btn.textContent = '↻ تنفيذ مرة أخرى';
+  const fenced = output.replace(/```/g, 'ˋˋˋ');
+  const msg = `[نتيجة تنفيذ] ${platform} ${req && (req.method || '')} ${req && req.path ? req.path : ''} — HTTP ${res.status || 'خطأ'}\n\`\`\`\n${fenced}\n\`\`\``;
+  if (auto && stopped) return endAuto();
+  while (busy) await sleep(100);
+  send(msg, true);
+}
+
+let currentJob = null;
+// Serverless 24/7 Telegram bot on Netlify — works with the phone off and the page closed.
+async function runHostBot(code, out, btn, auto){
+  btn.disabled = true; btn.textContent = '⏳ جارٍ التنفيذ…';
+  out.className = 'runout'; out.hidden = false; out.textContent = 'يضبط البوت على الخادم…';
+  let res, req, ok = false;
+  try {
+    try { req = JSON.parse(code); } catch { throw new Error('صيغة JSON غير صحيحة في الكتلة'); }
+    const bot = findBot('telegram', req.bot);
+    if (!bot) throw new Error(req.bot ? `البوت "${req.bot}" غير مضاف. أضفه من زر 🤖 البوتات.` : 'حدد اسم البوت في الحقل "bot".');
+    const action = ['enable', 'disable', 'status'].includes(req.action) ? req.action : 'enable';
+    const r = await jfetch('/api/hosted-bot/' + action, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: bot.token, persona: req.persona || '' }) }, 2);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || ('خطأ ' + r.status));
+    ok = true; res = JSON.stringify(j, null, 1);
+  } catch (e) { res = e.message; }
+  res = redactTokens(res);
+  out.className = 'runout ' + (ok ? 'ok' : 'bad'); out.textContent = res;
+  btn.disabled = false; btn.textContent = '↻ تنفيذ مرة أخرى';
+  const msg = `[نتيجة تنفيذ] hostbot ${req && req.action || ''} — ${ok ? 'نجح' : 'فشل'}\n\`\`\`\n${res.replace(/```/g, 'ˋˋˋ')}\n\`\`\``;
+  if (auto && stopped) return endAuto();
+  while (busy) await sleep(100);
+  send(msg, true);
+}
+async function jfetch(url, opts, tries = 3){
+  // Retry short network drops instead of failing the whole command.
+  for (let i = 0; ; i++) {
+    try { return await fetch(url, { cache: 'no-store', ...opts }); }
+    catch (e) { if (i >= tries - 1) throw new Error('انقطع الاتصال بالإنترنت، حاول مرة أخرى.'); await sleep(600 * (i + 1)); }
+  }
+}
+async function runOnDevice(command, out, btn, auto){
+  btn.disabled = true; btn.textContent = '⏳ جارٍ التنفيذ…';
+  out.className = 'runout'; out.hidden = false; out.textContent = 'إرسال الأمر إلى الهاتف…';
+  let result;
+  try {
+    const r = await jfetch('/api/device/run', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: deviceKey(), command, wait: 15 }) }, 1);
+    let j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || ('خطأ ' + r.status));
+    currentJob = j.id;
+    const started = Date.now(), deadline = started + 200000;
+    while (j.status !== 'done') {
+      if (auto && stopped) throw new Error('تم الإيقاف.');
+      if (Date.now() > deadline) throw new Error('لم تصل نتيجة من الهاتف. تأكد أن Termux مفتوح و agent.py يعمل ثم أعد المحاولة.');
+      if (j.status === 'pending') {
+        if (!j.online && Date.now() - started > 12000) {
+          cancelJob(j.id);
+          device.online = false; paintDevice();
+          throw new Error('الهاتف غير متصل — أندرويد أوقف Termux في الخلفية. الحل مرة واحدة: إعدادات الهاتف ← التطبيقات ← Termux ← البطارية ← «غير مقيّد»، واترك إشعار Termux ظاهراً (لا تسحبه). ثم شغّل: python agent.py\n(ملاحظة: إدارة بوتات تيليجرام وديسكورد لا تحتاج الهاتف ولا Termux.)');
+        }
+        out.textContent = j.online ? 'بانتظار استلام الهاتف للأمر…' : 'الهاتف غير متصل، بانتظار عودته… (تأكد أن Termux مفتوح و agent.py يعمل)';
+      } else out.textContent = 'ينفّذ على الهاتف… ' + Math.round((Date.now() - started) / 1000) + 'ث';
+      const rr = await jfetch(`/api/device/result?key=${deviceKey()}&id=${j.id}`);
+      j = await rr.json().catch(() => ({}));
+      if (!rr.ok) throw new Error(j.error || ('خطأ ' + rr.status));
+    }
+    result = j;
+    if (!device.online) { device.online = true; device.paired = true; paintDevice(); }
+  } catch (e) {
+    out.className = 'runout bad'; out.textContent = '⚠️ ' + e.message;
+    btn.disabled = false; btn.textContent = '▶ تنفيذ على الجهاز';
+    currentJob = null;
+    if (auto) endAuto();
+    refreshDevice();
+    return;
+  }
+  currentJob = null;
+  out.className = 'runout ' + (result.exitCode === 0 ? 'ok' : 'bad');
+  out.textContent = result.output + '\n— رمز الخروج: ' + result.exitCode;
+  btn.disabled = false; btn.textContent = '↻ تنفيذ مرة أخرى';
+  const safeOut = redactTokens(result.output).replace(/```/g, 'ˋˋˋ');
+  const msg = `[نتيجة تنفيذ] رمز الخروج: ${result.exitCode}\n\`\`\`\n${safeOut}\n\`\`\``;
+  if (auto && stopped) return endAuto();
+  while (busy) await sleep(100);
+  send(msg, true);
+}
+function cancelJob(id){
+  if (!id) return;
+  fetch('/api/device/cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: deviceKey(), id }) }).catch(() => {});
+}
+
+function endAuto(){ stopBtn.hidden = true; }
+function maybeAutoRun(el){
+  const rb = el.querySelector('.runbtn');
+  if (!rb) return endAuto();
+  if (!autoRun || stopped) return endAuto();
+  if (autoChain >= AUTO_LIMIT) {
+    endAuto();
+    bubble('err', `⏸ توقف التنفيذ التلقائي بعد ${AUTO_LIMIT} أوامر متتالية. أرسل رسالة للمتابعة.`);
+    return;
+  }
+  autoChain++;
+  stopBtn.hidden = false;
+  rb.dataset.auto = '1';
+  rb.click();
+}
+
+function save(){ localStorage.setItem(KEY, JSON.stringify(history.slice(-40))); }
+
+function bubble(role, text, sources){
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  if (role === 'ai') renderRich(el, text, true);
+  else if (role === 'user' && text.startsWith('[نتيجة تنفيذ]')) { el.classList.add('tool'); renderRich(el, text, false); }
+  else el.textContent = text;
+  if (role === 'ai' && sources && sources.length) {
+    const box = document.createElement('div'); box.className = 'sources';
+    box.appendChild(document.createTextNode('المصادر:'));
+    sources.forEach(src => {
+      const a = link(src.url, src.title || hostOf(src.url)); a.title = src.url; box.appendChild(a);
+    });
+    el.appendChild(box);
+  }
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+  return el;
+}
+
+
+function safeUrl(u){
+  try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch { return null; }
+}
+function hostOf(u){ try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } }
+function link(url, label){
+  const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  a.textContent = label; return a;
+}
+function openButton(url){
+  const a = link(url, ''); a.className = 'openbtn';
+  a.append('🔗 فتح الرابط ');
+  const sm = document.createElement('small'); sm.textContent = hostOf(url); a.appendChild(sm);
+  return a;
+}
+
+const INLINE_RE = /(`[^`\n]+`|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\)|https?:\/\/[^\s<>"'`)\]]+|\*\*[^*\n]+\*\*)/;
+function addSpans(parent, text){
+  text.split(INLINE_RE).forEach(part => {
+    if (!part) return;
+    let m;
+    if (/^`[^`\n]+`$/.test(part)) {
+      const c = document.createElement('code'); c.className = 'inline'; c.textContent = part.slice(1, -1); parent.appendChild(c);
+    } else if ((m = part.match(/^\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)$/)) && safeUrl(m[2])) {
+      parent.appendChild(link(safeUrl(m[2]), m[1]));
+    } else if (/^https?:\/\//.test(part) && safeUrl(part.replace(/[.,،؛!?]+$/, ''))) {
+      const clean = part.replace(/[.,،؛!?]+$/, '');
+      parent.appendChild(link(safeUrl(clean), clean));
+      if (clean !== part) parent.appendChild(document.createTextNode(part.slice(clean.length)));
+    } else if (/^\*\*[^*\n]+\*\*$/.test(part)) {
+      const b = document.createElement('strong'); b.textContent = part.slice(2, -2); parent.appendChild(b);
+    } else parent.appendChild(document.createTextNode(part));
+  });
+}
+
+const OPEN_RE = /<<\s*OPEN\s*:\s*([^>\s]+)\s*>>/i;
+function addInline(parent, text){
+  text.split('\n').forEach((line, i, arr) => {
+    const open = line.match(OPEN_RE);
+    if (open) {
+      const before = line.slice(0, open.index), after = line.slice(open.index + open[0].length);
+      if (before.trim()) addSpans(parent, before);
+      const url = safeUrl(open[1]);
+      if (url) parent.appendChild(openButton(url));
+      if (after.trim()) addSpans(parent, after);
+    } else {
+      const h = line.match(/^#{1,6}\s+(.*)$/);
+      if (h) { const s = document.createElement('span'); s.className = 'h'; addSpans(s, h[1]); parent.appendChild(s); }
+      else addSpans(parent, line.replace(/^(\s*)[-*]\s+/, '$1• '));
+    }
+    if (i < arr.length - 1 && !(line.match(/^#{1,6}\s/))) parent.appendChild(document.createTextNode('\n'));
+  });
+}
+
+function copyText(text){
+  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+  const t = document.createElement('textarea'); t.value = text; t.style.position = 'fixed'; t.style.opacity = '0';
+  document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); return Promise.resolve();
+}
+
+function codeBox(lang, code, runnable){
+  const box = document.createElement('div'); box.className = 'codebox';
+  const bar = document.createElement('div'); bar.className = 'codebar';
+  const label = document.createElement('span'); label.textContent = lang || 'code';
+  const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'copy'; btn.textContent = 'نسخ';
+  btn.onclick = () => copyText(code).then(() => {
+    btn.textContent = 'تم النسخ ✓'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'نسخ'; btn.classList.remove('ok'); }, 1800);
+  }).catch(() => { btn.textContent = 'فشل النسخ'; });
+  const acts = document.createElement('div'); acts.className = 'acts';
+  const pre = document.createElement('pre'); const c = document.createElement('code'); c.textContent = code; pre.appendChild(c);
+  box.append(bar, pre);
+  const l = (lang || '').toLowerCase();
+  if (runnable && (l === 'run' || l === 'runpy')) {
+    label.textContent = l === 'runpy' ? '📱 Python على الهاتف' : '📱 أمر على الهاتف';
+    const run = document.createElement('button'); run.type = 'button'; run.className = 'runbtn'; run.textContent = '▶ تنفيذ على الجهاز';
+    const out = document.createElement('div'); out.hidden = true;
+    run.onclick = () => { const a = run.dataset.auto === '1'; delete run.dataset.auto;
+      const cmd = injectTokens(code);
+      runOnDevice(l === 'runpy' ? '#!python\n' + cmd : cmd, out, run, a); };
+    acts.append(run);
+    box.append(out);
+  } else if (runnable && (l === 'telegram' || l === 'discord')) {
+    label.textContent = l === 'telegram' ? '✈️ بوت تيليجرام' : '🎮 بوت ديسكورد';
+    const run = document.createElement('button'); run.type = 'button'; run.className = 'runbtn'; run.textContent = '▶ تنفيذ على البوت';
+    const out = document.createElement('div'); out.hidden = true;
+    run.onclick = () => { const a = run.dataset.auto === '1'; delete run.dataset.auto; runBot(l, code, out, run, a); };
+    acts.append(run);
+    box.append(out);
+  } else if (runnable && l === 'hostbot') {
+    label.textContent = '🤖 تشغيل البوت تلقائياً (بدون هاتف)';
+    const run = document.createElement('button'); run.type = 'button'; run.className = 'runbtn'; run.textContent = '▶ تنفيذ على البوت';
+    const out = document.createElement('div'); out.hidden = true;
+    run.onclick = () => { const a = run.dataset.auto === '1'; delete run.dataset.auto; runHostBot(code, out, run, a); };
+    acts.append(run);
+    box.append(out);
+  }
+  acts.append(btn);
+  bar.append(label, acts);
+  return box;
+}
+
+function renderRich(el, text, runnable){
+  const re = /```([\w+#.-]*)[^\n]*\n?([\s\S]*?)(?:```|$)/g;
+  let last = 0, m;
+  while ((m = re.exec(text))) {
+    if (m.index > last) addInline(el, text.slice(last, m.index).replace(/\n+$/, ''));
+    el.appendChild(codeBox(m[1], m[2].replace(/\n$/, ''), runnable));
+    last = re.lastIndex;
+    if (m[0] === '') re.lastIndex++;
+  }
+  if (last < text.length) addInline(el, text.slice(last).replace(/^\n+/, ''));
+}
+
+function renderEmpty(){
+  chat.innerHTML = `<div class="empty"><h2>أهلاً 👋</h2><p>اسأل أي شيء. يستطيع البحث في الإنترنت، قراءة أي رابط ترسله، فتح المواقع لك، وتنفيذ أوامر على هاتفك بعد ربطه بـ Termux أو Pydroid (زر 📱 بالأعلى).</p>
+  <div class="chips">
+    <button class="chip" type="button">ابحث لي عن آخر أخبار التقنية اليوم</button>
+    <button class="chip" type="button">دخلني على يوتيوب</button>
+    <button class="chip" type="button">لخص لي هذه الصفحة: https://ar.wikipedia.org/wiki/ذكاء_اصطناعي</button>
+    <button class="chip" type="button">ساعدني في كتابة كود</button>
+    <button class="chip" type="button">اعرض لي الملفات في هاتفي ومعلومات الجهاز</button>
+  </div></div>`;
+  chat.querySelectorAll('.chip').forEach(c => c.onclick = () => { input.value = c.textContent; form.requestSubmit(); });
+}
+
+function render(){
+  chat.innerHTML = '';
+  if (!history.length) return renderEmpty();
+  history.forEach(m => bubble(m.role === 'user' ? 'user' : 'ai', m.content, m.sources));
+}
+
+let chatAbort = null;
+async function streamChat(payload, onEvent){
+  chatAbort = new AbortController();
+  const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload), signal: chatAbort.signal });
+  const type = res.headers.get('content-type') || '';
+  if (!res.ok || !/ndjson/.test(type) || !res.body) {
+    const d = await res.json().catch(() => ({}));
+    if (res.ok && d.reply) return onEvent({ t: 'done', reply: d.reply, sources: d.sources });
+    throw Object.assign(new Error(d.error || ('خطأ ' + res.status)), { final: true });
+  }
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = '', finished = false;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let nl;
+    while ((nl = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
+      if (!line) continue;
+      let ev; try { ev = JSON.parse(line); } catch { continue; }
+      if (ev.t === 'done' || ev.t === 'error') finished = true;
+      onEvent(ev);
+    }
+  }
+  if (!finished) throw new Error('انقطع الاتصال قبل اكتمال الرد.');
+}
+
+async function send(text, fromTool){
+  if (busy) return;
+  if (!fromTool) { autoChain = 0; stopped = false; }
+  busy = true; sendBtn.disabled = true; stopBtn.hidden = false;
+  if (!history.length) chat.innerHTML = '';
+  history.push({ role: 'user', content: text }); save();
+  bubble('user', text);
+  const typing = bubble('ai', '');
+  typing.classList.add('typing');
+  const setStatus = t => { typing.innerHTML = '<span></span><span></span><span></span>' + (t ? '<em class="status"></em>' : '');
+    if (t) typing.querySelector('.status').textContent = t; };
+  setStatus(/https?:\/\//.test(text) ? 'يقرأ الروابط…' : '');
+  // Use the real, current phone status (not a cached guess) so the assistant never claims a false connection.
+  if (hasKey()) await refreshDevice();
+  const payload = { messages: history.map(m => ({ role: m.role, content: m.content })),
+    device: device.online ? { online: true, kind: device.kind, info: device.info, auto: autoRun }
+                          : { online: false, paired: !!device.paired },
+    bots: botsForPrompt(), auto: autoRun };
+  let live = null, acc = '', pending = false;
+  const paint = () => { pending = false; if (!live) return; live.innerHTML = ''; renderRich(live, acc.replace(/<<\s*(FETCH|SEARCH)\s*:[^>\n]*>?>?/gi, ''), false); chat.scrollTop = chat.scrollHeight; };
+  try {
+    let final = null;
+    for (let attempt = 0; attempt < 2 && !final; attempt++) {
+      try {
+        await streamChat(payload, ev => {
+          if (ev.t === 'status') { if (!acc) setStatus(ev.text); }
+          else if (ev.t === 'delta') {
+            if (!live) { typing.classList.remove('typing'); typing.innerHTML = ''; live = typing; }
+            acc += ev.text;
+            if (!pending) { pending = true; requestAnimationFrame(paint); }
+          } else if (ev.t === 'reset') {
+            acc = ''; live = null; typing.classList.add('typing'); setStatus('يبحث ويقرأ…');
+          } else if (ev.t === 'done') final = ev;
+          else if (ev.t === 'error') throw Object.assign(new Error(ev.error), { final: true });
+        });
+      } catch (e) {
+        // One automatic retry if the connection dropped before any text arrived.
+        if (e.final || e.name === 'AbortError' || acc || attempt) throw e;
+        setStatus('إعادة الاتصال…'); await sleep(800);
+      }
+    }
+    if (!final || !final.reply) throw new Error('لم يصل رد، حاول مرة أخرى.');
+    typing.remove();
+    const sources = Array.isArray(final.sources) ? final.sources : [];
+    history.push({ role: 'assistant', content: final.reply, sources }); save();
+    const aiEl = bubble('ai', final.reply, sources);
+    setTimeout(() => maybeAutoRun(aiEl), 0);
+    const open = final.reply.match(OPEN_RE);
+    if (open && safeUrl(open[1])) { try { window.open(safeUrl(open[1]), '_blank', 'noopener'); } catch {} }
+  } catch (e) {
+    typing.remove();
+    history.pop(); save();
+    if (e.name === 'AbortError') bubble('err', '⏹ تم إيقاف الرد.');
+    else bubble('err', '⚠️ ' + (/Failed to fetch|NetworkError|Load failed|network/i.test(e.message) ? 'انقطع الاتصال بالإنترنت، حاول مرة أخرى.' : e.message));
+    endAuto();
+    if (!fromTool) input.value = text;
+  } finally {
+    chatAbort = null;
+    busy = false; sendBtn.disabled = false; stopBtn.hidden = true;
+    input.focus();
+  }
+}
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  let text = input.value.trim();
+  if (!text || busy) return;
+  input.value = ''; input.style.height = '';
+  if (TG_TOKEN_RE.test(text) || DC_TOKEN_RE.test(text)) {
+    TG_TOKEN_RE.lastIndex = DC_TOKEN_RE.lastIndex = 0;
+    sendBtn.disabled = true;
+    text = await captureTokens(text);
+    sendBtn.disabled = false;
+  }
+  TG_TOKEN_RE.lastIndex = DC_TOKEN_RE.lastIndex = 0;
+  send(text);
+});
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit(); }
+});
+input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 180) + 'px'; });
+document.getElementById('newChat').onclick = () => { history = []; save(); render(); input.focus(); };
+document.getElementById('devBtn').onclick = openDeviceModal;
+document.getElementById('autoBtn').onclick = () => { autoRun = !autoRun; localStorage.setItem(AKEY, autoRun ? '1' : '0'); paintAuto(); };
+stopBtn.onclick = () => { stopped = true; if (currentJob) cancelJob(currentJob); if (chatAbort) chatAbort.abort(); endAuto(); };
+document.getElementById('devClose').onclick = () => document.getElementById('devModal').classList.remove('show');
+document.getElementById('devModal').addEventListener('click', e => { if (e.target.id === 'devModal') e.target.classList.remove('show'); });
+document.querySelectorAll('.tab[data-tab]').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab[data-tab]').forEach(x => x.classList.toggle('on', x === t));
+  document.getElementById('tab-termux').hidden = t.dataset.tab !== 'termux';
+  document.getElementById('tab-pydroid').hidden = t.dataset.tab !== 'pydroid';
+});
+document.getElementById('devReset').onclick = async () => {
+  if (!confirm('سيتم فصل الجهاز الحالي وإنشاء مفتاح جديد. متابعة؟')) return;
+  if (hasKey()) { try { await fetch('/api/device/unpair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: deviceKey() }) }); } catch {} }
+  localStorage.removeItem(DKEY);
+  openDeviceModal();
+};
+document.getElementById('botBtn').onclick = () => { paintBots(); document.getElementById('botModal').classList.add('show'); };
+document.getElementById('botClose').onclick = () => document.getElementById('botModal').classList.remove('show');
+document.getElementById('botModal').addEventListener('click', e => { if (e.target.id === 'botModal') e.target.classList.remove('show'); });
+document.querySelectorAll('.bt').forEach(t => t.onclick = () => setBotPlatform(t.dataset.p));
+document.getElementById('botAdd').onclick = async () => {
+  const token = document.getElementById('botToken').value.trim();
+  const id1 = document.getElementById('botId1').value.trim(), id2 = document.getElementById('botId2').value.trim();
+  const msg = document.getElementById('botMsg');
+  if (!token) { msg.textContent = 'الصق التوكن أولاً'; return; }
+  msg.textContent = '⏳ جارٍ التحقق…';
+  try {
+    const b = await addBot(botPlatform, token, botPlatform === 'telegram' ? { chatId: id1 } : { guildId: id1, channelId: id2 });
+    msg.textContent = '✓ تمت إضافة ' + b.name;
+    document.getElementById('botToken').value = document.getElementById('botId1').value = document.getElementById('botId2').value = '';
+  } catch (err) { msg.textContent = '⚠️ ' + err.message; }
+};
+paintBots();
+paintAuto();
+render();
+refreshDevice();
+setInterval(() => { if (!document.hidden) refreshDevice(); }, 10000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshDevice(); });
+</script>
+</body>
+</html>
