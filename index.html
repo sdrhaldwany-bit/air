@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0d10">
 <title>NoRestrictions AI</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
 
@@ -21,358 +20,69 @@
   --ai:#171c23;
   --error:#ff7777;
 }
-
-* {
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-html,body {
-  width:100%;
-  height:100%;
-}
-
-body {
-  font-family:"IBM Plex Sans Arabic",sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  overflow:hidden;
-}
-
-.app {
-  width:100%;
-  max-width:900px;
-  height:100dvh;
-  margin:auto;
-  display:flex;
-  flex-direction:column;
-  background:var(--panel);
-  border-inline:1px solid var(--line);
-}
-
-header {
-  min-height:65px;
-  padding:12px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  border-bottom:1px solid var(--line);
-}
-
-.brand {
-  display:flex;
-  align-items:center;
-  gap:9px;
-  font-weight:700;
-  white-space:nowrap;
-}
-
-.dot {
-  width:9px;
-  height:9px;
-  background:var(--accent);
-  border-radius:50%;
-  box-shadow:0 0 10px var(--accent);
-}
-
-.actions {
-  display:flex;
-  align-items:center;
-  gap:7px;
-}
-
-button {
-  font-family:inherit;
-  cursor:pointer;
-}
-
-.ghost {
-  background:transparent;
-  border:1px solid var(--line);
-  color:var(--muted);
-  border-radius:8px;
-  padding:7px 11px;
-  font-size:13px;
-}
-
-.ghost:hover {
-  border-color:var(--accent);
-  color:var(--accent);
-}
-
-main {
-  flex:1;
-  overflow-y:auto;
-  padding:20px 16px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  scroll-behavior:smooth;
-}
-
-.empty {
-  margin:auto;
-  text-align:center;
-  color:var(--muted);
-  max-width:450px;
-  line-height:1.8;
-}
-
-.empty h2 {
-  color:var(--text);
-  margin-bottom:8px;
-}
-
-.chips {
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:8px;
-  margin-top:18px;
-}
-
-.chip {
-  background:var(--ai);
-  border:1px solid var(--line);
-  color:var(--text);
-  border-radius:20px;
-  padding:8px 12px;
-  font-size:13px;
-}
-
-.chip:hover {
-  border-color:var(--accent);
-}
-
-.msg {
-  max-width:85%;
-  padding:11px 15px;
-  border-radius:14px;
-  line-height:1.8;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-}
-
-.msg.user {
-  align-self:flex-start;
-  background:var(--user);
-  border-start-start-radius:4px;
-}
-
-.msg.ai {
-  align-self:flex-end;
-  background:var(--ai);
-  border:1px solid var(--line);
-  border-start-end-radius:4px;
-}
-
-.msg.error {
-  align-self:center;
-  color:var(--error);
-  background:transparent;
-  text-align:center;
-  font-size:13px;
-}
-
-.msg a {
-  color:var(--accent);
-  overflow-wrap:anywhere;
-}
-
-.codebox {
-  direction:ltr;
-  text-align:left;
-  margin:10px 0;
-  background:#080b0e;
-  border:1px solid var(--line);
-  border-radius:9px;
-  overflow:hidden;
-}
-
-.codebar {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:7px 10px;
-  background:#1b2027;
-  color:var(--muted);
-  font-size:12px;
-}
-
-.copy {
-  background:transparent;
-  border:1px solid var(--line);
-  color:var(--text);
-  border-radius:5px;
-  padding:3px 9px;
-}
-
-pre {
-  padding:13px;
-  overflow-x:auto;
-  white-space:pre;
-  font-size:13px;
-  line-height:1.6;
-}
-
-.typing {
-  color:var(--muted);
-  font-size:13px;
-}
-
-.typing span {
-  display:inline-block;
-  width:6px;
-  height:6px;
-  background:var(--muted);
-  border-radius:50%;
-  margin:0 3px;
-  animation:blink 1s infinite;
-}
-
-.typing span:nth-child(2) {
-  animation-delay:.2s;
-}
-
-.typing span:nth-child(3) {
-  animation-delay:.4s;
-}
-
-@keyframes blink {
-  0%,100% {opacity:.2}
-  50% {opacity:1}
-}
-
-footer {
-  border-top:1px solid var(--line);
-  padding:12px;
-  padding-bottom:calc(12px + env(safe-area-inset-bottom));
-}
-
-form {
-  display:flex;
-  align-items:flex-end;
-  gap:9px;
-}
-
-textarea {
-  flex:1;
-  min-width:0;
-  min-height:48px;
-  max-height:150px;
-  resize:none;
-  outline:none;
-  background:var(--bg);
-  border:1px solid var(--line);
-  border-radius:12px;
-  color:var(--text);
-  padding:12px;
-  font:inherit;
-}
-
-textarea:focus {
-  border-color:var(--accent);
-}
-
-.send {
-  height:48px;
-  padding:0 19px;
-  border:0;
-  border-radius:11px;
-  background:var(--accent);
-  color:#06150e;
-  font-weight:700;
-}
-
-.send:disabled {
-  opacity:.4;
-  cursor:not-allowed;
-}
-
-.stop {
-  height:48px;
-  padding:0 13px;
-  border:0;
-  border-radius:10px;
-  background:#d94d4d;
-  color:white;
-}
-
-.hidden {
-  display:none !important;
-}
-
-.modal {
-  position:fixed;
-  inset:0;
-  background:#000a;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:15px;
-  z-index:10;
-}
-
-.modal.show {
-  display:flex;
-}
-
-.sheet {
-  width:100%;
-  max-width:430px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:20px;
-  line-height:1.8;
-}
-
-.sheet h3 {
-  margin-bottom:10px;
-}
-
-.sheet p {
-  color:var(--muted);
-  font-size:14px;
-}
-
-.status {
-  margin-top:13px;
-  padding:10px;
-  border:1px solid var(--line);
-  border-radius:9px;
-  font-size:13px;
-}
-
-@media(max-width:600px) {
-  header {
-    padding:10px;
-  }
-
-  .brand {
-    font-size:13px;
-  }
-
-  .ghost {
-    padding:6px 8px;
-    font-size:11px;
-  }
-
-  .msg {
-    max-width:95%;
-  }
-
-  main {
-    padding:14px 10px;
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%}
+body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+.app{width:100%;max-width:900px;height:100dvh;margin:auto;display:flex;flex-direction:column;background:var(--panel);border-inline:1px solid var(--line)}
+header{min-height:65px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;white-space:nowrap}
+.dot{width:9px;height:9px;background:var(--accent);border-radius:50%;box-shadow:0 0 10px var(--accent)}
+.actions{display:flex;align-items:center;gap:7px}
+button{font-family:inherit;cursor:pointer}
+.ghost,.primary,.danger{border-radius:8px;padding:7px 11px;font-size:13px}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.primary{background:var(--accent);color:#06150e;border:0;font-weight:700}
+.danger{background:#8d3030;color:white;border:0}
+main{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px}
+.empty{margin:auto;text-align:center;color:var(--muted);max-width:450px;line-height:1.8}
+.empty h2{color:var(--text);margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:18px}
+.chip{background:var(--ai);border:1px solid var(--line);color:var(--text);border-radius:20px;padding:8px 12px;font-size:13px}
+.msg{max-width:85%;padding:11px 15px;border-radius:14px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.user{align-self:flex-start;background:var(--user)}
+.msg.ai{align-self:flex-end;background:var(--ai);border:1px solid var(--line)}
+.msg.error{align-self:center;color:var(--error);text-align:center;font-size:13px}
+.codebox{direction:ltr;text-align:left;margin:10px 0;background:#080b0e;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.codebar{display:flex;justify-content:space-between;padding:7px 10px;background:#1b2027;color:var(--muted);font-size:12px}
+.copy{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:5px;padding:3px 9px}
+pre{padding:13px;overflow-x:auto;white-space:pre;font-size:13px;line-height:1.6}
+.typing{color:var(--muted);font-size:13px}
+.typing span{display:inline-block;width:6px;height:6px;background:var(--muted);border-radius:50%;margin:0 3px;animation:blink 1s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+footer{border-top:1px solid var(--line);padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+form{display:flex;align-items:flex-end;gap:9px}
+textarea{flex:1;min-width:0;min-height:48px;max-height:150px;resize:none;outline:none;background:var(--bg);border:1px solid var(--line);border-radius:12px;color:var(--text);padding:12px;font:inherit}
+textarea:focus{border-color:var(--accent)}
+.send{height:48px;padding:0 19px;border:0;border-radius:11px;background:var(--accent);color:#06150e;font-weight:700}
+.stop{height:48px;padding:0 13px;border:0;border-radius:10px;background:#d94d4d;color:white}
+.hidden{display:none!important}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:15px;z-index:10}
+.modal.show{display:flex}
+.sheet{width:100%;max-width:470px;max-height:90dvh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;line-height:1.8}
+.sheet h3{margin-bottom:10px}
+.sheet p,.hint{color:var(--muted);font-size:13px}
+.status{margin-top:13px;padding:10px;border:1px solid var(--line);border-radius:9px;font-size:13px;overflow-wrap:anywhere}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.row>*{flex:1}
+.field{width:100%;margin-top:8px;background:var(--bg);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:10px;font:inherit}
+.codefield{direction:ltr;text-align:left;word-break:break-all;font-family:monospace;font-size:12px}
+.divider{border:0;border-top:1px solid var(--line);margin:17px 0}
+.toggleline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:9px;font-size:14px}
+.toggleline input{width:20px;height:20px;accent-color:var(--accent)}
+@media(max-width:600px){
+ header{padding:10px}
+ .brand{font-size:13px}
+ .ghost,.primary,.danger{padding:6px 8px;font-size:11px}
+ .msg{max-width:95%}
+ main{padding:14px 10px}
 }
 </style>
 </head>
 
 <body>
-
 <div class="app">
 
 <header>
@@ -380,63 +90,99 @@ textarea:focus {
     <span class="dot"></span>
     NoRestrictions AI
   </div>
-
   <div class="actions">
     <button class="ghost" id="connectionBtn">اتصال</button>
     <button class="ghost" id="newChat">محادثة جديدة</button>
   </div>
 </header>
 
-<main id="chat">
-</main>
+<main id="chat"></main>
 
 <footer>
   <form id="form">
-    <textarea
-      id="input"
-      rows="1"
-      placeholder="اكتب رسالتك هنا..."
-      autocomplete="off"
-    ></textarea>
-
-    <button class="stop hidden" id="stopBtn" type="button">
-      إيقاف
-    </button>
-
-    <button class="send" id="sendBtn" type="submit">
-      إرسال
-    </button>
+    <textarea id="input" rows="1" placeholder="اكتب رسالتك هنا..."></textarea>
+    <button class="stop hidden" id="stopBtn" type="button">إيقاف</button>
+    <button class="send" id="sendBtn" type="submit">إرسال</button>
   </form>
 </footer>
-
 </div>
 
 <div class="modal" id="connectionModal">
-  <div class="sheet">
-    <h3>حالة الاتصال</h3>
-    <p>
-      فحص الاتصال بخادم NoRestrictions AI.
-    </p>
-    <div class="status" id="connectionStatus">
-      لم يتم الفحص بعد.
-    </div>
-    <br>
-    <button class="ghost" id="checkConnection">فحص الاتصال</button>
-    <button class="ghost" id="closeModal">إغلاق</button>
-  </div>
+<div class="sheet">
+
+<h3>اتصال جهاز Termux</h3>
+<p>أنشئ مفتاحاً خاصاً لهذا الجهاز، ثم انسخ أمر التثبيت إلى Termux. لا تشارك المفتاح مع أي شخص.</p>
+
+<div class="status" id="deviceStatus">
+لم يتم إنشاء مفتاح أو فحص الاتصال بعد.
+</div>
+
+<div class="row">
+<button class="primary" id="createKeyBtn">إنشاء مفتاح وربط</button>
+<button class="ghost" id="checkDeviceBtn">فحص الحالة</button>
+</div>
+
+<label class="hint">مفتاح الجهاز</label>
+<input class="field codefield" id="deviceKey" readonly placeholder="سيظهر المفتاح هنا">
+
+<label class="hint">أمر التثبيت والاتصال</label>
+<textarea class="field codefield" id="installCommand" rows="3" readonly placeholder="أنشئ المفتاح أولاً"></textarea>
+
+<div class="row">
+<button class="ghost" id="copyCommandBtn">نسخ الأمر</button>
+<button class="ghost" id="copyKeyBtn">نسخ المفتاح</button>
+</div>
+
+<hr class="divider">
+
+<h3>إدارة المهام</h3>
+<p>التلقائي يتيح تنفيذ المهام الآمنة المحددة دون تأكيد لكل مهمة. لا ينفذ أوامر نظام عشوائية.</p>
+
+<label class="toggleline">
+<span>رد تلقائي على المهام الآمنة</span>
+<input type="checkbox" id="autoMode">
+</label>
+
+<label class="toggleline">
+<span>تسريع فائق ⚡</span>
+<input type="checkbox" id="turboMode">
+</label>
+
+<label class="hint">اختر مهمة آمنة</label>
+<select class="field" id="taskSelect">
+<option value="help">مساعدة الوكيل</option>
+<option value="pwd">عرض مجلد العمل</option>
+<option value="whoami">عرض اسم المستخدم</option>
+<option value="date">عرض الوقت والتاريخ</option>
+<option value="uname">معلومات النظام</option>
+<option value="python --version">إصدار Python</option>
+<option value="ls">عرض الملفات</option>
+</select>
+
+<div class="row">
+<button class="primary" id="runTaskBtn">تنفيذ المهمة</button>
+<button class="danger" id="cancelTaskBtn">إيقاف الانتظار</button>
+</div>
+
+<div class="status" id="taskStatus">لا توجد مهمة حالية.</div>
+
+<div class="row">
+<button class="ghost" id="closeModal">إغلاق</button>
+</div>
+
+</div>
 </div>
 
 <script>
 "use strict";
 
-/* إعدادات الخادم */
+const WORKER_URL =
+"https://norestrictions-api.sdrhaldwane.workers.dev";
 
-const API_URL =
-"https://norestrictions-api.sdrhaldwane.workers.dev/api/chat";
+const API_URL = WORKER_URL + "/api/chat";
 
 const HISTORY_KEY = "nr-chat-history";
-
-/* عناصر الصفحة */
+const DEVICE_KEY_STORAGE = "nr-device-key";
 
 const chat = document.getElementById("chat");
 const form = document.getElementById("form");
@@ -444,75 +190,64 @@ const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
 const stopBtn = document.getElementById("stopBtn");
 
-/* حالة التطبيق */
+const modal = document.getElementById("connectionModal");
+const deviceKeyInput = document.getElementById("deviceKey");
+const installCommandInput = document.getElementById("installCommand");
+const deviceStatus = document.getElementById("deviceStatus");
+const taskStatus = document.getElementById("taskStatus");
 
 let history = [];
 let busy = false;
 let activeController = null;
 let activeRequestId = 0;
+let taskPollController = null;
 
-/* تحميل المحادثات */
+/* تحميل المحادثة */
 
 try {
-  const saved = JSON.parse(
-    localStorage.getItem(HISTORY_KEY) || "[]"
-  );
+  const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
 
   if (Array.isArray(saved)) {
-    history = saved;
+    history = saved
+      .filter(x => x && ["user","assistant"].includes(x.role)
+      && typeof x.content === "string")
+      .slice(-40);
   }
 } catch {
   history = [];
 }
 
-/* حفظ المحادثات */
-
 function saveHistory() {
   try {
-    localStorage.setItem(
-      HISTORY_KEY,
-      JSON.stringify(history.slice(-40))
-    );
-  } catch (error) {
-    console.error("History save error:", error);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-40)));
+  } catch (e) {
+    console.error(e);
   }
 }
 
-/* تنظيف النصوص وعرضها بأمان */
+/* عرض الرسائل */
 
 function createMessage(role, content) {
   const element = document.createElement("div");
-
-  element.className =
-    role === "user" ? "msg user" : "msg ai";
-
+  element.className = role === "user" ? "msg user" : "msg ai";
   renderContent(element, content);
-
   chat.appendChild(element);
   scrollBottom();
-
   return element;
 }
-
-/* تحويل النص والروابط وأكواد البرمجة */
 
 function renderContent(element, content) {
   element.replaceChildren();
 
   const text = String(content || "");
-
   const regex = /```([\w+#.-]*)\s*\n([\s\S]*?)```/g;
 
   let lastIndex = 0;
   let match;
 
   while ((match = regex.exec(text)) !== null) {
-
     if (match.index > lastIndex) {
-      addTextWithLinks(
-        element,
-        text.slice(lastIndex, match.index)
-      );
+      addTextWithLinks(element, text.slice(lastIndex, match.index));
     }
 
     const box = document.createElement("div");
@@ -534,10 +269,7 @@ function renderContent(element, content) {
       try {
         await navigator.clipboard.writeText(code);
         copy.textContent = "تم النسخ";
-
-        setTimeout(() => {
-          copy.textContent = "نسخ";
-        }, 1500);
+        setTimeout(() => copy.textContent = "نسخ", 1500);
       } catch {
         copy.textContent = "تعذر النسخ";
       }
@@ -555,57 +287,39 @@ function renderContent(element, content) {
   }
 
   if (lastIndex < text.length) {
-    addTextWithLinks(
-      element,
-      text.slice(lastIndex)
-    );
+    addTextWithLinks(element, text.slice(lastIndex));
   }
 }
 
-/* إظهار الروابط كرابط قابل للضغط */
-
 function addTextWithLinks(element, text) {
   const regex = /(https?:\/\/[^\s<]+)/g;
-
   let lastIndex = 0;
   let match;
 
   while ((match = regex.exec(text)) !== null) {
-
     if (match.index > lastIndex) {
       element.appendChild(
-        document.createTextNode(
-          text.slice(lastIndex, match.index)
-        )
+        document.createTextNode(text.slice(lastIndex, match.index))
       );
     }
 
-    let url = match[0].replace(/[),.،]+$/, "");
+    const clean = match[0].replace(/[),.،]+$/, "");
 
     try {
-      const parsed = new URL(url);
+      const url = new URL(clean);
 
-      if (
-        parsed.protocol === "https:" ||
-        parsed.protocol === "http:"
-      ) {
+      if (["https:","http:"].includes(url.protocol)) {
         const link = document.createElement("a");
-
-        link.href = parsed.href;
+        link.href = url.href;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
-        link.textContent = url;
-
+        link.textContent = clean;
         element.appendChild(link);
       } else {
-        element.appendChild(
-          document.createTextNode(url)
-        );
+        element.appendChild(document.createTextNode(clean));
       }
     } catch {
-      element.appendChild(
-        document.createTextNode(url)
-      );
+      element.appendChild(document.createTextNode(clean));
     }
 
     lastIndex = regex.lastIndex;
@@ -613,30 +327,20 @@ function addTextWithLinks(element, text) {
 
   if (lastIndex < text.length) {
     element.appendChild(
-      document.createTextNode(
-        text.slice(lastIndex)
-      )
+      document.createTextNode(text.slice(lastIndex))
     );
   }
 }
-
-/* التمرير إلى آخر رسالة */
 
 function scrollBottom() {
   chat.scrollTop = chat.scrollHeight;
 }
 
-/* الشاشة الرئيسية */
-
 function renderEmpty() {
   chat.innerHTML = `
     <div class="empty">
       <h2>أهلاً بك في NoRestrictions AI</h2>
-
-      <p>
-        اكتب سؤالك وسيجيبك الذكاء الاصطناعي.
-      </p>
-
+      <p>اكتب سؤالك وسيجيبك الذكاء الاصطناعي.</p>
       <div class="chips">
         <button class="chip">اشرح لي الذكاء الاصطناعي</button>
         <button class="chip">ساعدني في البرمجة</button>
@@ -653,8 +357,6 @@ function renderEmpty() {
   });
 }
 
-/* إعادة عرض المحادثة */
-
 function renderHistory() {
   chat.innerHTML = "";
 
@@ -664,72 +366,33 @@ function renderHistory() {
   }
 
   history.forEach(message => {
-    createMessage(
-      message.role,
-      message.content
-    );
+    createMessage(message.role, message.content);
   });
 }
 
-/* إظهار حالة الكتابة */
-
 function showTyping() {
   const element = document.createElement("div");
-
   element.className = "msg ai typing";
-
-  element.innerHTML =
-    '<span></span><span></span><span></span>';
-
+  element.innerHTML = "<span></span><span></span><span></span>";
   chat.appendChild(element);
-
   scrollBottom();
-
   return element;
 }
 
-/* معالجة أخطاء الخادم */
-
-async function readServerResponse(response) {
-  const contentType =
-    response.headers.get("content-type") || "";
-
-  if (!contentType.includes("application/json")) {
-    const body = await response.text();
-
-    throw new Error(
-      "الخادم لم يرجع JSON. تحقق من عنوان API وإعدادات Cloudflare. " +
-      body.slice(0, 180)
-    );
-  }
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.error || "حدث خطأ HTTP " + response.status
-    );
-  }
-
-  if (
-    typeof data.reply !== "string" ||
-    !data.reply.trim()
-  ) {
-    throw new Error(
-      "الخادم لم يرجع إجابة صحيحة."
-    );
-  }
-
-  return data;
+function createError(message) {
+  const element = document.createElement("div");
+  element.className = "msg error";
+  element.textContent = "⚠️ " + message;
+  chat.appendChild(element);
+  scrollBottom();
 }
 
-/* إرسال الرسالة */
+/* الدردشة */
 
 async function sendMessage(text) {
   if (busy || !text.trim()) return;
 
   busy = true;
-
   const requestId = ++activeRequestId;
 
   activeController = new AbortController();
@@ -737,15 +400,9 @@ async function sendMessage(text) {
   sendBtn.disabled = true;
   stopBtn.classList.remove("hidden");
 
-  if (!history.length) {
-    chat.innerHTML = "";
-  }
+  if (!history.length) chat.innerHTML = "";
 
-  history.push({
-    role: "user",
-    content: text
-  });
-
+  history.push({role:"user", content:text});
   saveHistory();
 
   createMessage("user", text);
@@ -753,88 +410,46 @@ async function sendMessage(text) {
   const typing = showTyping();
 
   try {
-
-    const messages = history
-      .filter(message =>
-        message &&
-        (
-          message.role === "user" ||
-          message.role === "assistant"
-        ) &&
-        typeof message.content === "string"
-      )
-      .slice(-20);
-
-    /*
-      هذا هو تنسيق الطلب الذي يستقبله Worker
-      الموجود في مشروعك.
-    */
+    const messages = history.slice(-20);
 
     const response = await fetch(API_URL, {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify({
-        messages: messages
-      }),
-
-      signal: activeController.signal,
-
-      cache: "no-store"
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({messages}),
+      signal:activeController.signal,
+      cache:"no-store"
     });
-
-    /*
-      إيقاف أي نتيجة قديمة إذا تم إلغاء الطلب.
-    */
 
     if (requestId !== activeRequestId) {
       typing.remove();
       return;
     }
 
-    const data = await readServerResponse(response);
+    const data = await response.json();
 
-    if (requestId !== activeRequestId) {
-      typing.remove();
-      return;
+    if (!response.ok) {
+      throw new Error(data.error || "HTTP " + response.status);
+    }
+
+    if (typeof data.reply !== "string" || !data.reply.trim()) {
+      throw new Error("لم تصل إجابة صحيحة من الخادم.");
     }
 
     typing.remove();
 
-    history.push({
-      role: "assistant",
-      content: data.reply
-    });
-
+    history.push({role:"assistant",content:data.reply});
     saveHistory();
 
-    createMessage(
-      "assistant",
-      data.reply
-    );
+    createMessage("assistant", data.reply);
 
   } catch (error) {
-
     typing.remove();
 
-    if (
-      error.name === "AbortError" ||
-      requestId !== activeRequestId
-    ) {
+    if (error.name === "AbortError" || requestId !== activeRequestId) {
       return;
     }
 
-    /*
-      حذف رسالة المستخدم التي لم تحصل على رد.
-    */
-
-    if (
-      history.length &&
-      history[history.length - 1].role === "user"
-    ) {
+    if (history.length && history[history.length - 1].role === "user") {
       history.pop();
       saveHistory();
     }
@@ -842,32 +457,14 @@ async function sendMessage(text) {
     createError(error.message);
 
   } finally {
-
     if (requestId === activeRequestId) {
       busy = false;
       activeController = null;
-
       sendBtn.disabled = false;
       stopBtn.classList.add("hidden");
     }
   }
 }
-
-/* إظهار رسالة الخطأ */
-
-function createError(message) {
-  const element = document.createElement("div");
-
-  element.className = "msg error";
-
-  element.textContent = "⚠️ " + message;
-
-  chat.appendChild(element);
-
-  scrollBottom();
-}
-
-/* إرسال النموذج */
 
 form.addEventListener("submit", event => {
   event.preventDefault();
@@ -882,43 +479,23 @@ form.addEventListener("submit", event => {
   sendMessage(text);
 });
 
-/* إرسال بزر Enter */
-
 input.addEventListener("keydown", event => {
-  if (
-    event.key === "Enter" &&
-    !event.shiftKey &&
-    !event.isComposing
-  ) {
+  if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
     event.preventDefault();
     form.requestSubmit();
   }
 });
 
-/* تكبير مربع الكتابة */
-
 input.addEventListener("input", () => {
   input.style.height = "auto";
-
-  input.style.height =
-    Math.min(input.scrollHeight, 150) + "px";
+  input.style.height = Math.min(input.scrollHeight, 150) + "px";
 });
 
-/* إلغاء الطلب */
-
 stopBtn.addEventListener("click", () => {
-
   if (!busy) return;
 
-  /*
-    تغيير رقم الطلب يمنع قبول أي نتيجة قديمة.
-  */
-
   activeRequestId++;
-
-  if (activeController) {
-    activeController.abort();
-  }
+  activeController?.abort();
 
   activeController = null;
   busy = false;
@@ -927,17 +504,12 @@ stopBtn.addEventListener("click", () => {
   stopBtn.classList.add("hidden");
 
   createError("تم إيقاف الطلب.");
-
 });
 
-/* محادثة جديدة */
-
-document.getElementById("newChat")
-.addEventListener("click", () => {
-
-  if (busy && activeController) {
+document.getElementById("newChat").addEventListener("click", () => {
+  if (busy) {
     activeRequestId++;
-    activeController.abort();
+    activeController?.abort();
   }
 
   busy = false;
@@ -947,72 +519,272 @@ document.getElementById("newChat")
   stopBtn.classList.add("hidden");
 
   history = [];
-
   saveHistory();
-
   renderEmpty();
-
   input.focus();
 });
 
 /* نافذة الاتصال */
 
-const modal =
-  document.getElementById("connectionModal");
-
-document.getElementById("connectionBtn")
-.addEventListener("click", () => {
+document.getElementById("connectionBtn").addEventListener("click", () => {
   modal.classList.add("show");
+
+  const key = localStorage.getItem(DEVICE_KEY_STORAGE);
+
+  if (key) {
+    deviceKeyInput.value = key;
+    updateInstallCommand(key);
+    checkDevice();
+  }
 });
 
-document.getElementById("closeModal")
-.addEventListener("click", () => {
+document.getElementById("closeModal").addEventListener("click", () => {
   modal.classList.remove("show");
 });
 
-/* فحص Cloudflare */
+/* مفتاح الجهاز */
 
-async function checkConnection() {
-  const status =
-    document.getElementById("connectionStatus");
+function updateInstallCommand(key) {
+  installCommandInput.value =
+    "pkg install python curl -y && curl -fsSLo agent.py https://sdrhaldwany-bit.github.io/air/agent.py && NR_SERVER=" +
+    WORKER_URL + " python agent.py " + key;
+}
 
-  status.textContent = "⏳ جارٍ فحص الاتصال...";
+async function deviceRequest(path, options = {}) {
+  const response = await fetch(WORKER_URL + path, {
+    ...options,
+    cache:"no-store",
+    headers:{
+      "Content-Type":"application/json",
+      ...(options.headers || {})
+    }
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || "HTTP " + response.status);
+  }
+
+  return data;
+}
+
+async function createAndPair() {
+  deviceStatus.textContent = "جارٍ إنشاء مفتاح الجهاز...";
 
   try {
+    let key = localStorage.getItem(DEVICE_KEY_STORAGE);
 
-    const response = await fetch(API_URL, {
-      method: "OPTIONS",
-      cache: "no-store"
-    });
+    if (!key) {
+      const bytes = crypto.getRandomValues(new Uint8Array(32));
 
-    if (
-      response.ok ||
-      response.status === 204
-    ) {
-      status.textContent =
-        "✓ الخادم يستجيب لطلب الفحص.";
-    } else {
-      status.textContent =
-        "⚠️ استجابة الخادم: HTTP " +
-        response.status;
+      key = Array.from(bytes, byte =>
+        byte.toString(16).padStart(2, "0")
+      ).join("");
     }
 
+    const result = await deviceRequest("/api/device/pair", {
+      method:"POST",
+      body:JSON.stringify({key})
+    });
+
+    if (!result.ok) throw new Error("لم يكتمل الربط.");
+
+    localStorage.setItem(DEVICE_KEY_STORAGE, key);
+
+    deviceKeyInput.value = key;
+    updateInstallCommand(key);
+
+    deviceStatus.textContent =
+      "✓ تم تسجيل مفتاح الجهاز. انسخ أمر التثبيت وشغّله في Termux.";
+
   } catch (error) {
-
-    status.textContent =
-      "⚠️ تعذر الاتصال. تحقق من الإنترنت وإعدادات Cloudflare.";
-
+    deviceStatus.textContent = "تعذر الربط: " + error.message;
   }
 }
 
-document.getElementById("checkConnection")
-.addEventListener("click", checkConnection);
+async function checkDevice() {
+  const key = localStorage.getItem(DEVICE_KEY_STORAGE);
 
-/* بدء الموقع */
+  if (!key) {
+    deviceStatus.textContent = "أنشئ مفتاح الجهاز أولاً.";
+    return;
+  }
+
+  deviceStatus.textContent = "جارٍ فحص حالة الجهاز...";
+
+  try {
+    const data = await deviceRequest(
+      "/api/device/status?key=" + encodeURIComponent(key),
+      {method:"GET"}
+    );
+
+    deviceStatus.textContent = data.online
+      ? "✓ جهاز Termux متصل."
+      : "✓ المفتاح مسجل، لكن Termux غير متصل حالياً.";
+
+  } catch (error) {
+    deviceStatus.textContent = "فشل الفحص: " + error.message;
+  }
+}
+
+document.getElementById("createKeyBtn")
+.addEventListener("click", createAndPair);
+
+document.getElementById("checkDeviceBtn")
+.addEventListener("click", checkDevice);
+
+/* النسخ */
+
+async function copyText(text, message) {
+  if (!text) {
+    deviceStatus.textContent = "لا يوجد نص للنسخ.";
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    deviceStatus.textContent = message;
+  } catch {
+    deviceStatus.textContent = "تعذر النسخ. انسخ النص يدوياً.";
+  }
+}
+
+document.getElementById("copyCommandBtn").addEventListener("click", () => {
+  copyText(installCommandInput.value, "تم نسخ أمر التثبيت.");
+});
+
+document.getElementById("copyKeyBtn").addEventListener("click", () => {
+  copyText(deviceKeyInput.value, "تم نسخ المفتاح.");
+});
+
+/* أوضاع التشغيل */
+
+const autoMode = document.getElementById("autoMode");
+const turboMode = document.getElementById("turboMode");
+
+autoMode.checked = localStorage.getItem("nr-auto-mode") === "true";
+turboMode.checked = localStorage.getItem("nr-turbo-mode") === "true";
+
+autoMode.addEventListener("change", () => {
+  localStorage.setItem("nr-auto-mode", String(autoMode.checked));
+});
+
+turboMode.addEventListener("change", () => {
+  localStorage.setItem("nr-turbo-mode", String(turboMode.checked));
+});
+
+/* إرسال مهمة آمنة */
+
+async function runTask() {
+  const key = localStorage.getItem(DEVICE_KEY_STORAGE);
+
+  if (!key) {
+    taskStatus.textContent = "أنشئ مفتاح الجهاز واربط Termux أولاً.";
+    return;
+  }
+
+  const command = document.getElementById("taskSelect").value;
+
+  taskStatus.textContent = "جارٍ إرسال المهمة...";
+
+  try {
+    const result = await deviceRequest("/api/device/run", {
+      method:"POST",
+      body:JSON.stringify({
+        key,
+        command
+      })
+    });
+
+    taskStatus.textContent =
+      "تم إرسال المهمة رقم " + result.id +
+      ". جارٍ انتظار النتيجة...";
+
+    pollTask(result.id, key);
+
+  } catch (error) {
+    taskStatus.textContent = "تعذر إرسال المهمة: " + error.message;
+  }
+}
+
+async function pollTask(jobId, key) {
+  if (taskPollController) taskPollController.abort();
+
+  taskPollController = new AbortController();
+
+  const interval = turboMode.checked ? 1200 : 3000;
+  const started = Date.now();
+  const maxWait = 180000;
+
+  while (
+    taskPollController &&
+    !taskPollController.signal.aborted &&
+    Date.now() - started < maxWait
+  ) {
+    try {
+      const result = await deviceRequest(
+        "/api/device/result?key=" + encodeURIComponent(key) +
+        "&id=" + encodeURIComponent(jobId),
+        {method:"GET",signal:taskPollController.signal}
+      );
+
+      if (result.status === "done") {
+        taskStatus.textContent =
+          "اكتملت المهمة.\n\n" +
+          (result.output || "لا يوجد إخراج") +
+          "\n\nExit code: " + result.exit_code;
+        taskPollController = null;
+        return;
+      }
+
+      if (result.status === "cancel") {
+        taskStatus.textContent = "تم إلغاء المهمة.";
+        taskPollController = null;
+        return;
+      }
+
+      taskStatus.textContent =
+        "المهمة رقم " + jobId + " قيد التنفيذ...";
+
+    } catch (error) {
+      if (error.name === "AbortError") return;
+
+      taskStatus.textContent =
+        "تعذر جلب النتيجة: " + error.message;
+      taskPollController = null;
+      return;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, interval));
+  }
+
+  if (taskPollController && !taskPollController.signal.aborted) {
+    taskStatus.textContent =
+      "انتهت مهلة انتظار النتيجة. افحص حالة الجهاز وحاول مجدداً.";
+  }
+
+  taskPollController = null;
+}
+
+document.getElementById("runTaskBtn")
+.addEventListener("click", runTask);
+
+document.getElementById("cancelTaskBtn")
+.addEventListener("click", () => {
+  if (taskPollController) {
+    taskPollController.abort();
+    taskPollController = null;
+  }
+
+  taskStatus.textContent =
+    "تم إيقاف انتظار النتيجة من الموقع. هذا لا يوقف عملية تعمل بالفعل داخل Termux.";
+});
+
+/* بدء الصفحة */
 
 renderHistory();
 
 </script>
-
 </body>
 </html>
