@@ -1,154 +1,815 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NoRestrictions AI</title>
+<meta name="theme-color" content="#0b0d10">
+<title>NoRestrictions AI — دردشة</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+
 <style>
-*{box-sizing:border-box}
-body{
- margin:0;background:#0d0d0d;color:#eee;
- font-family:Arial,sans-serif;height:100vh;
- display:flex;flex-direction:column
+:root {
+  --bg:#0b0d10;
+  --panel:#12151a;
+  --line:#252b34;
+  --text:#e8eaed;
+  --muted:#9299a4;
+  --accent:#3ee6a8;
+  --user:#1c3b30;
+  --ai:#191e25;
+  --error:#ff7777;
 }
-header{
- padding:16px;background:#171717;border-bottom:1px solid #292929;
- display:flex;justify-content:space-between;align-items:center
+
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
-h2{margin:0;color:#fff;font-size:19px}
-#status{font-size:12px;color:#aaa}
-#termux{
- margin:12px;padding:10px;border:1px solid #333;
- border-radius:10px;background:#171717;color:#ddd
+
+body {
+  font-family:"IBM Plex Sans Arabic",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  height:100dvh;
+  overflow:hidden;
 }
-#chat{
- flex:1;overflow-y:auto;padding:16px;
- display:flex;flex-direction:column;gap:12px
+
+.app {
+  width:100%;
+  max-width:900px;
+  height:100%;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  background:var(--panel);
+  border-inline:1px solid var(--line);
 }
-.msg{
- padding:12px 15px;border-radius:13px;max-width:85%;
- line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere
+
+header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
 }
-.user{background:#244d3b;align-self:flex-start}
-.ai{background:#202020;align-self:flex-end}
-#form{
- display:flex;gap:8px;padding:12px;background:#171717;
- border-top:1px solid #292929
+
+.brand {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-weight:700;
+  font-size:1rem;
 }
-textarea{
- flex:1;resize:none;min-height:45px;max-height:120px;
- padding:12px;border-radius:10px;border:1px solid #333;
- background:#0d0d0d;color:white;font-size:15px;outline:none
+
+.dot {
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 10px var(--accent);
 }
-button{
- border:0;border-radius:10px;padding:0 17px;
- background:#21a36b;color:white;font-size:15px;cursor:pointer
+
+.model {
+  color:var(--muted);
+  font-size:.7rem;
+  border:1px solid var(--line);
+  padding:3px 8px;
+  border-radius:20px;
 }
-button:disabled{opacity:.5}
-#termux button{padding:8px 12px}
+
+.actions {
+  display:flex;
+  gap:7px;
+}
+
+button {
+  font-family:inherit;
+  cursor:pointer;
+}
+
+.ghost {
+  background:none;
+  border:1px solid var(--line);
+  color:var(--muted);
+  padding:7px 10px;
+  border-radius:8px;
+  font-size:.82rem;
+}
+
+.ghost:hover {
+  color:var(--accent);
+  border-color:var(--accent);
+}
+
+main {
+  flex:1;
+  overflow-y:auto;
+  padding:20px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  scroll-behavior:smooth;
+}
+
+.empty {
+  margin:auto;
+  text-align:center;
+  max-width:450px;
+  color:var(--muted);
+}
+
+.empty h2 {
+  color:var(--text);
+  font-size:1.5rem;
+  margin-bottom:9px;
+}
+
+.empty p {
+  line-height:1.8;
+  font-size:.9rem;
+}
+
+.chips {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin-top:20px;
+}
+
+.chip {
+  background:var(--ai);
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:20px;
+  padding:8px 12px;
+  font-size:.82rem;
+}
+
+.chip:hover {
+  border-color:var(--accent);
+}
+
+.msg {
+  max-width:85%;
+  padding:11px 15px;
+  border-radius:14px;
+  line-height:1.8;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  font-size:.95rem;
+}
+
+.msg.user {
+  align-self:flex-start;
+  background:var(--user);
+  border-start-start-radius:4px;
+}
+
+.msg.ai {
+  align-self:flex-end;
+  background:var(--ai);
+  border:1px solid var(--line);
+  border-start-end-radius:4px;
+}
+
+.msg.err {
+  align-self:center;
+  color:var(--error);
+  font-size:.85rem;
+}
+
+.codebox {
+  direction:ltr;
+  text-align:left;
+  background:#080a0d;
+  border:1px solid var(--line);
+  border-radius:10px;
+  margin:10px 0;
+  overflow:hidden;
+}
+
+.codebar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:7px 10px;
+  background:#20252c;
+  color:var(--muted);
+  font-size:.75rem;
+}
+
+.copy {
+  background:none;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:5px;
+  padding:3px 9px;
+}
+
+.codebox pre {
+  padding:13px;
+  overflow-x:auto;
+  white-space:pre;
+  font-family:monospace;
+  font-size:.85rem;
+  line-height:1.6;
+  color:#d8e5ed;
+}
+
+.msg a {
+  color:var(--accent);
+  word-break:break-all;
+}
+
+.typing span {
+  display:inline-block;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--muted);
+  margin:0 2px;
+  animation:blink 1s infinite;
+}
+
+.typing span:nth-child(2) {
+  animation-delay:.2s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay:.4s;
+}
+
+@keyframes blink {
+  50% {
+    opacity:.2;
+    transform:translateY(-3px);
+  }
+}
+
+form {
+  display:flex;
+  gap:9px;
+  padding:13px 15px;
+  border-top:1px solid var(--line);
+  align-items:flex-end;
+}
+
+textarea {
+  flex:1;
+  resize:none;
+  min-height:48px;
+  max-height:160px;
+  background:var(--bg);
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px;
+  font-family:inherit;
+  font-size:1rem;
+  outline:none;
+}
+
+textarea:focus {
+  border-color:var(--accent);
+}
+
+.send {
+  height:48px;
+  padding:0 20px;
+  background:var(--accent);
+  color:#04140d;
+  border:0;
+  border-radius:12px;
+  font-weight:700;
+}
+
+.send:disabled {
+  opacity:.4;
+}
+
+.stop {
+  height:48px;
+  padding:0 13px;
+  background:var(--error);
+  color:white;
+  border:0;
+  border-radius:10px;
+}
+
+.modal {
+  position:fixed;
+  inset:0;
+  background:#000b;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+  z-index:10;
+}
+
+.modal.show {
+  display:flex;
+}
+
+.sheet {
+  width:100%;
+  max-width:500px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:18px;
+  line-height:1.8;
+}
+
+.sheet h3 {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.sheet p {
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.status {
+  color:var(--accent);
+  margin-top:10px;
+  font-size:.85rem;
+}
+
+@media(max-width:600px) {
+  .model {
+    display:none;
+  }
+
+  .msg {
+    max-width:96%;
+  }
+
+  header {
+    padding:11px;
+  }
+
+  .ghost {
+    padding:6px 8px;
+    font-size:.75rem;
+  }
+}
 </style>
 </head>
-<body><header>
- <h2>NoRestrictions AI</h2>
- <span id="status">جاهز</span>
-</header><div id="termux">
- <div>اتصال Termux: <span id="termuxStatus">غير متصل</span></div>
- <button onclick="checkTermux()">فحص الاتصال</button>
- <small>يتطلب إعداد خادم محلي آمن داخل Termux.</small>
-</div><main id="chat">
- <div class="msg ai">مرحباً! أنا NoRestrictions AI. كيف أستطيع مساعدتك؟</div>
-</main><form id="form">
- <textarea id="input" placeholder="اكتب رسالتك هنا..." rows="1"></textarea>
- <button id="send" type="submit">إرسال</button>
-</form><script>
-const API_URL = "/api/chat";
+
+<body>
+
+<div class="app">
+
+<header>
+  <div class="brand">
+    <span class="dot"></span>
+    NoRestrictions AI
+    <span class="model">AI CHAT</span>
+  </div>
+
+  <div class="actions">
+    <button class="ghost" id="termuxBtn">📱 Termux</button>
+    <button class="ghost" id="newChat">محادثة جديدة</button>
+  </div>
+</header>
+
+<main id="chat"></main>
+
+<form id="form">
+  <textarea
+    id="input"
+    placeholder="اكتب رسالتك هنا..."
+    rows="1"
+  ></textarea>
+
+  <button class="stop" id="stopBtn" type="button" hidden>
+    إيقاف
+  </button>
+
+  <button class="send" id="sendBtn" type="submit">
+    إرسال
+  </button>
+</form>
+
+</div>
+
+<!-- نافذة Termux -->
+
+<div class="modal" id="termuxModal">
+  <div class="sheet">
+
+    <h3>
+      📱 اتصال Termux
+      <button class="ghost" id="closeTermux">إغلاق</button>
+    </h3>
+
+    <p>
+      واجهة اتصال Termux.
+      لم يتم إعداد خادم محلي للجهاز بعد.
+    </p>
+
+    <p class="status" id="termuxStatus">
+      الحالة: غير متصل
+    </p>
+
+    <button class="ghost" id="checkTermux">
+      التحقق من الحالة
+    </button>
+
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* عناصر الصفحة */
 
 const chat = document.getElementById("chat");
+const form = document.getElementById("form");
 const input = document.getElementById("input");
-const sendBtn = document.getElementById("send");
-const statusText = document.getElementById("status");
+const sendBtn = document.getElementById("sendBtn");
+const stopBtn = document.getElementById("stopBtn");
 
-let messages = [];
+let history = [];
+let busy = false;
+let controller = null;
 
-function addMessage(text, type) {
- const div = document.createElement("div");
- div.className = "msg " + type;
- div.textContent = text;
- chat.appendChild(div);
- chat.scrollTop = chat.scrollHeight;
- return div;
+/* التخزين المحلي */
+
+try {
+  history = JSON.parse(
+    localStorage.getItem("nr_history") || "[]"
+  );
+
+  if (!Array.isArray(history)) {
+    history = [];
+  }
+} catch {
+  history = [];
 }
 
-async function sendMessage(text) {
- if (!text.trim()) return;
+function saveHistory() {
+  try {
+    localStorage.setItem(
+      "nr_history",
+      JSON.stringify(history.slice(-30))
+    );
+  } catch (error) {
+    console.warn("تعذر حفظ المحادثة", error);
+  }
+}
 
- addMessage(text, "user");
- messages.push({role:"user", content:text});
+/* إنشاء رسالة */
 
- input.value = "";
- sendBtn.disabled = true;
- statusText.textContent = "يفكر...";
+function addMessage(role, content) {
+  const element = document.createElement("div");
 
- const loading = addMessage("جاري التفكير...", "ai");
+  element.className = "msg " + role;
+  element.textContent = content;
 
- try {
-  const response = await fetch(API_URL, {
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({messages})
+  chat.appendChild(element);
+  chat.scrollTop = chat.scrollHeight;
+
+  return element;
+}
+
+/* عرض شاشة البداية */
+
+function renderEmpty() {
+  chat.innerHTML = "";
+
+  const box = document.createElement("div");
+  box.className = "empty";
+
+  const title = document.createElement("h2");
+  title.textContent = "أهلاً بك في NoRestrictions AI 👋";
+
+  const description = document.createElement("p");
+  description.textContent =
+    "اسأل أي شيء، وسأساعدك في الإجابة والبرمجة وفهم المواضيع المختلفة.";
+
+  const chips = document.createElement("div");
+  chips.className = "chips";
+
+  const suggestions = [
+    "اشرح لي الذكاء الاصطناعي",
+    "ساعدني في كتابة كود HTML",
+    "ما آخر أخبار التقنية؟",
+    "اشرح لي Cloudflare",
+    "علمني JavaScript"
+  ];
+
+  suggestions.forEach(text => {
+    const button = document.createElement("button");
+    button.className = "chip";
+    button.type = "button";
+    button.textContent = text;
+
+    button.onclick = () => {
+      input.value = text;
+      form.requestSubmit();
+    };
+
+    chips.appendChild(button);
   });
 
-  const data = await response.json();
+  box.append(title, description, chips);
+  chat.appendChild(box);
+}
+
+/* عرض المحادثة */
+
+function renderHistory() {
+  chat.innerHTML = "";
+
+  if (!history.length) {
+    renderEmpty();
+    return;
+  }
+
+  history.forEach(message => {
+    addMessage(
+      message.role === "user" ? "user" : "ai",
+      message.content
+    );
+  });
+}
+
+/* مؤشر الكتابة */
+
+function showTyping() {
+  const element = document.createElement("div");
+
+  element.className = "msg ai typing";
+  element.innerHTML =
+    "<span></span><span></span><span></span>";
+
+  chat.appendChild(element);
+  chat.scrollTop = chat.scrollHeight;
+
+  return element;
+}
+
+/* طلب الدردشة من Vercel */
+
+async function requestAI(messages, signal) {
+
+  const response = await fetch("/api/chat", {
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
+
+    body: JSON.stringify({
+      messages: messages
+    }),
+
+    signal: signal,
+    cache: "no-store"
+  });
+
+  const contentType =
+    (response.headers.get("content-type") || "").toLowerCase();
+
+  const raw = await response.text();
+
+  /*
+    إصلاح مشكلة:
+    Unexpected token '<'
+    عندما يرجع الخادم HTML بدلاً من JSON
+  */
 
   if (!response.ok) {
-   throw new Error(data.error || "حدث خطأ في الخادم");
+    let message = "خطأ HTTP " + response.status;
+
+    try {
+      const data = JSON.parse(raw);
+      message = data.error || data.message || message;
+    } catch {
+      if (/^\s*</.test(raw)) {
+        message =
+          "الخادم أعاد HTML بدلاً من JSON. تأكد من وجود api/chat.mjs داخل مجلد api في Vercel.";
+      }
+    }
+
+    throw new Error(message);
   }
 
-  if (!data.reply) {
-   throw new Error("لم يصل رد من الخادم");
+  if (
+    !contentType.includes("application/json") &&
+    !/^\s*\{/.test(raw)
+  ) {
+    throw new Error(
+      "استجابة الخادم ليست JSON. تحقق من مسار /api/chat."
+    );
   }
 
-  loading.textContent = data.reply;
-  messages.push({role:"assistant", content:data.reply});
-  statusText.textContent = "متصل";
- } catch(error) {
-  loading.textContent = "خطأ: " + error.message;
-  statusText.textContent = "تعذر الاتصال";
- } finally {
-  sendBtn.disabled = false;
-  input.focus();
-  chat.scrollTop = chat.scrollHeight;
- }
+  let data;
+
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new Error("استجابة JSON غير صالحة.");
+  }
+
+  if (data.error) {
+    throw new Error(data.error);
+  }
+
+  if (typeof data.reply !== "string") {
+    throw new Error("لم يصل رد صحيح من الذكاء الاصطناعي.");
+  }
+
+  return data;
 }
 
-document.getElementById("form").addEventListener("submit", function(e){
- e.preventDefault();
- sendMessage(input.value);
-});
+/* إرسال الرسالة */
 
-input.addEventListener("keydown", function(e){
- if(e.key === "Enter" && !e.shiftKey){
-  e.preventDefault();
-  document.getElementById("form").requestSubmit();
- }
-});
+async function sendMessage(text) {
 
-async function checkTermux() {
- const result = document.getElementById("termuxStatus");
- result.textContent = "جارٍ الفحص...";
+  if (busy || !text.trim()) {
+    return;
+  }
 
- try {
-  const response = await fetch("http://127.0.0.1:8765/status", {
-   method:"GET",
-   signal:AbortSignal.timeout(3000)
+  busy = true;
+
+  sendBtn.disabled = true;
+  stopBtn.hidden = false;
+
+  const message = text.trim();
+
+  input.value = "";
+
+  if (!history.length) {
+    chat.innerHTML = "";
+  }
+
+  history.push({
+    role: "user",
+    content: message
   });
 
-  if (!response.ok) throw new Error();
+  saveHistory();
 
-  const data = await response.json();
-  result.textContent = data.connected ? "متصل" : "غير متصل";
- } catch {
-  result.textContent = "غير متصل";
- }
+  addMessage("user", message);
+
+  const typing = showTyping();
+
+  controller = new AbortController();
+
+  try {
+
+    const data = await requestAI(
+      history.map(item => ({
+        role: item.role,
+        content: item.content
+      })),
+      controller.signal
+    );
+
+    typing.remove();
+
+    history.push({
+      role: "assistant",
+      content: data.reply
+    });
+
+    saveHistory();
+
+    addMessage("ai", data.reply);
+
+    if (data.sources && data.sources.length) {
+      const sources = document.createElement("div");
+      sources.className = "msg ai";
+
+      const heading = document.createElement("strong");
+      heading.textContent = "المصادر:";
+
+      sources.appendChild(heading);
+
+      data.sources.forEach(source => {
+        const link = document.createElement("a");
+
+        link.href = source.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = source.title || source.url;
+
+        const line = document.createElement("p");
+        line.appendChild(link);
+
+        sources.appendChild(line);
+      });
+
+      chat.appendChild(sources);
+    }
+
+  } catch (error) {
+
+    typing.remove();
+
+    if (error.name === "AbortError") {
+      addMessage("err", "تم إيقاف الطلب.");
+    } else {
+      addMessage("err", "⚠️ " + error.message);
+    }
+
+  } finally {
+
+    busy = false;
+    controller = null;
+
+    sendBtn.disabled = false;
+    stopBtn.hidden = true;
+
+    input.focus();
+  }
 }
-</script></body>
+
+/* إرسال النموذج */
+
+form.addEventListener("submit", event => {
+  event.preventDefault();
+  sendMessage(input.value);
+});
+
+/* Enter للإرسال */
+
+input.addEventListener("keydown", event => {
+  if (
+    event.key === "Enter" &&
+    !event.shiftKey
+  ) {
+    event.preventDefault();
+    form.requestSubmit();
+  }
+});
+
+/* إيقاف الطلب */
+
+stopBtn.addEventListener("click", () => {
+  if (controller) {
+    controller.abort();
+  }
+});
+
+/* محادثة جديدة */
+
+document.getElementById("newChat").onclick = () => {
+
+  if (busy) {
+    return;
+  }
+
+  if (!confirm("هل تريد بدء محادثة جديدة؟")) {
+    return;
+  }
+
+  history = [];
+
+  saveHistory();
+  renderEmpty();
+};
+
+/* Termux */
+
+const termuxModal =
+  document.getElementById("termuxModal");
+
+document.getElementById("termuxBtn").onclick = () => {
+  termuxModal.classList.add("show");
+};
+
+document.getElementById("closeTermux").onclick = () => {
+  termuxModal.classList.remove("show");
+};
+
+document.getElementById("checkTermux").onclick = () => {
+  document.getElementById("termuxStatus").textContent =
+    "الحالة: غير متصل — لم يتم إعداد خادم محلي.";
+};
+
+termuxModal.addEventListener("click", event => {
+  if (event.target === termuxModal) {
+    termuxModal.classList.remove("show");
+  }
+});
+
+/* بدء الموقع */
+
+renderHistory();
+
+</script>
+
+</body>
 </html>
