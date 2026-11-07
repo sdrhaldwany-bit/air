@@ -12,7 +12,9 @@
 --text:#f0f4fa;
 --muted:#8b9aaf;
 }
+
 *{box-sizing:border-box}
+
 body{
 margin:0;
 background:var(--bg);
@@ -23,6 +25,7 @@ display:flex;
 flex-direction:column;
 overflow:hidden;
 }
+
 header{
 height:65px;
 flex-shrink:0;
@@ -33,44 +36,53 @@ padding:0 18px;
 background:#101722;
 border-bottom:1px solid var(--border);
 }
+
 .logo{
 font-size:20px;
 font-weight:bold;
 color:var(--green);
 }
+
 .status{
 font-size:12px;
 color:var(--green);
 }
+
 main{
 flex:1;
 overflow-y:auto;
 width:100%;
 }
+
 .container{
 max-width:850px;
 margin:auto;
 padding:20px 15px 30px;
 }
+
 #welcome{
 text-align:center;
 padding:70px 10px 35px;
 }
+
 #welcome h1{
 font-size:30px;
 margin:0 0 12px;
 color:var(--green);
 }
+
 #welcome p{
 color:var(--muted);
 line-height:1.8;
 }
+
 .suggestions{
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:10px;
 margin-top:25px;
 }
+
 .suggestion{
 background:var(--panel);
 border:1px solid var(--border);
@@ -80,14 +92,17 @@ color:#dce5f2;
 cursor:pointer;
 text-align:right;
 }
+
 .suggestion:hover{
 border-color:var(--green);
 }
+
 #messages{
 display:flex;
 flex-direction:column;
 gap:18px;
 }
+
 .message{
 max-width:95%;
 padding:14px;
@@ -95,17 +110,20 @@ border-radius:15px;
 line-height:1.8;
 overflow-wrap:anywhere;
 }
+
 .user{
 align-self:flex-start;
 background:#18392f;
 border:1px solid #285b48;
 }
+
 .ai{
 align-self:flex-end;
 background:var(--panel);
 border:1px solid var(--border);
 width:100%;
 }
+
 .message img{
 display:block;
 max-width:100%;
@@ -113,6 +131,7 @@ max-height:300px;
 border-radius:12px;
 margin-bottom:10px;
 }
+
 .message pre{
 direction:ltr;
 text-align:left;
@@ -120,45 +139,54 @@ overflow-x:auto;
 white-space:pre;
 background:#080c13;
 border:1px solid #29364a;
-border-radius:10px;
+border-radius:0 0 9px 9px;
 padding:15px;
-margin:10px 0;
+margin:0;
 font-family:monospace;
 font-size:13px;
 }
+
 .code-header{
 direction:ltr;
 display:flex;
 justify-content:space-between;
 align-items:center;
+flex-wrap:wrap;
+gap:7px;
 background:#202c3c;
 padding:9px 12px;
 border-radius:9px 9px 0 0;
 font-size:12px;
 color:#a9bdd4;
 }
+
 .code-header button{
 background:#34475d;
 color:white;
-padding:6px 12px;
+padding:7px 12px;
 border-radius:6px;
 border:0;
 cursor:pointer;
 }
+
 .code-box{
 margin:12px 0;
 direction:ltr;
 }
-.code-box pre{
-margin:0;
-border-radius:0 0 9px 9px;
+
+.save-image-btn{
+background:var(--green)!important;
+color:#07150f!important;
+font-weight:bold;
 }
+
 .composer-area{
 flex-shrink:0;
 background:#0d131d;
 border-top:1px solid var(--border);
 padding:12px;
 }
+
 .composer{
 max-width:850px;
 margin:auto;
@@ -167,6 +195,7 @@ border:1px solid var(--border);
 border-radius:16px;
 padding:10px;
 }
+
 #input{
 width:100%;
 resize:none;
@@ -180,22 +209,26 @@ font-size:16px;
 padding:10px;
 font-family:Arial;
 }
+
 .actions{
 display:flex;
 align-items:center;
 justify-content:space-between;
 gap:8px;
 }
+
 .action-left{
 display:flex;
 gap:8px;
 align-items:center;
 }
+
 button{
 cursor:pointer;
 border:0;
 font-weight:bold;
 }
+
 .icon-btn{
 background:#253246;
 color:white;
@@ -203,46 +236,55 @@ padding:11px 14px;
 border-radius:10px;
 font-size:17px;
 }
+
 .send-btn{
 background:var(--green);
 color:#07150f;
 padding:12px 22px;
 border-radius:10px;
 }
+
 button:disabled{
 opacity:.5;
 cursor:wait;
 }
+
 #imageInput{
 display:none;
 }
+
 #preview{
 display:none;
 padding:8px;
 }
+
 #preview img{
 width:75px;
 height:75px;
 object-fit:cover;
 border-radius:10px;
 }
+
 #preview button{
 background:#a33e3e;
 color:white;
 padding:7px;
 border-radius:7px;
 }
+
 .typing{
 color:var(--muted);
 padding:12px;
 font-size:13px;
 }
+
 .footer-note{
 text-align:center;
 font-size:11px;
 color:#64748b;
 margin-top:9px;
 }
+
 @media(max-width:500px){
 .container{padding:12px 10px}
 #welcome{padding-top:45px}
@@ -255,24 +297,18 @@ margin-top:9px;
 <div class="status" id="status">● متصل</div>
 </header><main id="main">
 <div class="container"><div id="welcome">
-<h1>مرحباً بك 👋</h1>
-<p>
+<h1>مرحباً بك 👋</h1><p>
 أنا NoRestrictions AI<br>
-اسألني، اطلب مني كتابة الأكواد، أو أرسل صورة لتحليلها.
-</p><div class="suggestions">
-<button class="suggestion" onclick="suggest('اكتب لي برنامج Python احترافي')">
+اسألني، اطلب مني كتابة الأكواد، أو أرسل صورة لتحليلها وتعديل الأكواد الموجودة فيها.
+</p><div class="suggestions"><button class="suggestion" onclick="suggest('اكتب لي برنامج Python احترافي')">
 💻 كتابة الأكواد
-</button>
-<button class="suggestion" onclick="suggest('اشرح لي كيف تعمل واجهات API')">
+</button><button class="suggestion" onclick="suggest('اشرح لي كيف تعمل واجهات API')">
 🧠 شرح البرمجة
-</button>
-<button class="suggestion" onclick="suggest('صمم لي موقع HTML احترافي')">
+</button><button class="suggestion" onclick="suggest('صمم لي موقع HTML احترافي')">
 🌐 تصميم المواقع
-</button>
-<button class="suggestion" onclick="suggest('ساعدني في تحليل صورة')">
-🖼️ تحليل الصور
-</button>
-</div>
+</button><button class="suggestion" onclick="suggest('سأرسل لك صورة تحتوي على كود، اقرأه وعدّله حسب طلبي')">
+🖼️ تعديل كود من صورة
+</button></div>
 </div><div id="messages"></div></div>
 </main><div class="composer-area"><div class="composer"><div id="preview">
 <img id="previewImg">
@@ -286,6 +322,7 @@ margin-top:9px;
 </div><div class="footer-note">
 NoRestrictions AI · AI Assistant
 </div></div><script>
+
 const API="https://norestrictions-api.sdrhaldwane.workers.dev";
 
 const $=id=>document.getElementById(id);
@@ -309,6 +346,10 @@ const systemPrompt=`
 8. استخدم اللغة العربية عند التحدث مع المستخدم بالعربية.
 9. لا تختصر الأكواد عندما يطلب المستخدم كوداً كاملاً.
 10. كن واضحاً ومنظماً ومباشراً.
+11. إذا أرسل المستخدم صورة تحتوي على أكواد برمجية وطلب تعديلها، اقرأ الأكواد الموجودة في الصورة، وافهم طلبه، ثم اكتب النسخة المعدّلة كاملة.
+12. لا تكتفِ بشرح التعديلات؛ اعرض الكود المعدّل كاملاً داخل code block.
+13. لا تخترع أجزاء غير واضحة في الصورة؛ اطلب صورة أوضح إذا تعذرت قراءة الكود.
+14. اجعل الكود قابلاً للنسخ والحفظ.
 `;
 
 function suggest(text){
@@ -342,8 +383,6 @@ scrollBottom();
 
 function renderAI(container,text){
 
-// تقسيم الرد إلى أجزاء نصية وأكواد
-
 const regex=/```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g;
 
 let last=0;
@@ -357,39 +396,55 @@ p.textContent=text.slice(last,match.index);
 container.appendChild(p);
 }
 
+const language=match[1]||"CODE";
+const codeText=match[2];
+
 const box=document.createElement("div");
 box.className="code-box";
 
 const header=document.createElement("div");
 header.className="code-header";
 
-const language=document.createElement("span");
-language.textContent=match[1]||"CODE";
+const lang=document.createElement("span");
+lang.textContent=language;
 
 const copy=document.createElement("button");
 copy.textContent="نسخ الكود";
 
-const pre=document.createElement("pre");
-const code=document.createElement("code");
-
-code.textContent=match[2];
-pre.appendChild(code);
-
 copy.onclick=async()=>{
+
 try{
-await navigator.clipboard.writeText(match[2]);
+await navigator.clipboard.writeText(codeText);
 copy.textContent="تم النسخ ✓";
 setTimeout(()=>copy.textContent="نسخ الكود",1500);
 }catch{
 copy.textContent="تعذر النسخ";
 }
+
 };
 
-header.append(language,copy);
+const save=document.createElement("button");
+save.className="save-image-btn";
+save.textContent="💾 حفظ كصورة";
+
+save.onclick=()=>{
+saveCodeAsImage(codeText,language);
+};
+
+const pre=document.createElement("pre");
+const code=document.createElement("code");
+
+code.textContent=codeText;
+
+pre.appendChild(code);
+
+header.append(lang,copy,save);
 box.append(header,pre);
+
 container.appendChild(box);
 
 last=regex.lastIndex;
+
 }
 
 if(last<text.length){
@@ -397,6 +452,107 @@ const p=document.createElement("div");
 p.textContent=text.slice(last);
 container.appendChild(p);
 }
+
+}
+
+function saveCodeAsImage(codeText,language){
+
+const canvas=document.createElement("canvas");
+const ctx=canvas.getContext("2d");
+
+const width=1400;
+const padding=45;
+const fontSize=23;
+const lineHeight=36;
+
+ctx.font=`${fontSize}px monospace`;
+
+const maxWidth=width-padding*2;
+const lines=[];
+
+codeText.split("\n").forEach(line=>{
+
+let current="";
+
+for(const char of line){
+
+const test=current+char;
+
+if(ctx.measureText(test).width>maxWidth && current){
+lines.push(current);
+current=char;
+}else{
+current=test;
+}
+
+}
+
+lines.push(current);
+
+});
+
+const height=padding*2+75+lines.length*lineHeight;
+
+canvas.width=width;
+canvas.height=height;
+
+ctx.fillStyle="#090d14";
+ctx.fillRect(0,0,width,height);
+
+ctx.fillStyle="#65e6ad";
+ctx.font="bold 27px Arial";
+ctx.direction="ltr";
+ctx.textAlign="left";
+
+ctx.fillText("NoRestrictions AI",padding,55);
+
+ctx.fillStyle="#8b9aaf";
+ctx.font="18px Arial";
+ctx.fillText(language.toUpperCase(),width-180,55);
+
+ctx.strokeStyle="#273448";
+ctx.lineWidth=2;
+
+ctx.beginPath();
+ctx.moveTo(padding,80);
+ctx.lineTo(width-padding,80);
+ctx.stroke();
+
+ctx.font=`${fontSize}px monospace`;
+ctx.fillStyle="#f0f4fa";
+ctx.textAlign="left";
+ctx.direction="ltr";
+
+lines.forEach((line,index)=>{
+
+ctx.fillText(
+line,
+padding,
+125+index*lineHeight
+);
+
+});
+
+canvas.toBlob(blob=>{
+
+if(!blob){
+alert("تعذر إنشاء الصورة");
+return;
+}
+
+const url=URL.createObjectURL(blob);
+
+const link=document.createElement("a");
+link.href=url;
+link.download="NoRestrictions-Code.png";
+
+document.body.appendChild(link);
+link.click();
+link.remove();
+
+setTimeout(()=>URL.revokeObjectURL(url),3000);
+
+},"image/png");
 
 }
 
@@ -440,9 +596,11 @@ return content
 }
 
 throw new Error("لم يصل رد مفهوم من النموذج");
+
 }
 
 function imageToBase64(file){
+
 return new Promise((resolve,reject)=>{
 
 const reader=new FileReader();
@@ -453,6 +611,7 @@ reader.onerror=()=>reject(new Error("تعذر قراءة الصورة"));
 reader.readAsDataURL(file);
 
 });
+
 }
 
 $("imageInput").addEventListener("change",event=>{
@@ -587,8 +746,10 @@ send();
 });
 
 $("input").addEventListener("input",function(){
+
 this.style.height="auto";
 this.style.height=Math.min(this.scrollHeight,150)+"px";
+
 });
 
 </script></body>
