@@ -3,570 +3,593 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NoRestrictions AI</title><style>
+:root{
+--bg:#090d14;
+--panel:#111824;
+--card:#172131;
+--border:#273448;
+--green:#65e6ad;
+--text:#f0f4fa;
+--muted:#8b9aaf;
+}
 *{box-sizing:border-box}
 body{
- margin:0;background:#0b0d12;color:#eee;
- font-family:Arial,sans-serif;
+margin:0;
+background:var(--bg);
+color:var(--text);
+font-family:Arial,sans-serif;
+height:100dvh;
+display:flex;
+flex-direction:column;
+overflow:hidden;
 }
 header{
- padding:18px;background:#151923;
- border-bottom:1px solid #292f3c;
- display:flex;justify-content:space-between;
- align-items:center;gap:10px;flex-wrap:wrap;
+height:65px;
+flex-shrink:0;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 18px;
+background:#101722;
+border-bottom:1px solid var(--border);
 }
-h2{margin:0;color:#65e6ad}
-#status{font-size:13px;color:#aaa}
-main{max-width:850px;margin:auto;padding:15px}
+.logo{
+font-size:20px;
+font-weight:bold;
+color:var(--green);
+}
+.status{
+font-size:12px;
+color:var(--green);
+}
+main{
+flex:1;
+overflow-y:auto;
+width:100%;
+}
+.container{
+max-width:850px;
+margin:auto;
+padding:20px 15px 30px;
+}
+#welcome{
+text-align:center;
+padding:70px 10px 35px;
+}
+#welcome h1{
+font-size:30px;
+margin:0 0 12px;
+color:var(--green);
+}
+#welcome p{
+color:var(--muted);
+line-height:1.8;
+}
+.suggestions{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+margin-top:25px;
+}
+.suggestion{
+background:var(--panel);
+border:1px solid var(--border);
+border-radius:12px;
+padding:15px;
+color:#dce5f2;
+cursor:pointer;
+text-align:right;
+}
+.suggestion:hover{
+border-color:var(--green);
+}
 #messages{
- height:65vh;overflow-y:auto;
- padding:12px;background:#11151e;
- border:1px solid #292f3c;border-radius:12px;
+display:flex;
+flex-direction:column;
+gap:18px;
 }
-.msg{
- padding:12px;margin:10px 0;
- border-radius:10px;white-space:pre-wrap;
- overflow-wrap:anywhere;line-height:1.7;
+.message{
+max-width:95%;
+padding:14px;
+border-radius:15px;
+line-height:1.8;
+overflow-wrap:anywhere;
 }
-.user{background:#183b32}
-.ai{background:#202635}
-.system{background:#302b1c;color:#ffe4a0}
-.msg img{
- display:block;max-width:100%;
- max-height:300px;object-fit:contain;
- border-radius:9px;margin-bottom:9px;
+.user{
+align-self:flex-start;
+background:#18392f;
+border:1px solid #285b48;
 }
-.controls{display:flex;gap:8px;margin-top:12px;align-items:flex-end}
-textarea{
- flex:1;min-width:0;resize:vertical;
- min-height:55px;padding:13px;
- color:white;background:#171d29;
- border:1px solid #343e50;border-radius:10px;
- font-size:16px;
+.ai{
+align-self:flex-end;
+background:var(--panel);
+border:1px solid var(--border);
+width:100%;
+}
+.message img{
+display:block;
+max-width:100%;
+max-height:300px;
+border-radius:12px;
+margin-bottom:10px;
+}
+.message pre{
+direction:ltr;
+text-align:left;
+overflow-x:auto;
+white-space:pre;
+background:#080c13;
+border:1px solid #29364a;
+border-radius:10px;
+padding:15px;
+margin:10px 0;
+font-family:monospace;
+font-size:13px;
+}
+.code-header{
+direction:ltr;
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:#202c3c;
+padding:9px 12px;
+border-radius:9px 9px 0 0;
+font-size:12px;
+color:#a9bdd4;
+}
+.code-header button{
+background:#34475d;
+color:white;
+padding:6px 12px;
+border-radius:6px;
+border:0;
+cursor:pointer;
+}
+.code-box{
+margin:12px 0;
+direction:ltr;
+}
+.code-box pre{
+margin:0;
+border-radius:0 0 9px 9px;
+}
+.composer-area{
+flex-shrink:0;
+background:#0d131d;
+border-top:1px solid var(--border);
+padding:12px;
+}
+.composer{
+max-width:850px;
+margin:auto;
+background:var(--panel);
+border:1px solid var(--border);
+border-radius:16px;
+padding:10px;
+}
+#input{
+width:100%;
+resize:none;
+min-height:48px;
+max-height:150px;
+background:transparent;
+border:0;
+outline:0;
+color:white;
+font-size:16px;
+padding:10px;
+font-family:Arial;
+}
+.actions{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:8px;
+}
+.action-left{
+display:flex;
+gap:8px;
+align-items:center;
 }
 button{
- border:0;border-radius:9px;padding:12px 18px;
- background:#36bd88;color:#07140e;
- font-weight:bold;cursor:pointer;
+cursor:pointer;
+border:0;
+font-weight:bold;
 }
-button:disabled{opacity:.5;cursor:wait}
-.panel{
- background:#151923;border:1px solid #292f3c;
- border-radius:10px;padding:12px;margin:12px 0;
+.icon-btn{
+background:#253246;
+color:white;
+padding:11px 14px;
+border-radius:10px;
+font-size:17px;
 }
-.small{font-size:12px;color:#aaa}
-input{
- width:100%;padding:11px;background:#0c1018;
- color:white;border:1px solid #343e50;
- border-radius:8px;margin:8px 0;
+.send-btn{
+background:var(--green);
+color:#07150f;
+padding:12px 22px;
+border-radius:10px;
 }
-.attach{
- background:#252d3c;color:white;
- font-size:21px;padding:13px;
- border-radius:10px;cursor:pointer;
+button:disabled{
+opacity:.5;
+cursor:wait;
 }
-#imageInput{display:none}
-#imagePreview{
- display:none;margin-top:10px;
- padding:10px;background:#171d29;
- border-radius:10px;
+#imageInput{
+display:none;
 }
-#imagePreview img{
- max-width:130px;max-height:130px;
- border-radius:8px;
+#preview{
+display:none;
+padding:8px;
 }
-#removeImage{
- background:#a83e3e;color:white;
- padding:7px 12px;margin-right:10px;
+#preview img{
+width:75px;
+height:75px;
+object-fit:cover;
+border-radius:10px;
+}
+#preview button{
+background:#a33e3e;
+color:white;
+padding:7px;
+border-radius:7px;
+}
+.typing{
+color:var(--muted);
+padding:12px;
+font-size:13px;
+}
+.footer-note{
+text-align:center;
+font-size:11px;
+color:#64748b;
+margin-top:9px;
+}
+@media(max-width:500px){
+.container{padding:12px 10px}
+#welcome{padding-top:45px}
+#welcome h1{font-size:25px}
+.suggestions{grid-template-columns:1fr}
+.message{max-width:100%}
 }
 </style></head><body><header>
- <h2>NoRestrictions AI</h2>
- <div id="status">● غير متصل</div>
-</header><main><div class="panel">
- <b>ربط جهاز Termux</b>
- <div class="small">
- أنشئ مفتاح الجهاز، ثم استخدم المفتاح نفسه عند تشغيل Agent.
- </div><button id="pairBtn">إنشاء وربط الجهاز</button>
-<input id="deviceKey" readonly placeholder="مفتاح الجهاز">
-
- <div class="small" id="pairStatus"></div>
-</div><div id="messages"></div><div id="imagePreview">
- <img id="previewImg">
- <button id="removeImage">إزالة الصورة</button>
- <div class="small" id="imageName"></div>
-</div><div class="controls"><label for="imageInput" class="attach">📎</label>
+<div class="logo">✦ NoRestrictions AI</div>
+<div class="status" id="status">● متصل</div>
+</header><main id="main">
+<div class="container"><div id="welcome">
+<h1>مرحباً بك 👋</h1>
+<p>
+أنا NoRestrictions AI<br>
+اسألني، اطلب مني كتابة الأكواد، أو أرسل صورة لتحليلها.
+</p><div class="suggestions">
+<button class="suggestion" onclick="suggest('اكتب لي برنامج Python احترافي')">
+💻 كتابة الأكواد
+</button>
+<button class="suggestion" onclick="suggest('اشرح لي كيف تعمل واجهات API')">
+🧠 شرح البرمجة
+</button>
+<button class="suggestion" onclick="suggest('صمم لي موقع HTML احترافي')">
+🌐 تصميم المواقع
+</button>
+<button class="suggestion" onclick="suggest('ساعدني في تحليل صورة')">
+🖼️ تحليل الصور
+</button>
+</div>
+</div><div id="messages"></div></div>
+</main><div class="composer-area"><div class="composer"><div id="preview">
+<img id="previewImg">
+<button onclick="removeImage()">إزالة الصورة</button>
+</div><textarea id="input" placeholder="اكتب رسالتك إلى NoRestrictions AI..."></textarea><div class="actions"><div class="action-left">
+<label for="imageInput" class="icon-btn">📎</label>
 <input type="file" id="imageInput" accept="image/*">
+</div><button class="send-btn" id="sendBtn" onclick="send()">
+إرسال ↑
+</button></div>
+</div><div class="footer-note">
+NoRestrictions AI · AI Assistant
+</div></div><script>
+const API="https://norestrictions-api.sdrhaldwane.workers.dev";
 
- <textarea id="input" placeholder="اكتب رسالتك أو اسأل عن صورة..."></textarea><button id="sendBtn">إرسال</button>
+const $=id=>document.getElementById(id);
 
-</div><div class="small">
- يدعم إرسال الصور مع الأسئلة النصية.
-</div></main><script>
-const API =
- "https://norestrictions-api.sdrhaldwane.workers.dev";
+let messages=[];
+let busy=false;
+let selectedImage=null;
 
-const $ = id => document.getElementById(id);
+const systemPrompt=`
+أنت NoRestrictions AI، مساعد ذكاء اصطناعي عام ومتخصص في البرمجة.
 
-let messages = [];
-let busy = false;
-let selectedImage = null;
+قواعد مهمة:
 
-const taskInstruction = `
-أنت NoRestrictions AI وتستطيع طلب تنفيذ مهام برمجية
-على جهاز Termux المرتبط.
-
-إذا احتجت تنفيذ مهمة، أرسل المهمة بهذا التنسيق الحرفي:
-
-[[NR_TASK]]
-{"action":"write_file","path":"main.py","content":"print('Hello')"}
-[[/NR_TASK]]
-
-الإجراءات المتاحة:
-write_file
-read_file
-list_files
-mkdir
-run_python
-
-يمكنك إرسال عدة مهام، كل مهمة داخل علامة مستقلة.
-لا تدّعِ نجاح التنفيذ قبل استلام النتيجة من الجهاز.
-بعد وصول النتيجة حللها وحدد الخطوة التالية.
-
-عند استلام صورة:
-حلل محتواها وأجب عن أسئلة المستخدم المتعلقة بها.
-لا تدّعِ رؤية صورة إذا لم تصلك بياناتها فعلياً.
+1. عندما يطلب المستخدم كتابة كود، اكتب الكود كاملاً مباشرة داخل ردك.
+2. لا تقل إنك سترسل الكود إلى Termux أو ستنفذه على جهاز المستخدم.
+3. لا تستخدم نظام المهام أو أوامر NR_TASK.
+4. لا تدّع أنك نفذت برنامجاً على جهاز المستخدم.
+5. اعرض الأكواد داخل Markdown code blocks مع تحديد لغة البرمجة.
+6. إذا طلب المستخدم مشروعاً كاملاً، اكتب الملفات المطلوبة ومحتوياتها.
+7. أجب عن الأسئلة المتعلقة بالصور المرسلة وحلل محتواها.
+8. استخدم اللغة العربية عند التحدث مع المستخدم بالعربية.
+9. لا تختصر الأكواد عندما يطلب المستخدم كوداً كاملاً.
+10. كن واضحاً ومنظماً ومباشراً.
 `;
 
-function addMessage(type,text,image=null) {
-
- const div=document.createElement("div");
- div.className="msg "+type;
-
- if(image) {
-  const img=document.createElement("img");
-  img.src=image;
-  div.appendChild(img);
- }
-
- const content=document.createElement("div");
- content.textContent=text;
-
- div.appendChild(content);
-
- $("messages").appendChild(div);
- $("messages").scrollTop=$("messages").scrollHeight;
-
- return div;
+function suggest(text){
+$("input").value=text;
+$("input").focus();
 }
 
-function getKey() {
- return localStorage.getItem("nr-device-key") || "";
+function addMessage(type,content,image=null){
+
+const div=document.createElement("div");
+div.className="message "+type;
+
+if(image){
+const img=document.createElement("img");
+img.src=image;
+div.appendChild(img);
 }
 
-async function api(path,method="GET",data=null) {
-
- const options={method,headers:{}};
-
- if(data!==null) {
-  options.headers["Content-Type"]="application/json";
-  options.body=JSON.stringify(data);
- }
-
- const response=await fetch(API+path,options);
- const text=await response.text();
-
- let result;
-
- try {
-  result=JSON.parse(text);
- } catch {
-  throw new Error("استجابة غير صالحة من السيرفر: "+text.slice(0,300));
- }
-
- if(!response.ok) {
-  throw new Error(result.error||"HTTP "+response.status);
- }
-
- return result;
+if(type==="ai"){
+renderAI(div,content);
+}else{
+const text=document.createElement("div");
+text.textContent=content;
+div.appendChild(text);
 }
 
-function randomKey() {
- const bytes=crypto.getRandomValues(new Uint8Array(32));
+$("messages").appendChild(div);
+scrollBottom();
 
- return Array.from(bytes)
-  .map(x=>x.toString(16).padStart(2,"0"))
-  .join("");
 }
 
-async function pairDevice() {
+function renderAI(container,text){
 
- const key=getKey()||randomKey();
+// تقسيم الرد إلى أجزاء نصية وأكواد
 
- $("pairBtn").disabled=true;
- $("pairStatus").textContent="جارٍ ربط الجهاز...";
+const regex=/```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g;
 
- try {
+let last=0;
+let match;
 
-  const result=await api(
-   "/api/device/pair",
-   "POST",
-   {
-    key,
-    kind:"termux",
-    info:"Android Termux Agent"
-   }
-  );
+while((match=regex.exec(text))!==null){
 
-  if(!result.success) throw new Error("فشل الربط");
-
-  localStorage.setItem("nr-device-key",key);
-  $("deviceKey").value=key;
-
-  $("pairStatus").textContent=
-   "تم الربط. استخدم المفتاح في تشغيل Agent.";
-
-  await checkStatus();
-
- } catch(error) {
-  $("pairStatus").textContent=error.message;
- } finally {
-  $("pairBtn").disabled=false;
- }
+if(match.index>last){
+const p=document.createElement("div");
+p.textContent=text.slice(last,match.index);
+container.appendChild(p);
 }
 
-async function checkStatus() {
+const box=document.createElement("div");
+box.className="code-box";
 
- const key=getKey();
+const header=document.createElement("div");
+header.className="code-header";
 
- if(!key) {
-  $("status").textContent="● لم يتم الربط";
-  return;
- }
+const language=document.createElement("span");
+language.textContent=match[1]||"CODE";
 
- try {
+const copy=document.createElement("button");
+copy.textContent="نسخ الكود";
 
-  const result=await api(
-   "/api/device/status?key="+encodeURIComponent(key)
-  );
+const pre=document.createElement("pre");
+const code=document.createElement("code");
 
-  $("status").textContent=
-   result.online?"● Termux متصل":"● Termux غير متصل";
+code.textContent=match[2];
+pre.appendChild(code);
 
- } catch {
-  $("status").textContent="● خطأ في الاتصال";
- }
+copy.onclick=async()=>{
+try{
+await navigator.clipboard.writeText(match[2]);
+copy.textContent="تم النسخ ✓";
+setTimeout(()=>copy.textContent="نسخ الكود",1500);
+}catch{
+copy.textContent="تعذر النسخ";
+}
+};
+
+header.append(language,copy);
+box.append(header,pre);
+container.appendChild(box);
+
+last=regex.lastIndex;
 }
 
-// اختيار الصور
+if(last<text.length){
+const p=document.createElement("div");
+p.textContent=text.slice(last);
+container.appendChild(p);
+}
+
+}
+
+function scrollBottom(){
+$("main").scrollTop=$("main").scrollHeight;
+}
+
+async function requestAI(){
+
+const payload={
+messages:[
+{role:"system",content:systemPrompt},
+...messages
+]
+};
+
+const response=await fetch(API+"/api/chat",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(payload)
+});
+
+const data=await response.json();
+
+if(!response.ok){
+throw new Error(data.error||"HTTP "+response.status);
+}
+
+const content=
+data.choices?.[0]?.message?.content||
+data.reply||
+data.message;
+
+if(typeof content==="string")return content;
+
+if(Array.isArray(content)){
+return content
+.filter(x=>x.type==="text")
+.map(x=>x.text)
+.join("\n");
+}
+
+throw new Error("لم يصل رد مفهوم من النموذج");
+}
+
+function imageToBase64(file){
+return new Promise((resolve,reject)=>{
+
+const reader=new FileReader();
+
+reader.onload=()=>resolve(reader.result);
+reader.onerror=()=>reject(new Error("تعذر قراءة الصورة"));
+
+reader.readAsDataURL(file);
+
+});
+}
 
 $("imageInput").addEventListener("change",event=>{
 
- const file=event.target.files[0];
+const file=event.target.files[0];
 
- if(!file)return;
+if(!file)return;
 
- if(!file.type.startsWith("image/")) {
-  alert("الرجاء اختيار صورة صحيحة");
-  return;
- }
+if(!file.type.startsWith("image/")){
+alert("اختر صورة صحيحة");
+return;
+}
 
- if(file.size>10*1024*1024) {
-  alert("حجم الصورة يجب ألا يتجاوز 10MB");
-  $("imageInput").value="";
-  return;
- }
+if(file.size>10*1024*1024){
+alert("حجم الصورة أكبر من 10MB");
+return;
+}
 
- selectedImage=file;
+selectedImage=file;
 
- $("previewImg").src=URL.createObjectURL(file);
- $("imageName").textContent=file.name;
- $("imagePreview").style.display="block";
+$("previewImg").src=URL.createObjectURL(file);
+$("preview").style.display="block";
+
 });
 
-function removeImage() {
-
- selectedImage=null;
-
- $("imageInput").value="";
- $("imagePreview").style.display="none";
- $("previewImg").src="";
-}
-
-$("removeImage").addEventListener("click",removeImage);
-
-// تحويل الصورة إلى Base64
-
-function imageToBase64(file) {
-
- return new Promise((resolve,reject)=>{
-
-  const reader=new FileReader();
-
-  reader.onload=()=>{
-   resolve(reader.result);
-  };
-
-  reader.onerror=()=>{
-   reject(new Error("تعذر قراءة الصورة"));
-  };
-
-  reader.readAsDataURL(file);
-
- });
-}
-
-// استخراج المهام
-
-function extractTasks(text) {
-
- const tasks=[];
-
- const regex=/\[NR_TASK\]([\s\S]*?)\[\/NR_TASK\]/g;
-
- let match;
-
- while((match=regex.exec(text))!==null) {
-
-  try {
-   tasks.push(JSON.parse(match[1].trim()));
-  } catch {
-   throw new Error("صيغة مهمة التنفيذ غير صحيحة");
-  }
-
- }
-
- return {
-  tasks,
-  visible:text.replace(regex,"").trim()
- };
-}
-
-// انتظار نتيجة Termux
-
-async function waitForResult(id) {
-
- const key=getKey();
-
- for(let i=0;i<120;i++) {
-
-  const result=await api(
-   "/api/device/result?key="+
-   encodeURIComponent(key)+
-   "&id="+encodeURIComponent(id)
-  );
-
-  if(result.status==="completed") {
-   return result;
-  }
-
-  await new Promise(resolve=>setTimeout(resolve,1500));
-
- }
-
- throw new Error("انتهت مهلة انتظار Termux");
-}
-
-async function executeTask(task) {
-
- const key=getKey();
-
- const queued=await api(
-  "/api/device/run",
-  "POST",
-  {key,task}
- );
-
- addMessage(
-  "system",
-  "تم إرسال المهمة رقم "+queued.id+" إلى Termux..."
- );
-
- const result=await waitForResult(queued.id);
-
- const output=
-  "رقم المهمة: "+result.id+
-  "\nرمز الخروج: "+result.exit_code+
-  "\nالنتيجة:\n"+(result.output||"لا توجد نتيجة");
-
- addMessage("system",output);
-
- return {
-  task,
-  job_id:result.id,
-  exit_code:result.exit_code,
-  output:result.output
- };
-}
-
-// الاتصال بالذكاء الاصطناعي
-
-async function askAI() {
-
- const payload={
-  messages:[
-   {role:"system",content:taskInstruction},
-   ...messages
-  ]
- };
-
- const result=await api("/api/chat","POST",payload);
-
- const content=
-  result.choices?.[0]?.message?.content||
-  result.reply||
-  result.message;
-
- if(typeof content==="string")return content;
-
- // دعم بعض صيغ ردود النماذج متعددة الوسائط
-
- if(Array.isArray(content)) {
-  return content
-   .filter(item=>item.type==="text")
-   .map(item=>item.text)
-   .join("\n");
- }
-
- throw new Error("لم يرجع مزود الذكاء الاصطناعي رسالة مفهومة");
-}
-
-// إرسال الرسائل والصور
-
-async function send() {
-
- if(busy)return;
-
- const input=$("input").value.trim();
-
- if(!input&&!selectedImage)return;
-
- if(!getKey()) {
-  addMessage("system","اربط جهاز Termux أولاً.");
-  return;
- }
-
- busy=true;
- $("sendBtn").disabled=true;
-
- const image=selectedImage;
-
- $("input").value="";
-
- try {
-
-  let userContent;
-
-  if(image) {
-
-   const base64=await imageToBase64(image);
-
-   // صيغة OpenAI-compatible Vision
-
-   userContent=[
-    {
-     type:"text",
-     text:input||"حلل هذه الصورة وأخبرني بمحتواها."
-    },
-    {
-     type:"image_url",
-     image_url:{
-      url:base64
-     }
-    }
-   ];
-
-   addMessage(
-    "user",
-    input||"حلل هذه الصورة",
-    URL.createObjectURL(image)
-   );
-
-  } else {
-
-   userContent=input;
-   addMessage("user",input);
-
-  }
-
-  removeImage();
-
-  messages.push({
-   role:"user",
-   content:userContent
-  });
-
-  for(let round=0;round<8;round++) {
-
-   const answer=await askAI();
-
-   const parsed=extractTasks(answer);
-
-   if(parsed.visible) {
-    addMessage("ai",parsed.visible);
-   }
-
-   messages.push({
-    role:"assistant",
-    content:answer
-   });
-
-   if(parsed.tasks.length===0)break;
-
-   const results=[];
-
-   for(const task of parsed.tasks) {
-    const result=await executeTask(task);
-    results.push(result);
-   }
-
-   const feedback=
-    "نتائج تنفيذ المهام على Termux:\n"+
-    JSON.stringify(results,null,2)+
-    "\nحلل النتائج وأكمل العمل إذا بقيت خطوات.";
-
-   messages.push({
-    role:"user",
-    content:feedback
-   });
-
-   addMessage(
-    "system",
-    "يراجع الذكاء الاصطناعي نتائج التنفيذ..."
-   );
-
-  }
-
- } catch(error) {
-
-  addMessage("system","خطأ: "+error.message);
-  console.error(error);
-
- } finally {
-
-  busy=false;
-  $("sendBtn").disabled=false;
-
- }
+function removeImage(){
+
+selectedImage=null;
+$("imageInput").value="";
+$("preview").style.display="none";
+$("previewImg").src="";
 
 }
 
-$("pairBtn").addEventListener("click",pairDevice);
-$("sendBtn").addEventListener("click",send);
+async function send(){
+
+if(busy)return;
+
+const text=$("input").value.trim();
+
+if(!text&&!selectedImage)return;
+
+busy=true;
+$("sendBtn").disabled=true;
+$("sendBtn").textContent="جارٍ الإرسال...";
+
+$("welcome").style.display="none";
+
+const image=selectedImage;
+
+$("input").value="";
+
+try{
+
+let content;
+
+if(image){
+
+const base64=await imageToBase64(image);
+
+content=[
+{
+type:"text",
+text:text||"حلل هذه الصورة."
+},
+{
+type:"image_url",
+image_url:{url:base64}
+}
+];
+
+addMessage(
+"user",
+text||"حلل هذه الصورة",
+URL.createObjectURL(image)
+);
+
+removeImage();
+
+}else{
+
+content=text;
+addMessage("user",text);
+
+}
+
+messages.push({
+role:"user",
+content
+});
+
+const typing=document.createElement("div");
+typing.className="typing";
+typing.textContent="NoRestrictions AI يفكر...";
+$("messages").appendChild(typing);
+
+const answer=await requestAI();
+
+typing.remove();
+
+messages.push({
+role:"assistant",
+content:answer
+});
+
+addMessage("ai",answer);
+
+}catch(error){
+
+addMessage("ai","حدث خطأ أثناء الاتصال:\n"+error.message);
+console.error(error);
+
+}finally{
+
+busy=false;
+$("sendBtn").disabled=false;
+$("sendBtn").textContent="إرسال ↑";
+
+scrollBottom();
+
+}
+
+}
 
 $("input").addEventListener("keydown",event=>{
 
- if(event.key==="Enter"&&!event.shiftKey) {
-  event.preventDefault();
-  send();
- }
+if(event.key==="Enter"&&!event.shiftKey){
+event.preventDefault();
+send();
+}
 
 });
 
-if(getKey()) {
- $("deviceKey").value=getKey();
- checkStatus();
-}
-
-setInterval(checkStatus,10000);
+$("input").addEventListener("input",function(){
+this.style.height="auto";
+this.style.height=Math.min(this.scrollHeight,150)+"px";
+});
 
 </script></body>
 </html>
