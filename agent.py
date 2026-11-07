@@ -1,429 +1,264 @@
 import os
 import sys
-import json
 import time
-import secrets
-import pathlib
-import subprocess
-import shlex
+import json
+import platform
 import urllib.request
 import urllib.error
-from datetime import datetime
-
-# =====================================
-# NoRestrictions AI - Termux Agent 4.2
-# =====================================
+from pathlib import Path
 
 SERVER = "https://norestrictions-api.sdrhaldwane.workers.dev"
 
-HOME = pathlib.Path.home().resolve()
-KEY_FILE = HOME / ".nr_agent_key"
-
+KEY_FILE = Path.home() / ".nr_agent_key"
 POLL_INTERVAL = 2
 PING_INTERVAL = 10
-REQUEST_TIMEOUT = 20
 
-running = True
-
-
-# =====================================
-# KEY
-# =====================================
-
-def get_key():
-    if KEY_FILE.exists():
-        key = KEY_FILE.read_text().strip()
-
-        if len(key) == 64:
-            return key
-
-    key = secrets.token_hex(32)
-    KEY_FILE.write_text(key)
-
-    try:
-        KEY_FILE.chmod(0o600)
-    except OSError:
-        pass
-
-    return key
+device_key = None
+last_ping = 0
 
 
-KEY = get_key()
-
-
-# =====================================
-# HTTP
-# =====================================
-
-def request(path, data=None, method="POST"):
+def request(path, method="GET", data=None):
     url = SERVER + path
 
     headers = {
         "Content-Type": "application/json",
-        "User-Agent": "NoRestrictions-Agent/4.2"
+        "User-Agent": "NoRestrictions-Agent/4.3"
     }
 
-    payload = None
-
+    body = None
     if data is not None:
-        payload = json.dumps(data).encode("utf-8")
+        body = json.dumps(data).encode("utf-8")
 
     req = urllib.request.Request(
         url,
-        data=payload,
+        data=body,
         headers=headers,
         method=method
     )
 
     try:
-        with urllib.request.urlopen(
-            req,
-            timeout=REQUEST_TIMEOUT
-        ) as response:
-            raw = response.read().decode("utf-8", errors="replace")
-
-            if not raw:
-                return {}
-
-            return json.loads(raw)
+        with urllib.request.urlopen(req, timeout=20) as response:
+            raw = response.read().decode("utf-8")
+            return json.loads(raw) if raw else {}
 
     except urllib.error.HTTPError as e:
-        message = e.read().decode("utf-8", errors="replace")
-        raise Exception(
-            f"HTTP {e.code}: {message[:300]}"
-        )
+        try:
+            message = e.read().decode("utf-8")
+        except Exception:
+            message = str(e)
 
-    except urllib.error.URLError as e:
-        raise Exception(f"Network error: {e.reason}")
+        print("HTTP Error:", e.code, message)
+        return None
+
+    except Exception as e:
+        print("Connection Error:", e)
+        return None
 
 
-# =====================================
-# PAIR DEVICE
-# =====================================
+def get_device_key():
+    global device_key
+
+    print("\n=== NoRestrictions AI ===")
+    print("الصق مفتاح الربط الذي نسخته من الموقع.")
+    print("")
+
+    key = input("Device Key: ").strip()
+
+    if not key:
+        print("لم تدخل مفتاحاً.")
+        sys.exit(1)
+
+    if len(key) < 32:
+        print("المفتاح غير صالح أو قصير.")
+        sys.exit(1)
+
+    device_key = key
+    KEY_FILE.write_text(key, encoding="utf-8")
+
 
 def pair_device():
-    print("\n[*] Connecting device...")
+    print("\nجاري ربط الجهاز...")
 
     result = request(
         "/api/device/pair",
-        {
-            "key": KEY,
-            "kind": "Termux",
-            "info": "Android Termux Agent 4.2"
+        method="POST",
+        data={
+            "key": device_key,
+            "kind": "termux",
+            "info": {
+                "platform": platform.platform(),
+                "python": platform.python_version()
+            }
         }
     )
 
-    if not result.get("ok"):
-        raise Exception("Device pairing failed")
-
-    print("[+] Device paired successfully.")
-
-    print("\n" + "=" * 45)
-    print("DEVICE KEY - COPY THIS INTO YOUR WEBSITE")
-    print("=" * 45)
-    print(KEY)
-    print("=" * 45 + "\n")
-
-
-# =====================================
-# PING
-# =====================================
-
-def ping():
-    try:
-        request(
-            "/api/device/ping",
-            {
-                "key": KEY,
-                "info": "Online - Agent 4.2"
-            }
-        )
-
-        return True
-
-    except Exception as e:
-        print("[PING ERROR]", e)
+    if result is None:
+        print("فشل الاتصال بالخادم.")
         return False
 
+    if result.get("error"):
+        print("فشل الربط:", result["error"])
+        return False
 
-# =====================================
-# SAFE PATH
-# =====================================
+    print("تم إرسال طلب الربط.")
+    return True
+
+
+def ping():
+    global last_ping
+
+    now = time.time()
+
+    if now - last_ping < PING_INTERVAL:
+        return
+
+    result = request(
+        "/api/device/ping",
+        method="POST",
+        data={"key": device_key}
+    )
+
+    if result is not None:
+        last_ping = now
+
+
+def poll_job():
+    return request(
+        "/api/device/poll?key=" + device_key
+    )
+
+
+def send_result(job_id, output, exit_code=0):
+    return request(
+        "/api/device/done",
+        method="POST",
+        data={
+            "key": device_key,
+            "id": job_id,
+            "output": str(output),
+            "exit_code": exit_code
+        }
+    )
+
 
 def safe_path(path):
-    if not isinstance(path, str):
-        raise ValueError("Invalid path")
+    base = Path.home().resolve()
+    target = (base / path).resolve()
 
-    if not path or len(path) > 300:
-        raise ValueError("Invalid path length")
+    if target != base and base not in target.parents:
+        raise ValueError("المسار خارج مجلد Termux المسموح.")
 
-    if ".." in pathlib.PurePosixPath(path).parts:
-        raise ValueError("Parent directory access is blocked")
+    return target
 
-    candidate = (HOME / path).resolve()
-
-    try:
-        candidate.relative_to(HOME)
-    except ValueError:
-        raise ValueError("Access outside Termux home is blocked")
-
-    return candidate
-
-
-# =====================================
-# COMMAND EXECUTOR
-# =====================================
 
 def execute_command(command):
-    if not isinstance(command, str):
-        return "Invalid command", 1
+    command = str(command).strip()
 
-    try:
-        args = shlex.split(command)
-    except ValueError:
-        return "Invalid command format", 1
+    if command == "pwd":
+        return str(Path.cwd()), 0
 
-    if not args:
-        return "Empty command", 1
+    if command == "whoami":
+        return os.environ.get("USER", "unknown"), 0
 
-    operation = args[0]
+    if command == "date":
+        return time.ctime(), 0
 
-    # pwd
-    if operation == "pwd" and len(args) == 1:
-        return str(HOME), 0
+    if command == "uname":
+        return platform.platform(), 0
 
-    # whoami
-    if operation == "whoami" and len(args) == 1:
-        try:
-            result = subprocess.run(
-                ["whoami"],
-                cwd=str(HOME),
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            return result.stdout or result.stderr, result.returncode
-        except Exception as e:
-            return str(e), 1
-
-    # date
-    if operation == "date" and len(args) == 1:
-        return datetime.now().astimezone().isoformat(), 0
-
-    # uname
-    if operation == "uname" and len(args) == 1:
-        try:
-            result = subprocess.run(
-                ["uname"],
-                cwd=str(HOME),
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            return result.stdout or result.stderr, result.returncode
-        except Exception as e:
-            return str(e), 1
-
-    # python --version
-    if operation == "python" and args == ["python", "--version"]:
-        try:
-            result = subprocess.run(
-                [sys.executable, "--version"],
-                cwd=str(HOME),
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-
-            output = result.stdout or result.stderr
-            return output, result.returncode
-
-        except Exception as e:
-            return str(e), 1
-
-    # help
-    if operation == "help" and len(args) == 1:
+    if command == "help":
         return (
-            "Available operations:\n"
+            "الأوامر المتاحة:\n"
             "pwd\n"
             "whoami\n"
             "date\n"
             "uname\n"
             "python --version\n"
-            "ls [path]\n"
-            "cat [path]\n"
-            "help",
-            0
+            "ls\n"
+            "cat <filename>\n"
+        ), 0
+
+    if command == "python --version":
+        return platform.python_version(), 0
+
+    if command == "ls":
+        files = list(Path.home().iterdir())
+        return "\n".join(x.name for x in files), 0
+
+    if command.startswith("cat "):
+        filename = command[4:].strip()
+
+        if not filename:
+            return "حدد اسم الملف.", 1
+
+        target = safe_path(filename)
+
+        if not target.is_file():
+            return "الملف غير موجود.", 1
+
+        content = target.read_text(
+            encoding="utf-8",
+            errors="replace"
         )
 
-    # ls
-    if operation == "ls" and len(args) <= 2:
-        path = args[1] if len(args) == 2 else "."
+        return content[:20000], 0
 
-        try:
-            target = safe_path(path)
+    return "هذه العملية غير مدعومة في Agent 4.3.", 1
 
-            if not target.exists():
-                return "Path does not exist", 1
-
-            if not target.is_dir():
-                return "Path is not a directory", 1
-
-            entries = sorted(os.listdir(target))
-
-            if not entries:
-                return "Directory is empty", 0
-
-            return "\n".join(entries[:300]), 0
-
-        except Exception as e:
-            return str(e), 1
-
-    # cat
-    if operation == "cat" and len(args) == 2:
-        try:
-            target = safe_path(args[1])
-
-            if not target.exists():
-                return "File does not exist", 1
-
-            if not target.is_file():
-                return "Not a file", 1
-
-            if target.stat().st_size > 50000:
-                return "File is too large (50 KB limit)", 1
-
-            content = target.read_text(
-                encoding="utf-8",
-                errors="replace"
-            )
-
-            return content[:12000], 0
-
-        except Exception as e:
-            return str(e), 1
-
-    return "Operation not allowed by Agent 4.2", 1
-
-
-# =====================================
-# POLL JOB
-# =====================================
-
-def poll_job():
-    result = request(
-        "/api/device/poll",
-        {"key": KEY}
-    )
-
-    return result.get("job")
-
-
-# =====================================
-# SEND RESULT
-# =====================================
-
-def send_result(job_id, output, exit_code):
-    return request(
-        "/api/device/done",
-        {
-            "key": KEY,
-            "id": int(job_id),
-            "output": str(output)[:12000],
-            "exit_code": int(exit_code)
-        }
-    )
-
-
-# =====================================
-# PROCESS JOB
-# =====================================
 
 def process_job(job):
     job_id = job.get("id")
     command = job.get("command")
 
     if not job_id or not command:
-        print("[!] Invalid job received")
         return
 
-    print("\n[JOB]", job_id)
-    print("[COMMAND]", command)
+    print("\nوصل طلب جديد:", command)
 
     try:
-        output, exit_code = execute_command(command)
+        output, code = execute_command(command)
 
     except Exception as e:
         output = str(e)
-        exit_code = 1
+        code = 1
 
-    try:
-        send_result(job_id, output, exit_code)
+    send_result(job_id, output, code)
+    print("تم إرسال النتيجة.")
 
-        print("[+] Result sent successfully")
-        print(output[:1000])
-
-    except Exception as e:
-        print("[RESULT ERROR]", e)
-
-
-# =====================================
-# MAIN LOOP
-# =====================================
 
 def main():
-    global running
+    get_device_key()
 
-    print("=" * 45)
-    print(" NoRestrictions AI - Agent 4.2")
-    print("=" * 45)
-
-    print("[*] Server:", SERVER)
-    print("[*] Home:", HOME)
-
-    try:
-        pair_device()
-    except Exception as e:
-        print("[PAIR ERROR]", e)
-        print("Check your internet and Worker deployment.")
+    if not pair_device():
+        print("تعذر إكمال الربط. تحقق من المفتاح والخادم.")
         return
 
-    last_ping = 0
+    print("\nAgent يعمل الآن.")
+    print("اترك Termux مفتوحاً لاستقبال الطلبات.")
+    print("اضغط Ctrl+C للإيقاف.\n")
 
-    print("[+] Agent started.")
-    print("[*] Waiting for jobs...\n")
-
-    while running:
+    while True:
         try:
-            now = time.time()
+            ping()
 
-            if now - last_ping >= PING_INTERVAL:
-                if ping():
-                    print("[ONLINE] Device heartbeat OK")
+            result = poll_job()
 
-                last_ping = now
+            if result:
+                job = result.get("job")
 
-            job = poll_job()
-
-            if job:
-                process_job(job)
+                if job:
+                    process_job(job)
 
             time.sleep(POLL_INTERVAL)
 
         except KeyboardInterrupt:
-            print("\n[!] Agent stopped by user.")
-            running = False
+            print("\nتم إيقاف Agent.")
+            break
 
         except Exception as e:
-            print("[AGENT ERROR]", e)
+            print("خطأ:", e)
             time.sleep(5)
 
-    print("[*] Agent stopped.")
-
-
-# =====================================
-# START
-# =====================================
 
 if __name__ == "__main__":
     main()
