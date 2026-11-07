@@ -2,205 +2,325 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>NoRestrictions AI - Agent</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NoRestrictions AI</title>
 
 <style>
-:root {
-    --bg: #090b10;
-    --panel: #11151e;
-    --panel2: #191f2b;
-    --border: #293243;
-    --text: #f1f4fa;
-    --muted: #929caf;
-    --accent: #6c8cff;
-    --green: #38d99a;
-    --red: #ff626f;
+:root{
+--bg:#090d14;
+--panel:#111824;
+--card:#172131;
+--border:#273448;
+--green:#65e6ad;
+--text:#f0f4fa;
+--muted:#8b9aaf;
 }
 
-* {
-    box-sizing: border-box;
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:var(--bg);
+color:var(--text);
+font-family:Arial,sans-serif;
+height:100dvh;
+display:flex;
+flex-direction:column;
+overflow:hidden
 }
 
-body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: Arial, sans-serif;
+header{
+height:65px;
+flex-shrink:0;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 18px;
+background:#101722;
+border-bottom:1px solid var(--border)
 }
 
-header {
-    padding: 20px;
-    background: #10141d;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
+.logo{
+font-size:20px;
+font-weight:bold;
+color:var(--green)
 }
 
-.logo {
-    font-size: 21px;
-    font-weight: bold;
+.status{
+font-size:12px;
+color:var(--green)
 }
 
-.logo span {
-    color: var(--accent);
+main{
+flex:1;
+overflow-y:auto;
+width:100%
 }
 
-.status {
-    color: var(--green);
-    font-size: 13px;
+.container{
+max-width:850px;
+margin:auto;
+padding:20px 15px 30px
 }
 
-.container {
-    max-width: 950px;
-    margin: auto;
-    padding: 20px;
+#welcome{
+text-align:center;
+padding:70px 10px 35px
 }
 
-.card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 18px;
+#welcome h1{
+font-size:30px;
+margin:0 0 12px;
+color:var(--green)
 }
 
-h2 {
-    font-size: 18px;
-    margin-top: 0;
+#welcome p{
+color:var(--muted);
+line-height:1.8
 }
 
-.description {
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.8;
+.suggestions{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+margin-top:25px
 }
 
-.upload {
-    border: 2px dashed #394966;
-    border-radius: 12px;
-    padding: 35px 15px;
-    text-align: center;
-    cursor: pointer;
-    background: #151b27;
+.suggestion{
+background:var(--panel);
+border:1px solid var(--border);
+border-radius:12px;
+padding:15px;
+color:#dce5f2;
+cursor:pointer;
+text-align:right
 }
 
-.upload:hover {
-    border-color: var(--accent);
+.suggestion:hover{
+border-color:var(--green)
 }
 
-.upload input {
-    display: none;
+#messages{
+display:flex;
+flex-direction:column;
+gap:18px
 }
 
-button {
-    border: 0;
-    padding: 12px 17px;
-    border-radius: 9px;
-    cursor: pointer;
-    font-weight: bold;
-    color: white;
-    background: var(--accent);
-    margin: 5px 0;
+.message{
+max-width:95%;
+padding:14px;
+border-radius:15px;
+line-height:1.8;
+overflow-wrap:anywhere
 }
 
-button:disabled {
-    opacity: .4;
-    cursor: not-allowed;
+.user{
+align-self:flex-start;
+background:#18392f;
+border:1px solid #285b48
 }
 
-.secondary {
-    background: #303b50;
+.ai{
+align-self:flex-end;
+background:var(--panel);
+border:1px solid var(--border);
+width:100%
 }
 
-.success {
-    background: #137d59;
+.message img{
+display:block;
+max-width:100%;
+max-height:300px;
+border-radius:12px;
+margin-bottom:10px
 }
 
-.danger {
-    background: #a93645;
+.message pre{
+direction:ltr;
+text-align:left;
+overflow-x:auto;
+white-space:pre;
+background:#080c13;
+border:1px solid #29364a;
+border-radius:0 0 9px 9px;
+padding:15px;
+margin:0;
+font-family:monospace;
+font-size:13px
 }
 
-input, textarea, select {
-    width: 100%;
-    background: var(--panel2);
-    color: white;
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 12px;
-    margin: 7px 0 13px;
-    font-family: inherit;
+.code-header{
+direction:ltr;
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:7px;
+background:#202c3c;
+padding:9px 12px;
+border-radius:9px 9px 0 0;
+font-size:12px;
+color:#a9bdd4
 }
 
-textarea {
-    min-height: 100px;
-    resize: vertical;
-    direction: ltr;
-    text-align: left;
+.code-header button{
+background:#34475d;
+color:white;
+padding:7px 12px;
+border-radius:6px;
+border:0;
+cursor:pointer
 }
 
-label {
-    font-size: 13px;
-    color: var(--muted);
+.code-box{
+margin:12px 0;
+direction:ltr
 }
 
-.preview {
-    max-width: 100%;
-    max-height: 300px;
-    display: block;
-    margin: 15px auto;
-    border-radius: 10px;
-    background: #080808;
+.save-image-btn{
+background:var(--green)!important;
+color:#07150f!important;
+font-weight:bold
 }
 
-pre {
-    background: #080b11;
-    border: 1px solid var(--border);
-    padding: 15px;
-    border-radius: 10px;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    direction: ltr;
-    text-align: left;
-    color: #b8d2ff;
-    font-size: 13px;
-    max-height: 350px;
-    overflow: auto;
+.composer-area{
+flex-shrink:0;
+background:#0d131d;
+border-top:1px solid var(--border);
+padding:12px
 }
 
-.message {
-    padding: 12px;
-    border-radius: 9px;
-    background: #1a2434;
-    color: #c7d5f0;
-    margin: 12px 0;
-    font-size: 13px;
-    line-height: 1.8;
+.composer{
+max-width:850px;
+margin:auto;
+background:var(--panel);
+border:1px solid var(--border);
+border-radius:16px;
+padding:10px
 }
 
-.hidden {
-    display: none;
+#input{
+width:100%;
+resize:none;
+min-height:48px;
+max-height:150px;
+background:transparent;
+border:0;
+outline:0;
+color:white;
+font-size:16px;
+padding:10px;
+font-family:Arial
 }
 
-.row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+.actions{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:8px
 }
 
-.row button {
-    flex: 1;
+.action-left{
+display:flex;
+gap:8px;
+align-items:center
 }
 
-footer {
-    text-align: center;
-    padding: 25px;
-    color: var(--muted);
-    font-size: 12px;
+button{
+cursor:pointer;
+border:0;
+font-weight:bold
+}
+
+.icon-btn{
+background:#253246;
+color:white;
+padding:11px 14px;
+border-radius:10px;
+font-size:17px
+}
+
+.send-btn{
+background:var(--green);
+color:#07150f;
+padding:12px 22px;
+border-radius:10px
+}
+
+button:disabled{
+opacity:.5;
+cursor:wait
+}
+
+#imageInput{
+display:none
+}
+
+#imageBtn{
+font-size:14px
+}
+
+#preview{
+display:none;
+padding:8px
+}
+
+#preview img{
+width:75px;
+height:75px;
+object-fit:cover;
+border-radius:10px
+}
+
+.preview-actions{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+margin-top:8px
+}
+
+.preview-actions button{
+padding:8px 11px;
+border-radius:8px;
+background:#253246;
+color:white;
+font-size:12px
+}
+
+#previewName{
+display:block;
+max-width:220px;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap
+}
+
+.preview-hint{
+font-size:11px;
+color:var(--muted);
+margin-top:7px;
+line-height:1.6
+}
+
+.typing{
+color:var(--muted);
+padding:12px;
+font-size:13px
+}
+
+.footer-note{
+text-align:center;
+font-size:11px;
+color:#64748b;
+margin-top:9px
+}
+
+@media(max-width:500px){
+.container{padding:12px 10px}
+#welcome{padding-top:45px}
+#welcome h1{font-size:25px}
+.suggestions{grid-template-columns:1fr}
+.message{max-width:100%}
 }
 </style>
 </head>
@@ -208,629 +328,822 @@ footer {
 <body>
 
 <header>
-    <div class="logo">
-        NoRestrictions <span>Agent</span>
-    </div>
-
-    <div class="status" id="connectionStatus">
-        ● جاهز للاتصال
-    </div>
+<div class="logo">✦ NoRestrictions AI</div>
+<div class="status" id="status">● جاري الاتصال...</div>
 </header>
 
+<main id="main">
 <div class="container">
 
-    <div class="card">
-        <h2>إعداد الاتصال</h2>
+<div id="welcome">
+<h1>مرحباً بك 👋</h1>
 
-        <label>Worker API</label>
+<p>
+أنا NoRestrictions AI<br>
+مساعدك للكتابة والبرمجة والأسئلة والمحادثة الطبيعية،
+مع إمكانية إرسال الصور وتحليلها.
+</p>
 
-        <input
-            id="apiUrl"
-            value="https://norestrictions-api.sdrhaldwane.workers.dev"
-            placeholder="Worker URL"
-            dir="ltr"
-        >
+<div class="suggestions">
 
-        <button onclick="checkConnection()">
-            فحص الاتصال
-        </button>
+<button class="suggestion"
+onclick="suggest('اكتب لي برنامج Python احترافي')">
+💻 كتابة الأكواد
+</button>
 
-        <div id="connectionMessage" class="message">
-            أدخل رابط Worker ثم افحص الاتصال.
-        </div>
-    </div>
+<button class="suggestion"
+onclick="suggest('اشرح لي كيف تعمل واجهات API')">
+🧠 شرح البرمجة
+</button>
 
-    <div class="card">
-        <h2>رفع صورة</h2>
+<button class="suggestion"
+onclick="suggest('صمم لي موقع HTML احترافي')">
+🌐 تصميم المواقع
+</button>
 
-        <p class="description">
-            ارفع صورة PNG حتى يقوم Agent بفحص البيانات المضمّنة
-            داخلها.
-        </p>
+<button class="suggestion"
+onclick="document.getElementById('imageInput').click()">
+🖼️ إرسال صورة للتحليل
+</button>
 
-        <label class="upload">
-            <div>📁 اضغط لاختيار صورة PNG</div>
-            <p class="description">PNG فقط</p>
+</div>
+</div>
 
-            <input
-                type="file"
-                id="imageInput"
-                accept="image/png"
-            >
-        </label>
+<div id="messages"></div>
 
-        <img id="imagePreview" class="preview hidden">
+</div>
+</main>
 
-        <div id="imageInfo" class="message hidden"></div>
+<div class="composer-area">
 
-        <button id="readButton" onclick="readImage()" disabled>
-            فحص الصورة وقراءة البيانات
-        </button>
-    </div>
+<div class="composer">
 
-    <div class="card hidden" id="metadataCard">
-        <h2>البيانات المكتشفة</h2>
+<div id="preview">
 
-        <p class="description">
-            هذه البيانات الموجودة داخل كتلة nrAi الخاصة بالتطبيق.
-        </p>
+<img id="previewImg" alt="معاينة الصورة">
 
-        <pre id="metadataOutput">{}</pre>
-    </div>
+<div class="preview-actions">
+<span id="previewName" class="preview-hint"></span>
 
-    <div class="card hidden" id="editorCard">
-        <h2>محرر البيانات</h2>
+<button type="button" onclick="removeImage()">
+إزالة الصورة ✕
+</button>
+</div>
 
-        <label>نوع العملية</label>
-
-        <select id="operationType" onchange="updateEditor()">
-            <option value="set">إضافة أو تعديل قيمة</option>
-            <option value="delete">حذف قيمة</option>
-            <option value="merge">دمج بيانات JSON</option>
-            <option value="replace">استبدال جميع البيانات</option>
-        </select>
-
-        <div id="pathArea">
-            <label>اسم المفتاح</label>
-            <input
-                id="metadataKey"
-                placeholder="example أو user.name"
-                dir="ltr"
-            >
-        </div>
-
-        <div id="valueArea">
-            <label>القيمة</label>
-            <textarea
-                id="metadataValue"
-                placeholder='مثال: "Hello" أو 123 أو {"name":"test"}'
-            ></textarea>
-        </div>
-
-        <button onclick="prepareChanges()">
-            معاينة التغييرات
-        </button>
-
-        <div id="previewArea" class="hidden">
-            <h2>معاينة قبل التنفيذ</h2>
-
-            <pre id="changesOutput"></pre>
-
-            <div class="message">
-                راجع التغييرات جيداً.
-                لن يتم تعديل الصورة إلا بعد تأكيدك.
-            </div>
-
-            <button class="success" onclick="confirmChanges()">
-                تأكيد وتنفيذ التعديلات
-            </button>
-
-            <button class="secondary" onclick="cancelChanges()">
-                إلغاء
-            </button>
-        </div>
-    </div>
-
-    <div class="card hidden" id="resultCard">
-        <h2>نتيجة Agent</h2>
-
-        <div class="message" id="resultMessage"></div>
-
-        <img id="resultPreview" class="preview">
-
-        <button class="success" onclick="downloadImage()">
-            تنزيل صورة PNG المعدّلة
-        </button>
-
-        <pre id="resultMetadata"></pre>
-    </div>
-
-    <div class="card">
-        <h2>معلومات النظام</h2>
-
-        <pre id="systemInfo">{
-  "name": "NoRestrictions Agent",
-  "version": "1.0",
-  "engine": "PNG",
-  "workersAI": false,
-  "work": true
-}</pre>
-    </div>
+<div class="preview-hint">
+اكتب سؤالك عن الصورة ثم اضغط إرسال.
+</div>
 
 </div>
 
-<footer>
-    NoRestrictions AI — Custom Agent System
-</footer>
+<textarea
+id="input"
+placeholder="اكتب رسالتك إلى NoRestrictions AI..."
+></textarea>
+
+<div class="actions">
+
+<div class="action-left">
+
+<button
+type="button"
+class="icon-btn"
+id="imageBtn"
+onclick="document.getElementById('imageInput').click()">
+🖼️ الصور
+</button>
+
+<input
+type="file"
+id="imageInput"
+accept="image/png,image/jpeg,image/webp"
+>
+
+</div>
+
+<button
+class="send-btn"
+id="sendBtn"
+onclick="send()">
+إرسال ↑
+</button>
+
+</div>
+</div>
+
+<div class="footer-note">
+NoRestrictions AI · AI Assistant
+</div>
+
+</div>
 
 <script>
+"use strict";
 
-// ===================================
-// CONFIGURATION
-// ===================================
+/* إعدادات الخادم */
 
-const API = () =>
-    document.getElementById("apiUrl").value
-    .trim()
-    .replace(/\/+$/, "");
+const API = "https://norestrictions-api.sdrhaldwane.workers.dev";
 
+const $ = id => document.getElementById(id);
+
+let messages = [];
+let busy = false;
 let selectedImage = null;
-let selectedImageURL = null;
-let pendingOperations = null;
-let modifiedImage = null;
+let selectedImageUrl = null;
 
-// ===================================
-// HELPERS
-// ===================================
+const systemPrompt = `
+أنت NoRestrictions AI، مساعد ذكاء اصطناعي عام.
 
-function showMessage(id, message) {
-    document.getElementById(id).textContent = message;
+تحدث بشكل طبيعي ومباشر.
+أجب بالعربية إذا تحدث المستخدم بالعربية.
+اكتب الأكواد كاملة عندما يطلب المستخدم ذلك.
+ضع الأكواد داخل كتل Markdown مع تحديد لغة البرمجة.
+
+إذا أرسل المستخدم صورة:
+حلّل محتواها بصرياً وأجب عن سؤاله اعتماداً على ما يظهر فيها.
+
+لا تدّع أنك نفذت شيئاً على جهاز المستخدم إذا لم يحدث ذلك فعلاً.
+`;
+
+
+/* اقتراحات البداية */
+
+function suggest(text){
+$("input").value = text;
+$("input").focus();
 }
 
-async function apiRequest(path, body = null) {
 
-    const response = await fetch(API() + path, {
-        method: body ? "POST" : "GET",
+/* النزول لآخر المحادثة */
 
-        headers: body ? {
-            "Content-Type": "application/json"
-        } : {},
-
-        body: body ? JSON.stringify(body) : undefined
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || result.success === false) {
-        throw new Error(
-            result.error || "Request failed"
-        );
-    }
-
-    return result;
+function scrollBottom(){
+$("main").scrollTop = $("main").scrollHeight;
 }
 
-// ===================================
-// CONNECTION
-// ===================================
 
-async function checkConnection() {
+/* إضافة رسالة */
 
-    const status = document.getElementById(
-        "connectionStatus"
-    );
+function addMessage(type, content, image = null){
 
-    showMessage(
-        "connectionMessage",
-        "جاري فحص الاتصال..."
-    );
+const div = document.createElement("div");
 
-    try {
+div.className = "message " + type;
 
-        const result = await apiRequest("/health");
+if(image){
 
-        status.textContent = "● متصل";
-        status.style.color = "#38d99a";
+const img = document.createElement("img");
 
-        showMessage(
-            "connectionMessage",
-            "تم الاتصال بنجاح — Worker Version: " +
-            result.version
-        );
+img.src = image;
+img.alt = "الصورة المرسلة";
 
-        document.getElementById(
-            "systemInfo"
-        ).textContent = JSON.stringify(
-            result,
-            null,
-            2
-        );
+div.appendChild(img);
 
-    } catch (error) {
-
-        status.textContent = "● غير متصل";
-        status.style.color = "#ff626f";
-
-        showMessage(
-            "connectionMessage",
-            "فشل الاتصال: " + error.message
-        );
-    }
 }
 
-// ===================================
-// IMAGE UPLOAD
-// ===================================
+if(type === "ai"){
 
-document.getElementById(
-    "imageInput"
-).addEventListener("change", async function(event) {
+renderAI(div, content);
 
-    const file = event.target.files[0];
+}else{
 
-    if (!file) return;
+const text = document.createElement("div");
 
-    if (file.type !== "image/png") {
-        alert("يرجى اختيار صورة PNG فقط");
-        return;
-    }
+text.textContent = content;
 
-    if (file.size > 7 * 1024 * 1024) {
-        alert("حجم الصورة أكبر من الحد المسموح (7MB)");
-        return;
-    }
+div.appendChild(text);
 
-    selectedImage = file;
+}
 
-    if (selectedImageURL) {
-        URL.revokeObjectURL(selectedImageURL);
-    }
+$("messages").appendChild(div);
 
-    selectedImageURL = URL.createObjectURL(file);
+scrollBottom();
 
-    const preview = document.getElementById(
-        "imagePreview"
-    );
+return div;
+}
 
-    preview.src = selectedImageURL;
-    preview.classList.remove("hidden");
 
-    document.getElementById(
-        "imageInfo"
-    ).textContent =
-        "الاسم: " + file.name +
-        " | الحجم: " + (file.size / 1024).toFixed(2) + " KB";
+/* عرض رد الذكاء الاصطناعي والأكواد */
 
-    document.getElementById(
-        "imageInfo"
-    ).classList.remove("hidden");
+function renderAI(container, text){
 
-    document.getElementById(
-        "readButton"
-    ).disabled = false;
+const regex = /```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g;
 
-    document.getElementById(
-        "metadataCard"
-    ).classList.add("hidden");
+let last = 0;
+let match;
 
-    document.getElementById(
-        "editorCard"
-    ).classList.add("hidden");
+while((match = regex.exec(text)) !== null){
 
-    document.getElementById(
-        "resultCard"
-    ).classList.add("hidden");
+if(match.index > last){
 
-    pendingOperations = null;
-    modifiedImage = null;
+const p = document.createElement("div");
+
+p.textContent = text.slice(last, match.index);
+
+container.appendChild(p);
+
+}
+
+const language = match[1] || "CODE";
+
+const codeText = match[2];
+
+const box = document.createElement("div");
+
+box.className = "code-box";
+
+const header = document.createElement("div");
+
+header.className = "code-header";
+
+const lang = document.createElement("span");
+
+lang.textContent = language;
+
+const copy = document.createElement("button");
+
+copy.textContent = "نسخ الكود";
+
+copy.onclick = async () => {
+
+try{
+
+await navigator.clipboard.writeText(codeText);
+
+copy.textContent = "تم النسخ ✓";
+
+setTimeout(() => {
+copy.textContent = "نسخ الكود";
+},1500);
+
+}catch{
+
+copy.textContent = "تعذر النسخ";
+
+}
+
+};
+
+const save = document.createElement("button");
+
+save.className = "save-image-btn";
+
+save.textContent = "💾 حفظ كصورة";
+
+save.onclick = () => saveCodeAsImage(codeText, language);
+
+const pre = document.createElement("pre");
+
+const code = document.createElement("code");
+
+code.textContent = codeText;
+
+pre.appendChild(code);
+
+header.append(lang, copy, save);
+
+box.append(header, pre);
+
+container.appendChild(box);
+
+last = regex.lastIndex;
+
+}
+
+if(last < text.length){
+
+const p = document.createElement("div");
+
+p.textContent = text.slice(last);
+
+container.appendChild(p);
+
+}
+
+}
+
+
+/* حفظ الكود كصورة */
+
+function saveCodeAsImage(codeText, language){
+
+const canvas = document.createElement("canvas");
+
+const ctx = canvas.getContext("2d");
+
+const width = 1400;
+const padding = 45;
+const fontSize = 23;
+const lineHeight = 36;
+
+ctx.font = `${fontSize}px monospace`;
+
+const maxWidth = width - padding * 2;
+
+const lines = [];
+
+codeText.split("\n").forEach(line => {
+
+let current = "";
+
+for(const char of line){
+
+const test = current + char;
+
+if(ctx.measureText(test).width > maxWidth && current){
+
+lines.push(current);
+
+current = char;
+
+}else{
+
+current = test;
+
+}
+
+}
+
+lines.push(current);
 
 });
 
-// ===================================
-// FILE TO BASE64
-// ===================================
+canvas.width = width;
 
-function fileToBase64(file) {
+canvas.height = padding * 2 + 75 + lines.length * lineHeight;
 
-    return new Promise((resolve, reject) => {
+ctx.fillStyle = "#090d14";
 
-        const reader = new FileReader();
+ctx.fillRect(0,0,width,canvas.height);
 
-        reader.onload = () => resolve(reader.result);
+ctx.fillStyle = "#65e6ad";
 
-        reader.onerror = () => reject(
-            new Error("تعذرت قراءة الصورة")
-        );
+ctx.font = "bold 27px Arial";
 
-        reader.readAsDataURL(file);
-    });
+ctx.direction = "ltr";
+
+ctx.textAlign = "left";
+
+ctx.fillText("NoRestrictions AI",padding,55);
+
+ctx.fillStyle = "#8b9aaf";
+
+ctx.font = "18px Arial";
+
+ctx.fillText(language.toUpperCase(),width-180,55);
+
+ctx.strokeStyle = "#273448";
+
+ctx.lineWidth = 2;
+
+ctx.beginPath();
+
+ctx.moveTo(padding,80);
+
+ctx.lineTo(width-padding,80);
+
+ctx.stroke();
+
+ctx.font = `${fontSize}px monospace`;
+
+ctx.fillStyle = "#f0f4fa";
+
+lines.forEach((line,index) => {
+
+ctx.fillText(line,padding,125 + index * lineHeight);
+
+});
+
+canvas.toBlob(blob => {
+
+if(!blob){
+
+alert("تعذر إنشاء الصورة");
+
+return;
+
 }
 
-// ===================================
-// READ IMAGE
-// ===================================
+const url = URL.createObjectURL(blob);
 
-async function readImage() {
+const link = document.createElement("a");
 
-    if (!selectedImage) {
-        alert("اختر صورة أولاً");
-        return;
-    }
+link.href = url;
 
-    const button = document.getElementById(
-        "readButton"
-    );
+link.download = "NoRestrictions-Code.png";
 
-    button.disabled = true;
-    button.textContent = "جاري الفحص...";
+document.body.appendChild(link);
 
-    try {
+link.click();
 
-        const image = await fileToBase64(
-            selectedImage
-        );
+link.remove();
 
-        const result = await apiRequest(
-            "/api/agent/image/read",
-            { image }
-        );
+setTimeout(() => URL.revokeObjectURL(url),3000);
 
-        document.getElementById(
-            "metadataCard"
-        ).classList.remove("hidden");
+},"image/png");
 
-        document.getElementById(
-            "editorCard"
-        ).classList.remove("hidden");
-
-        document.getElementById(
-            "metadataOutput"
-        ).textContent = JSON.stringify(
-            result.result.metadata,
-            null,
-            2
-        );
-
-        showMessage(
-            "connectionMessage",
-            "تم فحص الصورة بنجاح."
-        );
-
-    } catch (error) {
-
-        alert("حدث خطأ: " + error.message);
-
-    } finally {
-
-        button.disabled = false;
-        button.textContent = "فحص الصورة وقراءة البيانات";
-    }
 }
 
-// ===================================
-// EDITOR
-// ===================================
 
-function updateEditor() {
+/* تحويل الصورة إلى Base64 */
 
-    const type = document.getElementById(
-        "operationType"
-    ).value;
+function imageToBase64(file){
 
-    document.getElementById(
-        "pathArea"
-    ).classList.toggle(
-        "hidden",
-        type === "merge" || type === "replace"
-    );
+return new Promise((resolve,reject) => {
 
-    document.getElementById(
-        "valueArea"
-    ).classList.toggle(
-        "hidden",
-        type === "delete"
-    );
+const reader = new FileReader();
+
+reader.onload = () => resolve(reader.result);
+
+reader.onerror = () => reject(
+new Error("تعذر قراءة الصورة من الجهاز")
+);
+
+reader.readAsDataURL(file);
+
+});
+
 }
 
-// ===================================
-// BUILD OPERATION
-// ===================================
 
-function prepareChanges() {
+/* حالة الإرسال */
 
-    const type = document.getElementById(
-        "operationType"
-    ).value;
+function setBusy(value,label = "إرسال ↑"){
 
-    const key = document.getElementById(
-        "metadataKey"
-    ).value.trim();
+busy = value;
 
-    const rawValue = document.getElementById(
-        "metadataValue"
-    ).value.trim();
+$("sendBtn").disabled = value;
 
-    let operation = {
-        op: type
-    };
+$("imageBtn").disabled = value;
 
-    if (type === "set" || type === "delete") {
+$("sendBtn").textContent = value ? label : "إرسال ↑";
 
-        if (!key) {
-            alert("أدخل اسم المفتاح");
-            return;
-        }
-
-        operation.path = key;
-    }
-
-    if (type === "set") {
-
-        if (!rawValue) {
-            alert("أدخل القيمة");
-            return;
-        }
-
-        try {
-            operation.value = JSON.parse(rawValue);
-        } catch {
-            operation.value = rawValue;
-        }
-    }
-
-    if (type === "merge" || type === "replace") {
-
-        try {
-
-            operation.value = JSON.parse(rawValue);
-
-            if (
-                !operation.value ||
-                typeof operation.value !== "object" ||
-                Array.isArray(operation.value)
-            ) {
-                throw new Error();
-            }
-
-        } catch {
-
-            alert("أدخل JSON صالحاً");
-            return;
-        }
-    }
-
-    pendingOperations = [operation];
-
-    document.getElementById(
-        "changesOutput"
-    ).textContent = JSON.stringify(
-        pendingOperations,
-        null,
-        2
-    );
-
-    document.getElementById(
-        "previewArea"
-    ).classList.remove("hidden");
 }
 
-// ===================================
-// CANCEL
-// ===================================
 
-function cancelChanges() {
+/* اختيار صورة */
 
-    pendingOperations = null;
+$("imageInput").addEventListener("change",event => {
 
-    document.getElementById(
-        "previewArea"
-    ).classList.add("hidden");
+const file = event.target.files && event.target.files[0];
+
+if(!file) return;
+
+if(!/^image\/(png|jpeg|webp)$/.test(file.type)){
+
+alert("اختر صورة PNG أو JPG أو WEBP.");
+
+event.target.value = "";
+
+return;
+
 }
 
-// ===================================
-// CONFIRM AND APPLY
-// ===================================
+if(file.size > 7 * 1024 * 1024){
 
-async function confirmChanges() {
+alert("حجم الصورة أكبر من 7MB.");
 
-    if (!pendingOperations || !selectedImage) {
-        alert("لا توجد عملية جاهزة");
-        return;
-    }
+event.target.value = "";
 
-    const confirmed = confirm(
-        "هل تريد تنفيذ التعديلات على الصورة؟"
-    );
+return;
 
-    if (!confirmed) return;
-
-    const button = document.querySelector(
-        "#previewArea .success"
-    );
-
-    button.disabled = true;
-    button.textContent = "جاري التنفيذ...";
-
-    try {
-
-        const image = await fileToBase64(
-            selectedImage
-        );
-
-        const result = await apiRequest(
-            "/api/agent/image/edit",
-            {
-                image,
-                operations: pendingOperations
-            }
-        );
-
-        modifiedImage = result.image;
-
-        document.getElementById(
-            "resultCard"
-        ).classList.remove("hidden");
-
-        document.getElementById(
-            "resultPreview"
-        ).src = modifiedImage;
-
-        document.getElementById(
-            "resultMetadata"
-        ).textContent = JSON.stringify(
-            result.metadata,
-            null,
-            2
-        );
-
-        showMessage(
-            "resultMessage",
-            "اكتملت المعالجة بنجاح. يمكنك تنزيل الصورة الآن."
-        );
-
-        document.getElementById(
-            "previewArea"
-        ).classList.add("hidden");
-
-        pendingOperations = null;
-
-    } catch (error) {
-
-        alert("فشل التعديل: " + error.message);
-
-    } finally {
-
-        button.disabled = false;
-        button.textContent = "تأكيد وتنفيذ التعديلات";
-    }
 }
 
-// ===================================
-// DOWNLOAD
-// ===================================
+selectedImage = file;
 
-function downloadImage() {
+if(selectedImageUrl){
 
-    if (!modifiedImage) {
-        alert("لا توجد صورة معدلة");
-        return;
-    }
+URL.revokeObjectURL(selectedImageUrl);
 
-    const link = document.createElement("a");
-
-    link.href = modifiedImage;
-    link.download = "NoRestrictions-Modified.png";
-
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
 }
 
-// ===================================
-// START
-// ===================================
+selectedImageUrl = URL.createObjectURL(file);
 
-updateEditor();
+$("previewImg").src = selectedImageUrl;
+
+$("previewName").textContent = file.name;
+
+$("preview").style.display = "block";
+
+$("input").focus();
+
+});
+
+
+/* إزالة الصورة */
+
+function removeImage(){
+
+selectedImage = null;
+
+$("imageInput").value = "";
+
+$("preview").style.display = "none";
+
+$("previewImg").src = "";
+
+$("previewName").textContent = "";
+
+if(selectedImageUrl){
+
+URL.revokeObjectURL(selectedImageUrl);
+
+}
+
+selectedImageUrl = null;
+
+}
+
+
+/* استخراج الإجابة من رد الخادم */
+
+function extractAnswer(data){
+
+if(typeof data.reply === "string"){
+
+return data.reply;
+
+}
+
+if(typeof data.message === "string"){
+
+return data.message;
+
+}
+
+if(typeof data.content === "string"){
+
+return data.content;
+
+}
+
+const content = data.choices?.[0]?.message?.content;
+
+if(typeof content === "string"){
+
+return content;
+
+}
+
+if(Array.isArray(content)){
+
+return content
+.filter(x => x.type === "text" && x.text)
+.map(x => x.text)
+.join("\n");
+
+}
+
+return null;
+
+}
+
+
+/* إرسال الطلب إلى Worker */
+
+async function requestAI(){
+
+const response = await fetch(API + "/api/chat",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+messages:[
+{role:"system",content:systemPrompt},
+...messages
+]
+
+})
+
+});
+
+let data;
+
+try{
+
+data = await response.json();
+
+}catch{
+
+throw new Error(
+"الخادم أرجع استجابة غير مفهومة. تحقق من مسار /api/chat."
+);
+
+}
+
+if(!response.ok || data.success === false){
+
+throw new Error(
+data.error || `فشل الاتصال بالخادم HTTP ${response.status}`
+);
+
+}
+
+const answer = extractAnswer(data);
+
+if(!answer){
+
+throw new Error(
+"وصل رد من الخادم لكن لم أجد نص الإجابة."
+);
+
+}
+
+return answer;
+
+}
+
+
+/* إرسال الرسالة */
+
+async function send(){
+
+if(busy) return;
+
+const text = $("input").value.trim();
+
+if(!text && !selectedImage) return;
+
+setBusy(true,"جارٍ الإرسال...");
+
+$("welcome").style.display = "none";
+
+const imageFile = selectedImage;
+
+$("input").value = "";
+
+let typing = null;
+
+try{
+
+let content;
+
+if(imageFile){
+
+/* قراءة الصورة قبل إزالة المعاينة */
+
+const dataUrl = await imageToBase64(imageFile);
+
+content = [
+
+{
+type:"text",
+text:text || "حلّل هذه الصورة واشرح ما يظهر فيها."
+},
+
+{
+type:"image_url",
+image_url:{
+url:dataUrl,
+detail:"auto"
+}
+
+}
+
+];
+
+/* نستخدم Base64 في الرسالة حتى لا تختفي الصورة */
+
+addMessage(
+"user",
+text || "حلّل هذه الصورة واشرح ما يظهر فيها.",
+dataUrl
+);
+
+removeImage();
+
+}else{
+
+content = text;
+
+addMessage("user",text);
+
+}
+
+/* حفظ الرسالة في سجل المحادثة */
+
+messages.push({
+
+role:"user",
+
+content:content
+
+});
+
+/* مؤشر التفكير */
+
+typing = document.createElement("div");
+
+typing.className = "typing";
+
+typing.textContent = "NoRestrictions AI يفكر...";
+
+$("messages").appendChild(typing);
+
+scrollBottom();
+
+/* طلب الإجابة */
+
+const answer = await requestAI();
+
+typing.remove();
+
+typing = null;
+
+messages.push({
+
+role:"assistant",
+
+content:answer
+
+});
+
+addMessage("ai",answer);
+
+}catch(error){
+
+if(typing){
+
+typing.remove();
+
+}
+
+addMessage(
+"ai",
+"تعذر إكمال الطلب: " + error.message
+);
+
+console.error("NoRestrictions chat error:",error);
+
+}finally{
+
+setBusy(false);
+
+scrollBottom();
+
+}
+
+}
+
+
+/* إرسال بزر Enter */
+
+$("input").addEventListener("keydown",event => {
+
+if(event.key === "Enter" && !event.shiftKey){
+
+event.preventDefault();
+
+send();
+
+}
+
+});
+
+
+/* تكبير مربع الكتابة تلقائياً */
+
+$("input").addEventListener("input",function(){
+
+this.style.height = "auto";
+
+this.style.height =
+Math.min(this.scrollHeight,150) + "px";
+
+});
+
+
+/* فحص اتصال الخادم */
+
+(async function checkServer(){
+
+try{
+
+const r = await fetch(API + "/health",{
+
+cache:"no-store"
+
+});
+
+$("status").textContent =
+r.ok ? "● الخادم متصل" : "● مشكلة بالخادم";
+
+$("status").style.color =
+r.ok ? "var(--green)" : "#ff8585";
+
+}catch{
+
+$("status").textContent = "● تعذر الاتصال";
+
+$("status").style.color = "#ff8585";
+
+}
+
+})();
 
 </script>
 
