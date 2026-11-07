@@ -3,7 +3,7 @@
 
 """
 NoRestrictions AI - Safe Termux Agent
-Version: 3.0
+Version: 3.1
 """
 
 import os
@@ -11,13 +11,12 @@ import sys
 import re
 import json
 import time
-import hashlib
 import platform
-import subprocess
 import urllib.request
 import urllib.error
 import threading
 import shlex
+import secrets
 from pathlib import Path
 
 SERVER = os.environ.get(
@@ -26,10 +25,8 @@ SERVER = os.environ.get(
 ).rstrip("/")
 
 KEY_FILE = Path.home() / ".nr_agent_key"
-VERSION = "3.0"
+VERSION = "3.1"
 MAX_OUTPUT = 12000
-TIMEOUT = 15
-
 HOME = Path.home().resolve()
 
 
@@ -39,14 +36,12 @@ def get_key():
     if not key and KEY_FILE.exists():
         key = KEY_FILE.read_text().strip()
 
-    while not re.fullmatch(r"[a-f0-9]{64}", key or ""):
-        key = input("Device Key: ").strip().lower()
+    if not re.fullmatch(r"[a-f0-9]{64}", key or ""):
+        key = secrets.token_hex(32)
+        print("تم إنشاء مفتاح جهاز جديد.")
 
-    try:
-        KEY_FILE.write_text(key)
-        KEY_FILE.chmod(0o600)
-    except OSError:
-        pass
+    KEY_FILE.write_text(key)
+    KEY_FILE.chmod(0o600)
 
     return key
 
@@ -68,8 +63,15 @@ def request_api(action, data=None, method="POST"):
         method=method
     )
 
-    with urllib.request.urlopen(req, timeout=30) as response:
-        return json.loads(response.read().decode())
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            return json.loads(response.read().decode())
+
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode(errors="replace")
+        raise Exception(
+            f"HTTP {error.code}: {detail}"
+        )
 
 
 def safe_path(value):
@@ -107,6 +109,7 @@ def execute(command):
 
         if action == "ls" and len(parts) <= 2:
             target = safe_path(parts[1] if len(parts) == 2 else ".")
+
             if not target.is_dir():
                 return "المسار ليس مجلداً", 1
 
@@ -130,9 +133,7 @@ def execute(command):
                 "uname\nls [مسار]\ncat [ملف]\nhelp"
             ), 0
 
-        return (
-            "هذا الأمر غير مدعوم في النسخة الآمنة من الوكيل."
-        ), 126
+        return "هذا الأمر غير مدعوم في النسخة الآمنة.", 126
 
     except Exception as error:
         return "خطأ: " + str(error), 1
@@ -163,6 +164,7 @@ def handle_job(key, job):
     try:
         send_result(key, job_id, output, code)
         print("✓ تم إرسال النتيجة")
+
     except Exception as error:
         print("تعذر إرسال النتيجة:", error)
 
@@ -171,8 +173,8 @@ def heartbeat(key):
     while True:
         try:
             request_api("ping", {"key": key})
-        except Exception:
-            pass
+        except Exception as error:
+            print("تعذر إرسال نبضة الاتصال:", error)
 
         time.sleep(10)
 
@@ -187,11 +189,27 @@ def main():
     print("Server:", SERVER)
     print("=" * 40)
 
+    # تسجيل الجهاز قبل بدء الاتصال
+    try:
+        result = request_api("pair", {"key": key})
+
+        if not result.get("ok"):
+            print("فشل تسجيل الجهاز:", result)
+            return
+
+        print("✓ تم تسجيل الجهاز بنجاح")
+
+    except Exception as error:
+        print("فشل تسجيل الجهاز:", error)
+        return
+
     threading.Thread(
         target=heartbeat,
         args=(key,),
         daemon=True
     ).start()
+
+    print("✓ الوكيل يعمل وينتظر المهام...")
 
     delay = 2
 
@@ -200,18 +218,13 @@ def main():
             result = request_api("poll", {
                 "key": key,
                 "kind": "termux",
-                "info": platform.platform(),
-                "wait": 20
+                "info": platform.platform()
             })
 
             delay = 2
 
             for job in result.get("jobs", []):
-                threading.Thread(
-                    target=handle_job,
-                    args=(key, job),
-                    daemon=True
-                ).start()
+                handle_job(key, job)
 
         except KeyboardInterrupt:
             print("\nتم إيقاف الوكيل.")
