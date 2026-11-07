@@ -33,6 +33,11 @@ body {
     overflow: hidden;
 }
 
+button {
+    cursor: pointer;
+    font-family: inherit;
+}
+
 .app {
     width: 100%;
     max-width: 950px;
@@ -63,7 +68,7 @@ header {
     align-items: center;
     gap: 10px;
     font-weight: bold;
-    font-size: 17px;
+    font-size: 16px;
 }
 
 .logo {
@@ -77,15 +82,16 @@ header {
     font-size: 20px;
 }
 
+.status {
+    font-size: 11px;
+    color: var(--green);
+    margin-top: 4px;
+}
+
 .header-actions {
     display: flex;
     align-items: center;
     gap: 7px;
-}
-
-button {
-    cursor: pointer;
-    font-family: inherit;
 }
 
 .header-btn {
@@ -102,24 +108,16 @@ button {
     color: var(--green);
 }
 
-.status {
-    font-size: 11px;
-    color: var(--green);
-}
-
 /* CHAT */
 
 #chat {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 18px;
+    padding: 14px 18px 28px;
     display: flex;
     flex-direction: column;
     gap: 14px;
-
-    /* رفع منطقة المحادثة */
-    padding-bottom: 28px;
 }
 
 .welcome {
@@ -133,10 +131,6 @@ button {
     color: var(--text);
     font-size: 25px;
     margin-bottom: 8px;
-}
-
-.welcome p {
-    font-size: 14px;
 }
 
 .message {
@@ -167,7 +161,13 @@ button {
     font-size: 13px;
 }
 
-/* CODE */
+.message-time {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 6px;
+}
+
+/* CODE BLOCK */
 
 .code-box {
     direction: ltr;
@@ -193,7 +193,7 @@ button {
     padding: 13px;
     overflow-x: auto;
     white-space: pre-wrap;
-    word-break: break-word;
+    overflow-wrap: anywhere;
     font-size: 12px;
     line-height: 1.7;
     color: #d7e6e0;
@@ -208,14 +208,12 @@ button {
     font-size: 11px;
 }
 
-/* INPUT AREA */
+/* INPUT */
 
 .input-area {
     padding: 10px 15px 15px;
     border-top: 1px solid var(--border);
     background: #10141a;
-
-    /* رفع منطقة الكتابة قليلًا */
     transform: translateY(-3px);
 }
 
@@ -354,11 +352,7 @@ button {
     margin-top: 10px;
 }
 
-.terminal-command {
-    margin-top: 14px;
-}
-
-.terminal-command pre {
+.command {
     direction: ltr;
     text-align: left;
     background: #07090c;
@@ -369,6 +363,7 @@ button {
     overflow-wrap: anywhere;
     font-size: 12px;
     line-height: 1.7;
+    margin-top: 12px;
 }
 
 .key-display {
@@ -380,6 +375,16 @@ button {
     overflow-wrap: anywhere;
     font-size: 12px;
     margin-top: 10px;
+}
+
+.device-status {
+    padding: 12px;
+    background: #090c10;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-size: 13px;
+    line-height: 1.8;
+    margin-top: 12px;
 }
 
 .hidden {
@@ -397,7 +402,7 @@ button {
     }
 
     .brand {
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .message {
@@ -416,7 +421,9 @@ button {
         <div class="logo">N</div>
         <div>
             NoRestrictions AI
-            <div class="status">● متصل بالواجهة</div>
+            <div class="status" id="connectionStatus">
+                ● جاهز
+            </div>
         </div>
     </div>
 
@@ -429,16 +436,15 @@ button {
 </header>
 
 <main id="chat">
-
     <div class="welcome" id="welcome">
         <h1>NoRestrictions AI</h1>
         <p>مرحباً بك، اكتب رسالتك للبدء.</p>
     </div>
-
 </main>
 
 <div class="input-area">
     <form class="input-form" id="form">
+
         <textarea
             id="input"
             placeholder="اكتب رسالتك هنا..."
@@ -452,12 +458,13 @@ button {
         <button type="submit" class="send-btn" id="sendBtn">
             ↑
         </button>
+
     </form>
 </div>
 
 </div>
 
-<!-- TERMUX MODAL -->
+<!-- DEVICE MODAL -->
 
 <div class="modal" id="devModal">
     <div class="sheet">
@@ -469,47 +476,43 @@ button {
 
         <div class="tabs">
             <button class="tab active" id="termuxTab">Termux</button>
-            <button class="tab" id="pydroidTab">Pydroid 3</button>
+            <button class="tab" id="keyTab">مفتاح الجهاز</button>
         </div>
 
         <div id="termuxContent">
 
             <p class="description">
-                افتح Termux وانسخ أمر الاتصال التالي.
-                يحتوي الأمر على مفتاح الجهاز الخاص بهذا المتصفح.
-                لا تشارك المفتاح مع أي شخص.
+                افتح Termux وانسخ الأمر التالي.
+                يجب أن يكون ملف الوكيل متوافقاً مع طريقة تمرير المفتاح.
             </p>
 
-            <button class="primary-btn" id="showCommand">
-                عرض أمر الاتصال
+            <div class="command" id="commandText"></div>
+
+            <button class="primary-btn" id="copyCommand">
+                نسخ أمر الاتصال
             </button>
 
-            <div class="terminal-command" id="termuxCmd">
-                <div class="code-header">
-                    <span>Termux command</span>
-                    <button class="copy-btn" id="copyCommand">نسخ الأمر</button>
-                </div>
-
-                <pre id="commandText"></pre>
+            <div class="device-status" id="deviceStatus">
+                حالة الجهاز: لم يتم التحقق بعد.
             </div>
 
-            <p class="description" style="margin-top:15px">
-                لا تشغّل الأمر إلا إذا كنت تثق بملف الوكيل والخادم
-                وتعرف الصلاحيات التي سيستخدمها.
-            </p>
+            <button class="primary-btn" id="refreshDevice">
+                تحديث حالة الجهاز
+            </button>
 
         </div>
 
-        <div id="pydroidContent" class="hidden">
+        <div id="keyContent" class="hidden">
 
             <p class="description">
-                مفتاح الجهاز المستخدم لهذا المتصفح:
+                هذا مفتاح الجهاز الخاص بهذا المتصفح.
+                لا تشاركه مع الآخرين.
             </p>
 
             <div class="key-display" id="keyBox"></div>
 
             <button class="primary-btn" id="copyKey">
-                نسخ مفتاح الجهاز
+                نسخ المفتاح
             </button>
 
         </div>
@@ -528,8 +531,8 @@ button {
         </div>
 
         <p class="description">
-            يمكنك استخدام واجهة المحادثة لإرسال الرسائل.
-            إعداد البوتات يحتاج إلى ربط API صالح من جهة الخادم.
+            اختر البوت الذي تريد استخدامه.
+            إعداد النماذج والاتصال بها يتم من جهة الخادم.
         </p>
 
         <button class="primary-btn" id="defaultBot">
@@ -540,30 +543,50 @@ button {
 </div>
 
 <script>
-/* CONFIGURATION */
+
+/* =================================
+   CONFIGURATION
+================================= */
 
 const API_URL =
-    "https://norestrictions-api.sdrhaldwane.workers.dev";
+"https://norestrictions-api.sdrhaldwane.workers.dev";
 
 const AGENT_URL =
-    "https://sdrhaldwany-bit.github.io/air/agent.py";
+"https://sdrhaldwany-bit.github.io/air/agent.py";
 
 const DEVICE_KEY_NAME = "nr-device-key";
 
-/* DEVICE KEY */
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const form = document.getElementById("form");
+const sendBtn = document.getElementById("sendBtn");
+
+let controller = null;
+let conversation = [];
+
+
+/* =================================
+   DEVICE KEY
+================================= */
 
 function getDeviceKey() {
+
     let key = localStorage.getItem(DEVICE_KEY_NAME);
 
     if (!/^[a-f0-9]{64}$/.test(key || "")) {
+
         const bytes = new Uint8Array(32);
+
         crypto.getRandomValues(bytes);
 
         key = Array.from(bytes)
             .map(byte => byte.toString(16).padStart(2, "0"))
             .join("");
 
-        localStorage.setItem(DEVICE_KEY_NAME, key);
+        localStorage.setItem(
+            DEVICE_KEY_NAME,
+            key
+        );
     }
 
     return key;
@@ -571,69 +594,98 @@ function getDeviceKey() {
 
 const deviceKey = getDeviceKey();
 
-/* TERMUX COMMAND */
+
+/* =================================
+   TERMUX COMMAND
+================================= */
 
 function buildTermuxCommand() {
+
     return (
-        "pkg install python curl -y && " +
+        "pkg install python -y && " +
         "curl -sLO " + AGENT_URL + " && " +
         "NR_SERVER=" + API_URL +
         " python agent.py " + deviceKey
     );
 }
 
-const commandText = document.getElementById("commandText");
+document.getElementById("commandText").textContent =
+    buildTermuxCommand();
 
-commandText.textContent = buildTermuxCommand();
+document.getElementById("keyBox").textContent =
+    deviceKey;
 
-document.getElementById("keyBox").textContent = deviceKey;
 
-/* COPY */
+/* =================================
+   COPY
+================================= */
 
 async function copyText(text) {
+
     try {
+
         await navigator.clipboard.writeText(text);
+
         return true;
+
     } catch (error) {
+
         const area = document.createElement("textarea");
+
         area.value = text;
+
         document.body.appendChild(area);
+
         area.select();
 
         const success = document.execCommand("copy");
+
         area.remove();
 
         return success;
     }
 }
 
-document.getElementById("copyCommand").onclick = async function() {
+document.getElementById("copyCommand").onclick =
+async function() {
+
     const ok = await copyText(buildTermuxCommand());
 
-    this.textContent = ok ? "تم النسخ ✓" : "تعذر النسخ";
+    this.textContent = ok
+        ? "تم النسخ ✓"
+        : "تعذر النسخ";
 
     setTimeout(() => {
-        this.textContent = "نسخ الأمر";
+        this.textContent = "نسخ أمر الاتصال";
     }, 1800);
 };
 
-document.getElementById("copyKey").onclick = async function() {
+document.getElementById("copyKey").onclick =
+async function() {
+
     const ok = await copyText(deviceKey);
 
-    this.textContent = ok ? "تم النسخ ✓" : "تعذر النسخ";
+    this.textContent = ok
+        ? "تم النسخ ✓"
+        : "تعذر النسخ";
 
     setTimeout(() => {
-        this.textContent = "نسخ مفتاح الجهاز";
+        this.textContent = "نسخ المفتاح";
     }, 1800);
 };
 
-/* MODALS */
 
-const devModal = document.getElementById("devModal");
-const botModal = document.getElementById("botModal");
+/* =================================
+   MODALS
+================================= */
+
+const devModal =
+document.getElementById("devModal");
+
+const botModal =
+document.getElementById("botModal");
 
 document.getElementById("devBtn").onclick = () => {
-    commandText.textContent = buildTermuxCommand();
     devModal.classList.add("show");
 };
 
@@ -649,37 +701,41 @@ document.getElementById("botClose").onclick = () => {
     botModal.classList.remove("show");
 };
 
-document.getElementById("showCommand").onclick = () => {
-    document.getElementById("termuxCmd").classList.remove("hidden");
-};
-
 document.getElementById("termuxTab").onclick = function() {
-    this.classList.add("active");
-    document.getElementById("pydroidTab").classList.remove("active");
 
-    document.getElementById("termuxContent").classList.remove("hidden");
-    document.getElementById("pydroidContent").classList.add("hidden");
+    this.classList.add("active");
+
+    document.getElementById("keyTab")
+        .classList.remove("active");
+
+    document.getElementById("termuxContent")
+        .classList.remove("hidden");
+
+    document.getElementById("keyContent")
+        .classList.add("hidden");
 };
 
-document.getElementById("pydroidTab").onclick = function() {
-    this.classList.add("active");
-    document.getElementById("termuxTab").classList.remove("active");
+document.getElementById("keyTab").onclick = function() {
 
-    document.getElementById("pydroidContent").classList.remove("hidden");
-    document.getElementById("termuxContent").classList.add("hidden");
+    this.classList.add("active");
+
+    document.getElementById("termuxTab")
+        .classList.remove("active");
+
+    document.getElementById("keyContent")
+        .classList.remove("hidden");
+
+    document.getElementById("termuxContent")
+        .classList.add("hidden");
 };
 
-/* CHAT */
 
-const chat = document.getElementById("chat");
-const input = document.getElementById("input");
-const form = document.getElementById("form");
-const sendBtn = document.getElementById("sendBtn");
-
-let conversation = [];
-let controller = null;
+/* =================================
+   CHAT MESSAGES
+================================= */
 
 function addMessage(text, type) {
+
     const welcome = document.getElementById("welcome");
 
     if (welcome) {
@@ -687,21 +743,32 @@ function addMessage(text, type) {
     }
 
     const message = document.createElement("div");
+
     message.className = "message " + type;
+
     message.textContent = text;
 
     chat.appendChild(message);
+
     chat.scrollTop = chat.scrollHeight;
 
     return message;
 }
 
 function setLoading(loading) {
+
     sendBtn.disabled = loading;
+
     sendBtn.textContent = loading ? "…" : "↑";
 }
 
+
+/* =================================
+   CHAT API
+================================= */
+
 async function sendMessage(text) {
+
     if (!text.trim()) return;
 
     addMessage(text, "user-message");
@@ -712,24 +779,42 @@ async function sendMessage(text) {
     });
 
     setLoading(true);
+
     controller = new AbortController();
 
+    document.getElementById("connectionStatus")
+        .textContent = "● جاري الاتصال";
+
     try {
-        const response = await fetch(API_URL + "/api/chat", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                message: text,
-                messages: conversation,
-                device_key: deviceKey
-            }),
-            signal: controller.signal
-        });
+
+        const response = await fetch(
+            API_URL + "/api/chat",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    message: text,
+
+                    messages: conversation,
+
+                    device_key: deviceKey
+
+                }),
+
+                signal: controller.signal
+            }
+        );
 
         if (!response.ok) {
-            throw new Error("HTTP " + response.status);
+
+            throw new Error(
+                "خطأ من الخادم: " + response.status
+            );
         }
 
         const data = await response.json();
@@ -738,36 +823,60 @@ async function sendMessage(text) {
             data.reply ||
             data.response ||
             data.message ||
-            data.content ||
-            "لم يصل رد مفهوم من الخادم.";
+            data.content;
 
-        addMessage(
+        if (!answer) {
+
+            throw new Error(
+                "الخادم لم يرجع نص إجابة معروفاً."
+            );
+        }
+
+        const finalAnswer =
             typeof answer === "string"
                 ? answer
-                : JSON.stringify(answer, null, 2),
-            "ai-message"
-        );
+                : JSON.stringify(answer, null, 2);
+
+        addMessage(finalAnswer, "ai-message");
 
         conversation.push({
             role: "assistant",
-            content: String(answer)
+            content: finalAnswer
         });
 
+        document.getElementById("connectionStatus")
+            .textContent = "● جاهز";
+
     } catch (error) {
+
         if (error.name !== "AbortError") {
+
             addMessage(
-                "حدث خطأ في الاتصال بالخادم: " + error.message,
+                "تعذر الاتصال: " + error.message,
                 "error-message"
             );
+
+            document.getElementById("connectionStatus")
+                .textContent = "● خطأ اتصال";
         }
+
     } finally {
+
         controller = null;
+
         setLoading(false);
+
         input.focus();
     }
 }
 
+
+/* =================================
+   SEND FORM
+================================= */
+
 form.addEventListener("submit", function(event) {
+
     event.preventDefault();
 
     const text = input.value.trim();
@@ -775,39 +884,67 @@ form.addEventListener("submit", function(event) {
     if (!text) return;
 
     input.value = "";
+
     input.style.height = "48px";
 
     sendMessage(text);
 });
 
-/* TEXTAREA AUTO HEIGHT */
+
+/* =================================
+   TEXTAREA
+================================= */
 
 input.addEventListener("input", function() {
+
     this.style.height = "48px";
-    this.style.height = Math.min(this.scrollHeight, 150) + "px";
+
+    this.style.height =
+        Math.min(this.scrollHeight, 150) + "px";
 });
 
 input.addEventListener("keydown", function(event) {
-    if (event.key === "Enter" && !event.shiftKey) {
+
+    if (
+        event.key === "Enter" &&
+        !event.shiftKey
+    ) {
+
         event.preventDefault();
+
         form.requestSubmit();
     }
 });
 
-/* STOP */
+
+/* =================================
+   STOP
+================================= */
 
 document.getElementById("stopBtn").onclick = function() {
+
     if (controller) {
+
         controller.abort();
+
         controller = null;
+
         setLoading(false);
+
+        document.getElementById("connectionStatus")
+            .textContent = "● تم الإيقاف";
     }
 };
 
-/* NEW CHAT */
+
+/* =================================
+   NEW CHAT
+================================= */
 
 document.getElementById("newChat").onclick = function() {
+
     conversation = [];
+
     chat.innerHTML = `
         <div class="welcome" id="welcome">
             <h1>NoRestrictions AI</h1>
@@ -816,27 +953,87 @@ document.getElementById("newChat").onclick = function() {
     `;
 };
 
-/* AUTO BUTTON */
+
+/* =================================
+   DEVICE STATUS
+================================= */
+
+async function refreshDevice() {
+
+    const status =
+        document.getElementById("deviceStatus");
+
+    status.textContent = "جاري التحقق من الجهاز...";
+
+    try {
+
+        const url =
+            API_URL +
+            "/api/device/status?device_key=" +
+            encodeURIComponent(deviceKey);
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " + response.status
+            );
+        }
+
+        const data = await response.json();
+
+        status.textContent =
+            data.online
+                ? "🟢 الجهاز متصل"
+                : "🟠 الجهاز غير متصل";
+
+    } catch (error) {
+
+        status.textContent =
+            "تعذر التحقق من الحالة. تحقق من إعداد Worker.";
+    }
+}
+
+document.getElementById("refreshDevice").onclick =
+    refreshDevice;
+
+
+/* =================================
+   AUTO BUTTON
+================================= */
 
 document.getElementById("autoBtn").onclick = function() {
+
     addMessage(
-        "التشغيل التلقائي غير مفعّل. لا يتم تنفيذ أوامر الجهاز دون موافقة واضحة.",
+        "التشغيل التلقائي غير مفعّل. لن يتم تنفيذ مهام الجهاز دون موافقة واضحة.",
         "ai-message"
     );
 };
 
-/* DEFAULT BOT */
+
+/* =================================
+   BOT
+================================= */
 
 document.getElementById("defaultBot").onclick = function() {
+
     botModal.classList.remove("show");
+
     input.focus();
 };
 
-/* CLOSE MODAL ON BACKDROP */
+
+/* =================================
+   MODAL BACKDROP
+================================= */
 
 [devModal, botModal].forEach(modal => {
+
     modal.addEventListener("click", function(event) {
+
         if (event.target === modal) {
+
             modal.classList.remove("show");
         }
     });
