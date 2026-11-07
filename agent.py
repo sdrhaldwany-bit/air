@@ -4,389 +4,251 @@ import time
 import json
 import socket
 import platform
+import getpass
 import urllib.request
-import urllib.parse
 import urllib.error
-import subprocess
-import traceback
+from datetime import datetime
 
-# ==================================
-# NoRestrictions AI - Termux Agent
-# ==================================
-
-VERSION = "5.0"
-
+VERSION = "6.0"
 SERVER = os.environ.get(
     "NR_SERVER",
     "https://norestrictions-api.sdrhaldwane.workers.dev"
 ).rstrip("/")
 
-DEVICE_KEY = (
-    sys.argv[1]
-    if len(sys.argv) > 1
-    else os.environ.get("NR_DEVICE_KEY", "")
-)
+DEVICE_KEY = ""
 
-POLL_INTERVAL = 4
-RUNNING = True
+POLL_INTERVAL = 3
+REQUEST_TIMEOUT = 15
 
 
-# ==================================
-# HTTP
-# ==================================
-
-def request(method, path, data=None):
-
+def api_request(path, method="GET", data=None):
     url = SERVER + path
 
     headers = {
         "Content-Type": "application/json",
-        "User-Agent": "NoRestrictions-Agent/5.0"
+        "User-Agent": "NoRestrictions-Agent/" + VERSION
     }
-
-    if data is not None:
-        data["device_key"] = DEVICE_KEY
 
     body = None
 
     if data is not None:
         body = json.dumps(data).encode("utf-8")
 
-    req = urllib.request.Request(
+    request = urllib.request.Request(
         url,
         data=body,
         headers=headers,
         method=method
     )
 
-    try:
-        with urllib.request.urlopen(req, timeout=20) as response:
-            raw = response.read().decode("utf-8")
-            return json.loads(raw) if raw else {}
-
-    except urllib.error.HTTPError as error:
-        detail = error.read().decode("utf-8", errors="replace")
-        raise Exception(
-            "HTTP {}: {}".format(error.code, detail[:500])
-        )
-
-    except Exception as error:
-        raise Exception(str(error))
+    with urllib.request.urlopen(
+        request,
+        timeout=REQUEST_TIMEOUT
+    ) as response:
+        raw = response.read().decode("utf-8")
+        return json.loads(raw)
 
 
-# ==================================
-# DEVICE INFORMATION
-# ==================================
-
-def device_info():
-
-    return {
-        "hostname": socket.gethostname(),
-        "platform": platform.platform(),
-        "system": platform.system(),
-        "release": platform.release(),
-        "python": platform.python_version()
-    }
-
-
-# ==================================
-# NETWORK INFORMATION
-# ==================================
-
-def network_info():
-
-    result = {
-        "hostname": socket.gethostname(),
-        "local_ip": "غير معروف",
-        "dns": "غير معروف"
-    }
-
-    try:
-        sock = socket.socket(
-            socket.AF_INET,
-            socket.SOCK_DGRAM
-        )
-
-        sock.connect(("1.1.1.1", 80))
-
-        result["local_ip"] = sock.getsockname()[0]
-
-        sock.close()
-
-    except Exception:
-        pass
-
-    try:
-        result["dns"] = socket.gethostbyname("example.com")
-
-    except Exception as error:
-        result["dns"] = "فشل DNS: " + str(error)
-
-    return result
-
-
-# ==================================
-# INTERNET CHECK
-# ==================================
-
-def internet_check():
-
-    urls = [
-        "https://www.cloudflare.com",
-        "https://www.google.com"
-    ]
-
-    results = []
-
-    for url in urls:
-
-        try:
-            start = time.time()
-
-            req = urllib.request.Request(
-                url,
-                headers={
-                    "User-Agent": "NoRestrictions-Agent/5.0"
-                }
-            )
-
-            with urllib.request.urlopen(req, timeout=8) as response:
-                elapsed = round(
-                    (time.time() - start) * 1000
-                )
-
-                results.append({
-                    "url": url,
-                    "status": response.status,
-                    "latency_ms": elapsed,
-                    "success": True
-                })
-
-        except Exception as error:
-
-            results.append({
-                "url": url,
-                "success": False,
-                "error": str(error)
-            })
-
-    return {
-        "tests": results
-    }
-
-
-# ==================================
-# DNS CHECK
-# ==================================
-
-def dns_check():
-
-    domains = [
-        "example.com",
-        "cloudflare.com",
-        "google.com"
-    ]
-
-    results = []
-
-    for domain in domains:
-
-        try:
-            addresses = socket.getaddrinfo(
-                domain,
-                None,
-                socket.AF_INET
-            )
-
-            ips = sorted(set(
-                item[4][0] for item in addresses
-            ))
-
-            results.append({
-                "domain": domain,
-                "success": True,
-                "addresses": ips
-            })
-
-        except Exception as error:
-
-            results.append({
-                "domain": domain,
-                "success": False,
-                "error": str(error)
-            })
-
-    return {
-        "results": results
-    }
-
-
-# ==================================
-# ALLOWED TASKS
-# ==================================
-
-def execute_task(command):
-
-    command = str(command).strip().lower()
-
-    if command == "help":
-        return """
-الأوامر المسموحة:
-
-help
-whoami
-date
-device_info
-network_info
-internet_check
-dns_check
-"""
-
-    if command == "whoami":
-        return os.environ.get(
-            "USER",
-            "unknown"
-        )
-
-    if command == "date":
-        return time.strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
-
-    if command == "device_info":
-        return device_info()
-
-    if command == "network_info":
-        return network_info()
-
-    if command == "internet_check":
-        return internet_check()
-
-    if command == "dns_check":
-        return dns_check()
-
-    return {
-        "error": "هذا الأمر غير مسموح",
-        "command": command
-    }
-
-
-# ==================================
-# JOB POLLING
-# ==================================
-
-def poll_job():
-
-    query = urllib.parse.urlencode({
-        "device_key": DEVICE_KEY
-    })
-
-    return request(
-        "GET",
-        "/api/device/poll?" + query
+def get_device_info():
+    return (
+        "النظام: " + platform.system() + "\n"
+        "الإصدار: " + platform.release() + "\n"
+        "المعمارية: " + platform.machine() + "\n"
+        "Python: " + platform.python_version() + "\n"
+        "اسم الجهاز: " + socket.gethostname()
     )
 
 
-# ==================================
-# SEND RESULT
-# ==================================
+def get_network_info():
+    hostname = socket.gethostname()
 
-def send_result(job_id, output, exit_code=0):
+    try:
+        ip = socket.gethostbyname(hostname)
+    except Exception:
+        ip = "غير متاح"
 
-    return request(
-        "POST",
+    return (
+        "اسم المضيف: " + hostname + "\n"
+        "عنوان IP المحلي: " + ip
+    )
+
+
+def internet_check():
+    try:
+        request = urllib.request.Request(
+            "https://www.google.com/generate_204",
+            headers={"User-Agent": "NoRestrictions-Agent"}
+        )
+
+        with urllib.request.urlopen(
+            request,
+            timeout=8
+        ) as response:
+            return "الاتصال بالإنترنت يعمل ✓"
+
+    except Exception as error:
+        return "تعذر التحقق من الإنترنت: " + str(error)
+
+
+def dns_check():
+    try:
+        result = socket.getaddrinfo(
+            "example.com",
+            443,
+            type=socket.SOCK_STREAM
+        )
+
+        addresses = sorted(set(
+            item[4][0] for item in result
+        ))
+
+        return "نتيجة DNS:\n" + "\n".join(addresses[:5])
+
+    except Exception as error:
+        return "فشل فحص DNS: " + str(error)
+
+
+def execute_command(command):
+    command = str(command).strip().lower()
+
+    if command == "help":
+        return (
+            "الأوامر المتاحة:\n"
+            "help\n"
+            "whoami\n"
+            "date\n"
+            "device_info\n"
+            "network_info\n"
+            "internet_check\n"
+            "dns_check"
+        ), 0
+
+    if command == "whoami":
+        return "المستخدم الحالي: " + getpass.getuser(), 0
+
+    if command == "date":
+        return datetime.now().astimezone().isoformat(
+            timespec="seconds"
+        ), 0
+
+    if command == "device_info":
+        return get_device_info(), 0
+
+    if command == "network_info":
+        return get_network_info(), 0
+
+    if command == "internet_check":
+        return internet_check(), 0
+
+    if command == "dns_check":
+        return dns_check(), 0
+
+    return "هذا الطلب غير موجود ضمن قائمة العمليات المسموحة.", 1
+
+
+def poll_tasks():
+    path = "/api/device/poll?key=" + DEVICE_KEY
+    return api_request(path)
+
+
+def send_result(job_id, output, exit_code):
+    return api_request(
         "/api/device/done",
-        {
+        method="POST",
+        data={
+            "key": DEVICE_KEY,
             "id": job_id,
-            "output": json.dumps(
-                output,
-                ensure_ascii=False
-            ) if not isinstance(output, str) else output,
-            "exit_code": exit_code
+            "output": str(output)[:10000],
+            "exit_code": int(exit_code)
         }
     )
 
 
-# ==================================
-# MAIN LOOP
-# ==================================
-
 def main():
+    global DEVICE_KEY
 
-    global RUNNING
+    if len(sys.argv) >= 2:
+        DEVICE_KEY = sys.argv[1].strip()
+    else:
+        DEVICE_KEY = input("الصق مفتاح الجهاز: ").strip()
 
-    if not DEVICE_KEY:
-        print("خطأ: مفتاح الجهاز غير موجود.")
-        print("شغّل البرنامج مع مفتاح الجهاز.")
+    if len(DEVICE_KEY) != 64:
+        print("[!] مفتاح الجهاز غير صالح.")
         return
 
-    if not SERVER.startswith("https://"):
-        print("خطأ: يجب استخدام اتصال HTTPS.")
+    if any(c not in "0123456789abcdefABCDEF" for c in DEVICE_KEY):
+        print("[!] صيغة المفتاح غير صحيحة.")
         return
 
-    print("=" * 42)
-    print(" NoRestrictions AI Agent")
-    print(" Version:", VERSION)
-    print("=" * 42)
-
-    print("[+] Server:", SERVER)
+    print("=" * 40)
+    print("NoRestrictions AI Agent")
+    print("Version:", VERSION)
+    print("Server:", SERVER)
     print("[+] Device key: موجود")
+    print("=" * 40)
+
+    print("[+] جاري الاتصال بالخادم...")
+
+    try:
+        result = poll_tasks()
+
+        if not result.get("success"):
+            print("[!] تعذر تسجيل الجهاز:", result)
+            return
+
+    except Exception as error:
+        print("[!] فشل الاتصال:", error)
+        return
+
     print("[+] Agent started")
     print("[+] Waiting for tasks...")
-    print()
 
-    while RUNNING:
-
+    while True:
         try:
+            result = poll_tasks()
 
-            data = poll_job()
-
-            job = data.get("job")
-
-            if not job:
+            if not result.get("success"):
+                print("[!] استجابة غير ناجحة من الخادم.")
                 time.sleep(POLL_INTERVAL)
                 continue
 
-            job_id = job.get("id")
-            command = job.get("command")
+            jobs = result.get("jobs", [])
 
-            if not job_id or not command:
-                time.sleep(POLL_INTERVAL)
-                continue
+            for job in jobs:
+                job_id = job.get("id")
+                command = job.get("command", "")
 
-            print("[TASK]", command)
+                if not job_id:
+                    continue
 
-            try:
+                print("[+] Task received:", job_id)
+                print("[+] Operation:", command)
 
-                output = execute_task(command)
+                try:
+                    output, exit_code = execute_command(command)
 
-                send_result(
-                    job_id,
-                    output,
-                    0
-                )
+                except Exception as error:
+                    output = "حدث خطأ أثناء العملية: " + str(error)
+                    exit_code = 1
 
-                print("[OK] Task completed")
+                try:
+                    send_result(job_id, output, exit_code)
+                    print("[+] Result sent:", job_id)
 
-            except Exception as error:
-
-                send_result(
-                    job_id,
-                    str(error),
-                    1
-                )
-
-                print("[ERROR]", error)
+                except Exception as error:
+                    print("[!] تعذر إرسال النتيجة:", error)
 
         except KeyboardInterrupt:
+            print("\n[+] Agent stopped.")
+            break
 
-            RUNNING = False
-            print("\nAgent stopped.")
+        except urllib.error.HTTPError as error:
+            print("[!] HTTP Error:", error.code)
+            time.sleep(POLL_INTERVAL)
 
         except Exception as error:
-
-            print("[CONNECTION ERROR]", error)
-            time.sleep(8)
+            print("[!] Connection error:", error)
+            time.sleep(POLL_INTERVAL)
 
 
 if __name__ == "__main__":
