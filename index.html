@@ -7,420 +7,507 @@
 
 <style>
 :root {
-    --bg: #090b10;
-    --panel: #11151e;
-    --panel2: #171d29;
-    --border: #252d3b;
-    --text: #f2f5fa;
-    --muted: #8993a5;
-    --accent: #7c5cff;
-    --green: #26d98b;
-    --red: #ff596b;
+    --bg:#090b10;
+    --panel:#10141d;
+    --panel2:#171d29;
+    --border:#252d3b;
+    --text:#f1f5f9;
+    --muted:#8995a8;
+    --accent:#7c5cff;
+    --green:#22c55e;
 }
 
-* {
-    box-sizing: border-box;
-}
+* {box-sizing:border-box}
 
 body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: Arial, sans-serif;
-    height: 100dvh;
-    overflow: hidden;
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:Arial,Tahoma,sans-serif;
+    height:100vh;
+    overflow:hidden;
 }
 
-button, input, textarea {
-    font: inherit;
-}
+button,input,textarea {font:inherit}
 
 button {
-    cursor: pointer;
+    cursor:pointer;
+    border:0;
 }
 
 .app {
-    display: flex;
-    height: 100dvh;
+    display:flex;
+    height:100vh;
 }
 
-/* SIDEBAR */
+/* Sidebar */
 
 .sidebar {
-    width: 270px;
-    background: #0d1119;
-    border-left: 1px solid var(--border);
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    width:260px;
+    background:#0d1119;
+    border-left:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    padding:17px;
+    gap:15px;
 }
 
 .logo {
-    font-size: 22px;
-    font-weight: bold;
-    padding: 10px 5px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:19px;
+    font-weight:bold;
 }
 
-.logo span {
-    color: var(--accent);
+.logo-icon {
+    width:38px;
+    height:38px;
+    background:linear-gradient(135deg,#795bff,#a855f7);
+    border-radius:12px;
+    display:grid;
+    place-items:center;
 }
 
 .new-chat {
-    border: 1px solid var(--border);
-    background: var(--panel2);
-    color: white;
-    border-radius: 12px;
-    padding: 13px;
-    text-align: center;
+    background:var(--accent);
+    color:white;
+    padding:13px;
+    border-radius:10px;
+    font-weight:bold;
 }
 
-.new-chat:hover {
-    border-color: var(--accent);
+.nav-title {
+    color:var(--muted);
+    font-size:12px;
+    margin-top:12px;
 }
 
-.sidebar-title {
-    color: var(--muted);
-    font-size: 12px;
-    margin-top: 15px;
+.nav-item {
+    background:transparent;
+    color:#cbd5e1;
+    text-align:right;
+    padding:12px;
+    border-radius:9px;
+    width:100%;
 }
 
-.chat-list {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    overflow-y: auto;
-}
-
-.chat-item {
-    background: transparent;
-    border: 0;
-    color: var(--muted);
-    text-align: right;
-    padding: 12px;
-    border-radius: 9px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.chat-item.active,
-.chat-item:hover {
-    background: var(--panel2);
-    color: white;
+.nav-item:hover,.nav-item.active {
+    background:var(--panel2);
 }
 
 .sidebar-bottom {
-    margin-top: auto;
+    margin-top:auto;
 }
 
-.device-button {
-    width: 100%;
-    padding: 12px;
-    background: var(--panel2);
-    border: 1px solid var(--border);
-    color: white;
-    border-radius: 10px;
+.device-status {
+    padding:13px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:var(--panel);
+    font-size:13px;
 }
 
-/* MAIN */
-
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.header {
-    height: 65px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 22px;
-}
-
-.header-title {
-    font-weight: bold;
-}
-
-.status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--muted);
+.status-line {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
 }
 
 .dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--red);
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#ef4444;
 }
 
-.dot.online {
-    background: var(--green);
+.dot.online {background:var(--green)}
+
+/* Main */
+
+.main {
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
 }
 
-.mobile-menu {
-    display: none;
-    background: transparent;
-    color: white;
-    border: 0;
-    font-size: 22px;
+.topbar {
+    height:65px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
 }
 
-/* MESSAGES */
+.top-title {
+    font-weight:bold;
+    font-size:16px;
+}
+
+.top-actions {
+    display:flex;
+    gap:8px;
+}
+
+.small-btn {
+    background:var(--panel2);
+    border:1px solid var(--border);
+    color:white;
+    border-radius:9px;
+    padding:9px 13px;
+}
+
+/* Chat */
+
+.chat-area {
+    flex:1;
+    overflow-y:auto;
+    padding:25px 15px 35px;
+}
 
 .messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 25px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    max-width:850px;
+    margin:auto;
+    display:flex;
+    flex-direction:column;
+    gap:23px;
 }
 
 .welcome {
-    margin: auto;
-    text-align: center;
-    max-width: 450px;
-    color: var(--muted);
+    text-align:center;
+    margin:auto;
+    padding:65px 15px;
+}
+
+.welcome-icon {
+    width:65px;
+    height:65px;
+    background:linear-gradient(135deg,#795bff,#a855f7);
+    border-radius:20px;
+    display:grid;
+    place-items:center;
+    margin:auto auto 20px;
+    font-size:29px;
 }
 
 .welcome h1 {
-    color: white;
-    font-size: 32px;
+    font-size:27px;
+    margin:10px;
 }
 
-.welcome span {
-    color: var(--accent);
+.welcome p {
+    color:var(--muted);
+    line-height:1.8;
 }
 
 .message {
-    max-width: 850px;
-    width: 100%;
-    margin: 0 auto;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
+    display:flex;
+    gap:11px;
+    align-items:flex-start;
 }
 
 .avatar {
-    width: 35px;
-    height: 35px;
-    min-width: 35px;
-    border-radius: 11px;
-    display: grid;
-    place-items: center;
-    background: var(--panel2);
-    font-weight: bold;
+    width:34px;
+    height:34px;
+    min-width:34px;
+    border-radius:11px;
+    display:grid;
+    place-items:center;
+    background:#242b3b;
+    font-size:14px;
 }
 
-.user .avatar {
-    background: #30245c;
+.message.user .avatar {
+    background:#4534a4;
 }
 
-.assistant .avatar {
-    background: #173c32;
+.message-body {
+    min-width:0;
+    flex:1;
 }
 
-.content {
-    min-width: 0;
-    flex: 1;
-    line-height: 1.8;
-    overflow-wrap: anywhere;
+.message-name {
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:8px;
 }
 
-.content pre {
-    direction: ltr;
-    text-align: left;
-    white-space: pre-wrap;
-    background: #080b11;
-    border: 1px solid var(--border);
-    padding: 13px;
-    border-radius: 10px;
-    overflow-x: auto;
+.message-content {
+    line-height:1.9;
+    overflow-wrap:anywhere;
+    white-space:pre-wrap;
 }
 
-.result-box {
-    background: #101b19;
-    border: 1px solid #244b3d;
-    padding: 12px;
-    border-radius: 10px;
-    margin-top: 10px;
+.message.user .message-content {
+    background:#171e2c;
+    padding:12px 15px;
+    border-radius:13px;
+    display:inline-block;
+    max-width:100%;
 }
 
-.result-title {
-    color: var(--green);
-    font-size: 13px;
-    margin-bottom: 8px;
+/* Code blocks */
+
+.code-card {
+    background:#080b11;
+    border:1px solid #30394a;
+    border-radius:12px;
+    overflow:hidden;
+    margin:14px 0;
+    direction:ltr;
 }
 
-/* INPUT */
-
-.input-area {
-    padding: 15px;
-    border-top: 1px solid var(--border);
+.code-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 13px;
+    background:#151b27;
+    border-bottom:1px solid #30394a;
 }
 
-.input-box {
-    max-width: 850px;
-    margin: auto;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 12px;
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
+.code-language {
+    color:#a5b4fc;
+    font-size:12px;
+    direction:ltr;
 }
 
-.input-box textarea {
-    flex: 1;
-    min-width: 0;
-    resize: none;
-    background: transparent;
-    border: 0;
-    outline: none;
-    color: white;
-    padding: 8px;
-    max-height: 150px;
-    min-height: 40px;
+.copy-code {
+    background:#293449;
+    color:white;
+    padding:7px 12px;
+    border-radius:7px;
+    font-size:12px;
 }
 
-.send {
-    width: 43px;
-    height: 43px;
-    border: 0;
-    border-radius: 12px;
-    color: white;
-    background: var(--accent);
+.code-card pre {
+    padding:16px;
+    margin:0;
+    overflow-x:auto;
+    text-align:left;
+    direction:ltr;
+    white-space:pre;
+    font-size:13px;
+    line-height:1.7;
+    color:#d8e2f0;
 }
 
-.send:disabled {
-    opacity: .5;
-    cursor: not-allowed;
+.inline-code {
+    direction:ltr;
+    background:#242c3c;
+    padding:2px 6px;
+    border-radius:5px;
 }
 
-.hint {
-    text-align: center;
-    color: var(--muted);
-    font-size: 11px;
-    margin-top: 9px;
+/* Composer */
+
+.composer-wrap {
+    padding:15px;
+    border-top:1px solid var(--border);
+    background:rgba(9,11,16,.96);
 }
 
-/* MODAL */
+.composer {
+    max-width:850px;
+    margin:auto;
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+    padding:11px;
+    border:1px solid #343e50;
+    border-radius:15px;
+    background:#131925;
+}
+
+.composer textarea {
+    flex:1;
+    resize:none;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:white;
+    min-height:27px;
+    max-height:150px;
+    padding:5px;
+}
+
+.send-btn {
+    background:var(--accent);
+    color:white;
+    width:40px;
+    height:40px;
+    border-radius:11px;
+    font-size:18px;
+}
+
+.footer-note {
+    text-align:center;
+    color:#687386;
+    font-size:11px;
+    margin-top:9px;
+}
+
+/* Software panel */
+
+.software-panel {
+    width:280px;
+    background:#0d1119;
+    border-right:1px solid var(--border);
+    padding:16px;
+    display:none;
+    flex-direction:column;
+    overflow-y:auto;
+}
+
+.software-panel.open {
+    display:flex;
+}
+
+.software-title {
+    font-size:17px;
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.software-description {
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.7;
+    margin-bottom:15px;
+}
+
+.software-list {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.software-item {
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:11px;
+    padding:12px;
+}
+
+.software-item strong {
+    display:block;
+    margin-bottom:7px;
+    font-size:13px;
+}
+
+.software-item small {
+    color:var(--muted);
+    display:block;
+    margin-bottom:9px;
+}
+
+.software-item button {
+    background:#293449;
+    color:white;
+    padding:7px 10px;
+    border-radius:7px;
+    font-size:12px;
+}
+
+/* Modal */
 
 .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.75);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    z-index: 10;
+    position:fixed;
+    inset:0;
+    background:#000b;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:15px;
+    z-index:10;
 }
 
-.modal.show {
-    display: flex;
+.modal.show {display:flex}
+
+.modal-box {
+    width:100%;
+    max-width:440px;
+    background:#121824;
+    border:1px solid var(--border);
+    border-radius:17px;
+    padding:23px;
 }
 
-.modal-card {
-    width: 100%;
-    max-width: 440px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 22px;
+.modal-box h2 {margin-top:0}
+
+.modal-box p {
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.8;
 }
 
-.modal-card h2 {
-    margin-top: 0;
-}
-
-.modal-card p {
-    color: var(--muted);
-    line-height: 1.7;
-    font-size: 13px;
-}
-
-.modal-card input {
-    width: 100%;
-    background: #080b11;
-    color: white;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 13px;
-    outline: none;
-    direction: ltr;
-    margin: 10px 0;
+.key-box {
+    background:#080c13;
+    padding:13px;
+    border:1px solid #343e50;
+    border-radius:9px;
+    direction:ltr;
+    text-align:left;
+    overflow-wrap:anywhere;
+    font-size:12px;
+    margin:15px 0;
 }
 
 .modal-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.modal-actions button {
-    flex: 1;
-    padding: 12px;
-    border-radius: 10px;
-    border: 0;
+    display:flex;
+    gap:8px;
+    margin-top:15px;
 }
 
 .primary {
-    background: var(--accent);
-    color: white;
+    flex:1;
+    background:var(--accent);
+    color:white;
+    padding:12px;
+    border-radius:9px;
 }
 
 .secondary {
-    background: var(--panel2);
-    color: white;
-    border: 1px solid var(--border) !important;
+    background:#293449;
+    color:white;
+    padding:12px;
+    border-radius:9px;
 }
 
 .toast {
-    position: fixed;
-    bottom: 25px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #202735;
-    padding: 12px 20px;
-    border-radius: 10px;
-    display: none;
-    z-index: 20;
+    position:fixed;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#202b3b;
+    color:white;
+    padding:12px 18px;
+    border-radius:9px;
+    display:none;
+    z-index:20;
+    font-size:13px;
 }
 
-@media(max-width:750px) {
-    .sidebar {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        z-index: 5;
-        transform: translateX(100%);
-        transition: .2s;
-    }
-
-    .sidebar.open {
-        transform: translateX(0);
-    }
-
-    .mobile-menu {
-        display: block;
-    }
-
-    .header {
-        padding: 0 13px;
-    }
-
-    .messages {
-        padding: 18px 10px;
+@media(max-width:850px) {
+    .sidebar {width:65px;padding:12px 8px}
+    .logo span,.nav-title,.nav-item span,.device-status .status-text {display:none}
+    .logo {justify-content:center}
+    .new-chat {font-size:0}
+    .new-chat:after {content:"+";font-size:22px}
+    .nav-item {text-align:center;padding:13px 3px}
+    .device-status {padding:10px 5px;text-align:center}
+    .status-line {justify-content:center}
+    .software-panel {
+        position:fixed;
+        top:65px;
+        bottom:0;
+        left:0;
+        z-index:5;
+        width:270px;
+        box-shadow:0 0 30px #0008;
     }
 }
 </style>
@@ -430,156 +517,149 @@ button {
 
 <div class="app">
 
-    <aside class="sidebar" id="sidebar">
+<!-- Sidebar -->
+<aside class="sidebar">
 
-        <div class="logo">
-            NoRestrictions <span>AI</span>
-        </div>
-
-        <button class="new-chat" onclick="newChat()">
-            ＋ محادثة جديدة
-        </button>
-
-        <div class="sidebar-title">المحادثات</div>
-
-        <div class="chat-list" id="chatList"></div>
-
-        <div class="sidebar-bottom">
-            <button class="device-button" onclick="openDeviceModal()">
-                ⚙ ربط جهاز Termux
-            </button>
-        </div>
-
-    </aside>
-
-    <main class="main">
-
-        <header class="header">
-
-            <button class="mobile-menu" onclick="toggleSidebar()">
-                ☰
-            </button>
-
-            <div class="header-title">
-                NoRestrictions AI
-            </div>
-
-            <div class="status">
-                <span class="dot" id="statusDot"></span>
-                <span id="statusText">جاري الفحص...</span>
-            </div>
-
-        </header>
-
-        <section class="messages" id="messages"></section>
-
-        <footer class="input-area">
-
-            <div class="input-box">
-
-                <textarea
-                    id="messageInput"
-                    placeholder="اكتب رسالتك هنا..."
-                    rows="1"
-                ></textarea>
-
-                <button class="send" id="sendButton" onclick="sendMessage()">
-                    ➤
-                </button>
-
-            </div>
-
-            <div class="hint">
-                NoRestrictions AI — تأكد من مراجعة نتائج أوامر جهازك.
-            </div>
-
-        </footer>
-
-    </main>
-
-</div>
-
-
-<!-- DEVICE MODAL -->
-
-<div class="modal" id="deviceModal">
-
-    <div class="modal-card">
-
-        <h2>ربط جهاز Termux</h2>
-
-        <p>
-            شغّل Agent في Termux، ثم انسخ مفتاح الجهاز الذي يظهر
-            والصقه في الخانة أدناه.
-        </p>
-
-        <input
-            id="deviceKey"
-            type="password"
-            placeholder="Device Key"
-            autocomplete="off"
-        >
-
-        <div class="modal-actions">
-
-            <button class="primary" onclick="saveDeviceKey()">
-                ربط الجهاز
-            </button>
-
-            <button class="secondary" onclick="closeDeviceModal()">
-                إغلاق
-            </button>
-
-        </div>
-
-        <p id="pairStatus"></p>
-
+    <div class="logo">
+        <div class="logo-icon">✦</div>
+        <span>NoRestrictions AI</span>
     </div>
 
+    <button class="new-chat" onclick="newChat()">＋ محادثة جديدة</button>
+
+    <div class="nav-title">القائمة</div>
+
+    <button class="nav-item active" onclick="showChat()">
+        💬 <span>المحادثة</span>
+    </button>
+
+    <button class="nav-item" onclick="toggleSoftware()">
+        💻 <span>قائمة البرمجيات</span>
+    </button>
+
+    <button class="nav-item" onclick="openPair()">
+        🔗 <span>ربط Termux</span>
+    </button>
+
+    <div class="sidebar-bottom">
+        <div class="device-status">
+            <div class="status-text">حالة الجهاز</div>
+            <div class="status-line">
+                <span class="dot" id="statusDot"></span>
+                <span id="statusText" class="status-text">غير متصل</span>
+            </div>
+        </div>
+    </div>
+
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+    <header class="topbar">
+        <div class="top-title">NoRestrictions AI</div>
+
+        <div class="top-actions">
+            <button class="small-btn" onclick="toggleSoftware()">💻 البرمجيات</button>
+            <button class="small-btn" onclick="openPair()">🔗 ربط الجهاز</button>
+        </div>
+    </header>
+
+    <section class="chat-area" id="chatArea">
+        <div class="messages" id="messages">
+
+            <div class="welcome" id="welcome">
+                <div class="welcome-icon">✦</div>
+                <h1>مرحباً بك</h1>
+                <p>
+                    ابدأ محادثتك مع NoRestrictions AI.<br>
+                    يمكنك طرح الأسئلة وطلب كتابة الأكواد البرمجية.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="composer-wrap">
+        <div class="composer">
+            <textarea
+                id="messageInput"
+                placeholder="اكتب رسالتك هنا..."
+                rows="1"
+            ></textarea>
+
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+        </div>
+
+        <div class="footer-note">
+            تحقق من الأكواد قبل تشغيلها على جهازك.
+        </div>
+    </footer>
+
+</main>
+
+<!-- Software panel -->
+<aside class="software-panel" id="softwarePanel">
+    <div class="software-title">💻 قائمة البرمجيات</div>
+    <div class="software-description">
+        الأكواد التي يكتبها الذكاء الاصطناعي تحفظ هنا لتستطيع الرجوع إليها.
+    </div>
+
+    <div class="software-list" id="softwareList">
+        <p style="color:#8995a8;font-size:13px">
+            لم يتم حفظ أي كود حتى الآن.
+        </p>
+    </div>
+</aside>
+
 </div>
 
+<!-- Pair Modal -->
+<div class="modal" id="pairModal">
+    <div class="modal-box">
+
+        <h2>🔗 ربط Termux</h2>
+
+        <p>
+            تم إنشاء مفتاح جهاز خاص بك.
+            انسخه والصقه في Termux عندما يطلب منك Device Key.
+        </p>
+
+        <div class="key-box" id="deviceKey">جاري إنشاء المفتاح...</div>
+
+        <div class="modal-actions">
+            <button class="primary" onclick="copyDeviceKey()">نسخ المفتاح</button>
+            <button class="secondary" onclick="closePair()">إغلاق</button>
+        </div>
+
+        <p id="pairMessage"></p>
+
+        <p style="font-size:11px">
+            لا تشارك هذا المفتاح مع أي شخص.
+        </p>
+
+    </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
-
 <script>
+const API = "https://norestrictions-api.sdrhaldwane.workers.dev";
 
-// =====================================
-// CONFIG
-// =====================================
+const HISTORY_KEY = "nr-chat-history-v44";
+const DEVICE_KEY = "nr-device-key-v44";
+const SOFTWARE_KEY = "nr-software-v44";
 
-const API =
-"https://norestrictions-api.sdrhaldwane.workers.dev";
+let messages = [];
+let software = [];
+let deviceKey = localStorage.getItem(DEVICE_KEY) || "";
+let waitingJobs = new Set();
 
-const HISTORY_KEY = "nr-chat-history-v43";
-const DEVICE_KEY = "nr-device-key";
+/* Helpers */
 
-const MAX_MESSAGES = 20;
-const RESULT_TIMEOUT = 120000;
-
-
-// =====================================
-// STATE
-// =====================================
-
-let conversations = [];
-let currentChatId = null;
-let sending = false;
-let statusTimer = null;
-
-
-// =====================================
-// HELPERS
-// =====================================
-
-function $(id) {
-    return document.getElementById(id);
-}
-
-function toast(message) {
-    const el = $("toast");
-
-    el.textContent = message;
+function toast(text) {
+    const el = document.getElementById("toast");
+    el.textContent = text;
     el.style.display = "block";
 
     setTimeout(() => {
@@ -587,612 +667,452 @@ function toast(message) {
     }, 2500);
 }
 
-function escapeHTML(text) {
-    return String(text).replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-    })[char]);
-}
-
-function getCurrentChat() {
-    return conversations.find(
-        chat => chat.id === currentChatId
-    );
-}
-
-function saveHistory() {
-    try {
-        localStorage.setItem(
-            HISTORY_KEY,
-            JSON.stringify(conversations)
-        );
-    } catch {
-        toast("تعذر حفظ المحادثات.");
-    }
-}
-
-
-// =====================================
-// CONVERSATIONS
-// =====================================
-
-function createChat() {
-    const chat = {
-        id: crypto.randomUUID(),
-        title: "محادثة جديدة",
-        messages: [],
-        createdAt: Date.now()
+async function api(path, method="GET", data=null) {
+    const options = {
+        method,
+        headers: {
+            "Content-Type":"application/json"
+        }
     };
 
-    conversations.unshift(chat);
+    if (data !== null) {
+        options.body = JSON.stringify(data);
+    }
 
-    currentChatId = chat.id;
+    const response = await fetch(API + path, options);
+    const result = await response.json();
 
-    saveHistory();
-    renderChatList();
-    renderMessages();
+    if (!response.ok) {
+        throw new Error(result.error || "API Error");
+    }
+
+    return result;
 }
 
-function newChat() {
-    createChat();
+/* Device key */
 
-    $("messageInput").value = "";
+function generateKey() {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
 
-    if (window.innerWidth <= 750) {
-        $("sidebar").classList.remove("open");
+    return Array.from(bytes)
+        .map(b => b.toString(16).padStart(2,"0"))
+        .join("");
+}
+
+async function ensureDeviceKey() {
+    if (!deviceKey) {
+        deviceKey = generateKey();
+        localStorage.setItem(DEVICE_KEY, deviceKey);
     }
+
+    return deviceKey;
+}
+
+async function openPair() {
+    await ensureDeviceKey();
+
+    document.getElementById("deviceKey").textContent = deviceKey;
+    document.getElementById("pairMessage").textContent = "جاري تسجيل الجهاز...";
+
+    document.getElementById("pairModal").classList.add("show");
+
+    try {
+        const result = await api("/api/device/pair", "POST", {
+            key:deviceKey,
+            kind:"termux",
+            info:{
+                browser:navigator.userAgent,
+                platform:navigator.platform
+            }
+        });
+
+        document.getElementById("pairMessage").textContent =
+            result.message || "تم تسجيل مفتاح الجهاز. الصقه في Termux.";
+    } catch(e) {
+        document.getElementById("pairMessage").textContent =
+            "تعذر التسجيل: " + e.message;
+    }
+}
+
+function closePair() {
+    document.getElementById("pairModal").classList.remove("show");
+}
+
+async function copyDeviceKey() {
+    try {
+        await navigator.clipboard.writeText(deviceKey);
+        toast("تم نسخ مفتاح الجهاز");
+    } catch(e) {
+        const el = document.createElement("textarea");
+        el.value = deviceKey;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        el.remove();
+        toast("تم نسخ المفتاح");
+    }
+}
+
+/* Device status */
+
+async function checkStatus() {
+    if (!deviceKey) return;
+
+    try {
+        const result = await api(
+            "/api/device/status?key=" + encodeURIComponent(deviceKey)
+        );
+
+        const online = result.online === true ||
+                       result.status === "online";
+
+        document.getElementById("statusDot").classList.toggle("online",online);
+        document.getElementById("statusText").textContent =
+            online ? "متصل" : "غير متصل";
+
+    } catch(e) {
+        document.getElementById("statusDot").classList.remove("online");
+        document.getElementById("statusText").textContent = "غير متصل";
+    }
+}
+
+/* Chat history */
+
+function saveHistory() {
+    localStorage.setItem(HISTORY_KEY,JSON.stringify(messages));
 }
 
 function loadHistory() {
     try {
-        conversations = JSON.parse(
-            localStorage.getItem(HISTORY_KEY) || "[]"
-        );
-
-        if (!Array.isArray(conversations)) {
-            conversations = [];
-        }
-
-    } catch {
-        conversations = [];
+        messages = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    } catch(e) {
+        messages = [];
     }
 
-    if (conversations.length) {
-        currentChatId = conversations[0].id;
-    } else {
-        createChat();
-    }
-
-    renderChatList();
     renderMessages();
 }
 
-function selectChat(id) {
-    currentChatId = id;
-
-    renderChatList();
+function newChat() {
+    messages = [];
+    saveHistory();
     renderMessages();
-
-    $("sidebar").classList.remove("open");
 }
 
-function renderChatList() {
-    const list = $("chatList");
-
-    list.innerHTML = "";
-
-    conversations.forEach(chat => {
-        const button = document.createElement("button");
-
-        button.className =
-            "chat-item " +
-            (chat.id === currentChatId ? "active" : "");
-
-        button.textContent = chat.title || "محادثة جديدة";
-
-        button.onclick = () => selectChat(chat.id);
-
-        list.appendChild(button);
-    });
+function showChat() {
+    document.getElementById("softwarePanel").classList.remove("open");
 }
 
+function toggleSoftware() {
+    document.getElementById("softwarePanel").classList.toggle("open");
+}
 
-// =====================================
-// MESSAGE RENDERING
-// =====================================
+/* Message rendering */
 
 function renderMessages() {
-    const box = $("messages");
-    const chat = getCurrentChat();
+    const container = document.getElementById("messages");
+    container.innerHTML = "";
 
-    box.innerHTML = "";
-
-    if (!chat || !chat.messages.length) {
-        box.innerHTML = `
-            <div class="welcome">
-                <h1>NoRestrictions <span>AI</span></h1>
-                <p>مرحباً بك، كيف يمكنني مساعدتك اليوم؟</p>
-            </div>
-        `;
-
+    if (!messages.length) {
+        container.innerHTML = `
+            <div class="welcome" id="welcome">
+                <div class="welcome-icon">✦</div>
+                <h1>مرحباً بك</h1>
+                <p>ابدأ محادثتك مع NoRestrictions AI.</p>
+            </div>`;
         return;
     }
 
-    chat.messages.forEach(message => {
-        addMessageElement(message, false);
+    messages.forEach((message,index) => {
+        addMessageElement(message,index);
     });
 
-    box.scrollTop = box.scrollHeight;
+    scrollBottom();
 }
 
-function addMessageElement(message, scroll = true) {
-    const box = $("messages");
-
-    const row = document.createElement("div");
-
-    row.className =
-        "message " +
-        (message.role === "user" ? "user" : "assistant");
-
-    const avatar = document.createElement("div");
-    avatar.className = "avatar";
-
-    avatar.textContent =
-        message.role === "user" ? "أنت" : "AI";
-
-    const content = document.createElement("div");
-    content.className = "content";
-
-    content.textContent = message.content || "";
-
-    if (message.result !== undefined) {
-        const result = document.createElement("div");
-
-        result.className = "result-box";
-
-        const title = document.createElement("div");
-        title.className = "result-title";
-        title.textContent = "نتيجة Termux";
-
-        const output = document.createElement("pre");
-        output.textContent = message.result;
-
-        result.appendChild(title);
-        result.appendChild(output);
-
-        content.appendChild(result);
-    }
-
-    row.appendChild(avatar);
-    row.appendChild(content);
-
-    box.appendChild(row);
-
-    if (scroll) {
-        box.scrollTop = box.scrollHeight;
-    }
-
-    return content;
+function escapeHTML(text) {
+    return String(text).replace(/[&<>"']/g, char => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+    }[char]));
 }
 
+function formatText(text) {
+    let safe = escapeHTML(text);
 
-// =====================================
-// DEVICE KEY
-// =====================================
+    safe = safe.replace(
+        /```([\w+-]*)\n?([\s\S]*?)```/g,
+        (match,language,code) => {
+            const id = "code-" + Math.random().toString(36).slice(2);
 
-function openDeviceModal() {
-    $("deviceModal").classList.add("show");
-
-    $("deviceKey").value =
-        localStorage.getItem(DEVICE_KEY) || "";
-
-    $("pairStatus").textContent = "";
-}
-
-function closeDeviceModal() {
-    $("deviceModal").classList.remove("show");
-}
-
-async function saveDeviceKey() {
-    const key = $("deviceKey").value.trim();
-
-    if (!/^[a-f0-9]{64}$/i.test(key)) {
-        $("pairStatus").textContent =
-            "المفتاح يجب أن يتكون من 64 خانة hex.";
-
-        return;
-    }
-
-    $("pairStatus").textContent = "جاري الربط...";
-
-    try {
-        const response = await fetch(
-            API + "/api/device/pair",
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    key,
-                    kind: "Termux",
-                    info: "NoRestrictions AI"
-                })
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok || !data.ok) {
-            throw new Error(data.error || "فشل الربط");
-        }
-
-        localStorage.setItem(DEVICE_KEY, key);
-
-        $("pairStatus").textContent =
-            "تم تسجيل الجهاز. جاري فحص الاتصال...";
-
-        await checkDeviceStatus();
-
-        toast("تم حفظ مفتاح الجهاز.");
-
-        setTimeout(closeDeviceModal, 1000);
-
-    } catch (error) {
-        $("pairStatus").textContent = error.message;
-    }
-}
-
-
-// =====================================
-// DEVICE STATUS
-// =====================================
-
-async function checkDeviceStatus() {
-    const key = localStorage.getItem(DEVICE_KEY);
-
-    const dot = $("statusDot");
-    const label = $("statusText");
-
-    if (!key) {
-        dot.classList.remove("online");
-        label.textContent = "غير مربوط";
-        return false;
-    }
-
-    try {
-        const response = await fetch(
-            API + "/api/device/status?key=" +
-            encodeURIComponent(key)
-        );
-
-        const data = await response.json();
-
-        const online =
-            response.ok &&
-            data.ok &&
-            data.paired &&
-            data.online;
-
-        dot.classList.toggle("online", online);
-
-        label.textContent =
-            online ? "Termux متصل" : "Termux غير متصل";
-
-        return online;
-
-    } catch {
-        dot.classList.remove("online");
-        label.textContent = "تعذر الاتصال بالسيرفر";
-
-        return false;
-    }
-}
-
-
-// =====================================
-// API CHAT
-// =====================================
-
-async function callChat(messages) {
-    const key = localStorage.getItem(DEVICE_KEY);
-
-    const response = await fetch(
-        API + "/api/chat",
-        {
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                messages: messages.slice(-MAX_MESSAGES),
-                deviceKey: key || null
-            })
+            return `
+            <div class="code-card">
+                <div class="code-header">
+                    <span class="code-language">${escapeHTML(language || "code")}</span>
+                    <button class="copy-code"
+                        onclick="copyCode('${id}')">نسخ الكود</button>
+                </div>
+                <pre><code id="${id}">${code.trim()}</code></pre>
+            </div>`;
         }
     );
 
-    const data = await response.json();
+    safe = safe.replace(/`([^`]+)`/g,
+        '<code class="inline-code">$1</code>');
 
-    if (!response.ok) {
-        throw new Error(
-            data.error || "Chat request failed"
-        );
-    }
+    safe = safe.replace(/\n/g,"<br>");
 
-    return data;
+    return safe;
 }
 
+function addMessageElement(message,index) {
+    const container = document.getElementById("messages");
 
-// =====================================
-// TERMUX RESULT
-// =====================================
+    const row = document.createElement("div");
+    row.className = "message " + message.role;
 
-async function waitForResult(jobId, assistantMessage, contentElement) {
-    const key = localStorage.getItem(DEVICE_KEY);
+    const avatar = message.role === "user" ? "أنت" : "✦";
+    const name = message.role === "user" ? "أنت" : "NoRestrictions AI";
 
-    if (!key) {
-        assistantMessage.content +=
-            "\nلم يتم العثور على مفتاح الجهاز.";
+    row.innerHTML = `
+        <div class="avatar">${avatar}</div>
+        <div class="message-body">
+            <div class="message-name">${name}</div>
+            <div class="message-content">${formatText(message.content || "")}</div>
+        </div>
+    `;
 
+    container.appendChild(row);
+}
+
+async function copyCode(id) {
+    const code = document.getElementById(id);
+    if (!code) return;
+
+    await navigator.clipboard.writeText(code.textContent);
+    toast("تم نسخ الكود");
+}
+
+function scrollBottom() {
+    const area = document.getElementById("chatArea");
+    area.scrollTop = area.scrollHeight;
+}
+
+/* Software library */
+
+function loadSoftware() {
+    try {
+        software = JSON.parse(localStorage.getItem(SOFTWARE_KEY) || "[]");
+    } catch(e) {
+        software = [];
+    }
+
+    renderSoftware();
+}
+
+function saveSoftware(title,code) {
+    const item = {
+        id:Date.now(),
+        title:title || "كود برمجي",
+        code:code,
+        date:new Date().toLocaleString("ar")
+    };
+
+    software.unshift(item);
+
+    if (software.length > 50) {
+        software = software.slice(0,50);
+    }
+
+    localStorage.setItem(SOFTWARE_KEY,JSON.stringify(software));
+    renderSoftware();
+}
+
+function renderSoftware() {
+    const list = document.getElementById("softwareList");
+
+    if (!software.length) {
+        list.innerHTML = `
+            <p style="color:#8995a8;font-size:13px">
+                لم يتم حفظ أي كود حتى الآن.
+            </p>`;
         return;
     }
 
-    const start = Date.now();
+    list.innerHTML = "";
 
-    assistantMessage.content +=
-        "\n\n⏳ أنتظر تنفيذ المهمة في Termux...";
+    software.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "software-item";
 
-    contentElement.textContent = assistantMessage.content;
+        const title = document.createElement("strong");
+        title.textContent = item.title;
 
-    while (Date.now() - start < RESULT_TIMEOUT) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        const date = document.createElement("small");
+        date.textContent = item.date;
 
-        try {
-            const url =
-                API +
-                "/api/device/result?key=" +
-                encodeURIComponent(key) +
-                "&id=" +
-                encodeURIComponent(jobId);
+        const button = document.createElement("button");
+        button.textContent = "نسخ الكود";
+        button.onclick = async () => {
+            await navigator.clipboard.writeText(item.code);
+            toast("تم نسخ الكود");
+        };
 
-            const response = await fetch(url);
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || "Result error");
-            }
-
-            if (data.status === "done" || data.status === "failed") {
-                assistantMessage.content =
-                    assistantMessage.content.replace(
-                        "\n\n⏳ أنتظر تنفيذ المهمة في Termux...",
-                        ""
-                    );
-
-                assistantMessage.result =
-                    data.output || "(لا توجد نتيجة)";
-
-                assistantMessage.content +=
-                    data.status === "done"
-                    ? "\n\nتم تنفيذ المهمة."
-                    : "\n\nفشل تنفيذ المهمة.";
-
-                assistantMessage.exitCode = data.exit_code;
-
-                contentElement.textContent =
-                    assistantMessage.content;
-
-                const result = document.createElement("div");
-                result.className = "result-box";
-
-                const title = document.createElement("div");
-                title.className = "result-title";
-                title.textContent = "نتيجة Termux";
-
-                const output = document.createElement("pre");
-                output.textContent = assistantMessage.result;
-
-                result.appendChild(title);
-                result.appendChild(output);
-
-                contentElement.appendChild(result);
-
-                saveHistory();
-
-                return;
-            }
-
-            if (data.status === "cancelled") {
-                assistantMessage.content +=
-                    "\n\nتم إلغاء المهمة.";
-
-                contentElement.textContent =
-                    assistantMessage.content;
-
-                saveHistory();
-
-                return;
-            }
-
-        } catch (error) {
-            console.error("Result polling:", error);
-        }
-    }
-
-    assistantMessage.content +=
-        "\n\nانتهت مهلة الانتظار. تحقق من اتصال Agent في Termux.";
-
-    contentElement.textContent =
-        assistantMessage.content;
-
-    saveHistory();
+        div.append(title,date,button);
+        list.appendChild(div);
+    });
 }
 
+function extractCodeBlocks(text) {
+    const matches = [...text.matchAll(/```([\w+-]*)\n?([\s\S]*?)```/g)];
 
-// =====================================
-// SEND MESSAGE
-// =====================================
+    matches.forEach((match,index) => {
+        saveSoftware(
+            match[1] ? "كود " + match[1] : "كود برمجي " + (index+1),
+            match[2].trim()
+        );
+    });
+}
+
+/* Send message */
 
 async function sendMessage() {
-    if (sending) return;
-
-    const input = $("messageInput");
-
+    const input = document.getElementById("messageInput");
     const text = input.value.trim();
 
     if (!text) return;
 
-    const chat = getCurrentChat();
-
-    if (!chat) return;
-
-    sending = true;
-
-    $("sendButton").disabled = true;
-
-    const welcome = $("messages").querySelector(".welcome");
-
-    if (welcome) welcome.remove();
-
-    const userMessage = {
-        role: "user",
-        content: text
-    };
-
-    chat.messages.push(userMessage);
-
-    if (
-        chat.title === "محادثة جديدة" &&
-        chat.messages.length === 1
-    ) {
-        chat.title = text.slice(0, 35);
-    }
-
-    addMessageElement(userMessage);
-
     input.value = "";
-    input.style.height = "40px";
+
+    messages.push({
+        role:"user",
+        content:text
+    });
 
     const assistantMessage = {
-        role: "assistant",
-        content: "جاري التفكير..."
+        role:"assistant",
+        content:"جاري التفكير..."
     };
 
-    chat.messages.push(assistantMessage);
-
-    const contentElement =
-        addMessageElement(assistantMessage);
+    messages.push(assistantMessage);
 
     saveHistory();
-    renderChatList();
+    renderMessages();
+
+    const sendButton = document.getElementById("sendBtn");
+    sendButton.disabled = true;
 
     try {
-        const history = chat.messages
-            .filter(message =>
-                message.role === "user" ||
-                message.role === "assistant"
-            )
-            .slice(-MAX_MESSAGES)
-            .map(message => ({
-                role: message.role,
-                content: message.content
-            }));
-
-        // Remove the temporary waiting message from the API history.
-        history.pop();
-
-        const data = await callChat(history);
+        const result = await api("/api/chat","POST",{
+            messages:messages
+                .filter(m => m.content !== "جاري التفكير...")
+                .slice(-20)
+                .map(m => ({
+                    role:m.role,
+                    content:m.content
+                })),
+            deviceKey:deviceKey
+        });
 
         assistantMessage.content =
-            data.reply || "لم يصل رد.";
-
-        contentElement.textContent =
-            assistantMessage.content;
+            result.reply || "لم يصل رد من الخادم.";
 
         saveHistory();
+        renderMessages();
 
-        if (
-            data.termux &&
-            data.termux.status === "pending" &&
-            data.termux.id
-        ) {
-            await waitForResult(
-                data.termux.id,
-                assistantMessage,
-                contentElement
-            );
+        extractCodeBlocks(assistantMessage.content);
+
+        if (result.termux && result.termux.id) {
+            assistantMessage.content += "\n\n⏳ تم إرسال الطلب إلى Termux، أنتظر النتيجة...";
+            saveHistory();
+            renderMessages();
+
+            waitForResult(result.termux.id,assistantMessage);
         }
 
-    } catch (error) {
-        assistantMessage.content =
-            "حدث خطأ: " + error.message;
-
-        contentElement.textContent =
-            assistantMessage.content;
-
+    } catch(e) {
+        assistantMessage.content = "حدث خطأ: " + e.message;
         saveHistory();
-
-    } finally {
-        sending = false;
-        $("sendButton").disabled = false;
-        input.focus();
+        renderMessages();
     }
+
+    sendButton.disabled = false;
+    input.focus();
 }
 
+/* Termux result */
 
-// =====================================
-// INPUT EVENTS
-// =====================================
+async function waitForResult(jobId,message) {
+    if (waitingJobs.has(jobId)) return;
 
-$("messageInput").addEventListener("keydown", event => {
-    if (
-        event.key === "Enter" &&
-        !event.shiftKey
-    ) {
-        event.preventDefault();
+    waitingJobs.add(jobId);
+
+    for (let i=0;i<60;i++) {
+        await new Promise(resolve => setTimeout(resolve,2000));
+
+        try {
+            const result = await api(
+                "/api/device/result?key=" +
+                encodeURIComponent(deviceKey) +
+                "&id=" + encodeURIComponent(jobId)
+            );
+
+            if (result.status === "done") {
+                message.content = String(result.output || "اكتمل التنفيذ.");
+                saveHistory();
+                renderMessages();
+                extractCodeBlocks(message.content);
+                waitingJobs.delete(jobId);
+                return;
+            }
+
+            if (result.status === "failed" || result.status === "cancelled") {
+                message.content = "تعذر تنفيذ الطلب: " + (result.output || result.status);
+                saveHistory();
+                renderMessages();
+                waitingJobs.delete(jobId);
+                return;
+            }
+
+        } catch(e) {
+            // إعادة المحاولة
+        }
+    }
+
+    message.content = "انتهت مهلة انتظار نتيجة Termux. تحقق من اتصال الجهاز.";
+    saveHistory();
+    renderMessages();
+    waitingJobs.delete(jobId);
+}
+
+/* Input events */
+
+const messageInput = document.getElementById("messageInput");
+
+messageInput.addEventListener("keydown",e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
         sendMessage();
     }
 });
 
-$("messageInput").addEventListener("input", event => {
-    event.target.style.height = "40px";
-
-    event.target.style.height =
-        Math.min(event.target.scrollHeight, 150) + "px";
+messageInput.addEventListener("input",() => {
+    messageInput.style.height = "auto";
+    messageInput.style.height =
+        Math.min(messageInput.scrollHeight,150) + "px";
 });
 
-
-// =====================================
-// MOBILE SIDEBAR
-// =====================================
-
-function toggleSidebar() {
-    $("sidebar").classList.toggle("open");
-}
-
-
-// =====================================
-// START
-// =====================================
+/* Start */
 
 loadHistory();
+loadSoftware();
+checkStatus();
 
-checkDeviceStatus();
-
-statusTimer = setInterval(
-    checkDeviceStatus,
-    5000
-);
-
+setInterval(checkStatus,5000);
 </script>
 
 </body>
-    </html>
+</html>
