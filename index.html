@@ -2,14 +2,21 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b0d10">
 <title>NoRestrictions AI</title>
+
 <style>
 :root {
-  --bg:#0b0d10;--panel:#12151a;--line:#252b33;
-  --text:#e8eaed;--muted:#929aa5;--accent:#3ee6a8;
-  --user:#1c3b30;--ai:#191e25;--error:#ff7777;
+  --bg:#0b0d10;
+  --panel:#12151a;
+  --line:#252b33;
+  --text:#e8eaed;
+  --muted:#929aa5;
+  --accent:#3ee6a8;
+  --user:#1c3b30;
+  --ai:#191e25;
+  --error:#ff7777;
 }
 *{box-sizing:border-box}
 body{
@@ -30,7 +37,8 @@ header{
 .badge{font-size:11px;color:var(--muted)}
 button{
   cursor:pointer;font:inherit;border:1px solid var(--line);
-  border-radius:9px;padding:8px 12px;background:#171c23;color:var(--text);
+  border-radius:9px;padding:9px 12px;
+  background:#171c23;color:var(--text);
 }
 button:hover{border-color:var(--accent)}
 button:disabled{opacity:.5;cursor:not-allowed}
@@ -57,8 +65,8 @@ textarea{
 }
 textarea:focus{border-color:var(--accent)}
 .status{
-  font-size:12px;color:var(--muted);display:flex;
-  align-items:center;gap:7px;
+  font-size:12px;color:var(--muted);
+  display:flex;align-items:center;gap:7px;
 }
 .dot{width:8px;height:8px;border-radius:50%;background:#777}
 .dot.on{background:var(--accent)}
@@ -74,11 +82,6 @@ textarea:focus{border-color:var(--accent)}
 }
 .sheet h3{margin-top:0}
 .sheet p{color:var(--muted);font-size:14px}
-.field{
-  width:100%;padding:11px;margin:7px 0;background:var(--bg);
-  border:1px solid var(--line);border-radius:9px;color:var(--text);
-  font:inherit;direction:ltr;
-}
 .code{
   direction:ltr;text-align:left;overflow-wrap:anywhere;
   padding:12px;background:var(--bg);border:1px solid var(--line);
@@ -86,7 +89,10 @@ textarea:focus{border-color:var(--accent)}
 }
 .commands{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .commands button{font-size:13px}
-.result{font:13px monospace;direction:ltr;text-align:left;white-space:pre-wrap}
+.result{
+  font:13px monospace;direction:ltr;text-align:left;
+  white-space:pre-wrap;overflow-wrap:anywhere;margin-top:12px;
+}
 @media(max-width:550px){
   header{padding:10px}
   .msg{max-width:96%}
@@ -94,45 +100,48 @@ textarea:focus{border-color:var(--accent)}
 }
 </style>
 </head>
+
 <body>
 <div class="app">
-  <header>
-    <div>
-      <div class="brand">🟢 NoRestrictions AI</div>
-      <div class="badge">notrack-uncensored</div>
-    </div>
-    <div style="display:flex;gap:7px;flex-wrap:wrap">
-      <button id="deviceBtn">📱 Termux</button>
-      <button id="newBtn">محادثة جديدة</button>
-    </div>
-  </header>
 
-  <div style="padding:8px 15px;border-bottom:1px solid var(--line)">
-    <div class="status">
-      <span class="dot" id="statusDot"></span>
-      <span id="statusText">جارٍ فحص الجهاز...</span>
-    </div>
+<header>
+  <div>
+    <div class="brand">🟢 NoRestrictions AI</div>
+    <div class="badge">notrack-uncensored</div>
   </div>
+  <div style="display:flex;gap:7px;flex-wrap:wrap">
+    <button id="deviceBtn">📱 Termux</button>
+    <button id="newBtn">محادثة جديدة</button>
+  </div>
+</header>
 
-  <main id="chat">
-    <div class="empty">
-      <h2>أهلاً بك 👋</h2>
-      <p>ابدأ محادثة مع NoRestrictions AI</p>
-    </div>
-  </main>
+<div style="padding:8px 15px;border-bottom:1px solid var(--line)">
+  <div class="status">
+    <span class="dot" id="statusDot"></span>
+    <span id="statusText">جارٍ فحص الجهاز...</span>
+  </div>
+</div>
 
-  <footer>
-    <form id="form">
-      <textarea id="input" rows="1" placeholder="اكتب رسالتك..."></textarea>
-      <button class="accent" id="sendBtn">إرسال</button>
-    </form>
-  </footer>
+<main id="chat">
+  <div class="empty">
+    <h2>أهلاً بك 👋</h2>
+    <p>ابدأ محادثة مع NoRestrictions AI</p>
+  </div>
+</main>
+
+<footer>
+  <form id="form">
+    <textarea id="input" rows="1" placeholder="اكتب رسالتك..."></textarea>
+    <button class="accent" id="sendBtn" type="submit">إرسال</button>
+  </form>
+</footer>
+
 </div>
 
 <div class="modal" id="deviceModal">
   <div class="sheet">
     <h3>📱 ربط جهاز Termux</h3>
-    <p>أنشئ مفتاحًا لهذا الجهاز، ثم سجّله وشغّل الوكيل المتوافق مع الـWorker.</p>
+    <p>شغّل الوكيل في Termux حتى يظهر الجهاز متصلاً.</p>
 
     <div class="status">
       <span class="dot" id="modalDot"></span>
@@ -141,17 +150,18 @@ textarea:focus{border-color:var(--accent)}
 
     <p>مفتاح الجهاز:</p>
     <div class="code" id="deviceKey"></div>
-    <button id="copyKey">نسخ المفتاح</button>
+    <button id="copyKey" type="button">نسخ المفتاح</button>
 
     <p>أمر تشغيل الوكيل:</p>
     <div class="code" id="agentCommand"></div>
-    <button id="copyCommand">نسخ الأمر</button>
+    <button id="copyCommand" type="button">نسخ الأمر</button>
 
     <p class="badge">لا تشارك مفتاح الجهاز مع أي شخص.</p>
     <hr style="border-color:var(--line);margin:15px 0">
 
     <h3>اختبار الجهاز</h3>
-    <p>اختر عملية معلوماتية. لن تُنفّذ أوامر نظام عشوائية.</p>
+    <p>عمليات معلوماتية محددة وآمنة.</p>
+
     <div class="commands">
       <button data-command="help">المساعدة</button>
       <button data-command="whoami">هوية المستخدم</button>
@@ -161,18 +171,21 @@ textarea:focus{border-color:var(--accent)}
       <button data-command="internet_check">فحص الإنترنت</button>
       <button data-command="dns_check">فحص DNS</button>
     </div>
+
     <div id="jobResult" class="result"></div>
-    <p><button id="closeModal">إغلاق</button></p>
+    <p><button id="closeModal" type="button">إغلاق</button></p>
   </div>
 </div>
 
 <script>
 "use strict";
 
+/* إعدادات المشروع */
 const API = "https://norestrictions-api.sdrhaldwane.workers.dev";
 const AGENT = "https://sdrhaldwany-bit.github.io/air/agent.py";
 
 const $ = id => document.getElementById(id);
+
 const chat = $("chat");
 const input = $("input");
 const form = $("form");
@@ -184,30 +197,47 @@ const DEVICE_KEY = "nr-device-key";
 let history = [];
 let busy = false;
 let device = {online:false,paired:false};
+let checkingJob = false;
 
+/* تحميل المحادثات */
 try {
   const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-  if (Array.isArray(saved)) history = saved;
-} catch {}
-
-function saveHistory(){
-  localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(-40)));
+  if(Array.isArray(saved)) {
+    history = saved.filter(m =>
+      m && typeof m.content === "string" &&
+      ["user","assistant"].includes(m.role)
+    ).slice(-40);
+  }
+} catch {
+  history = [];
 }
 
+function saveHistory(){
+  try {
+    localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(-40)));
+  } catch {}
+}
+
+/* مفتاح الجهاز */
 function getDeviceKey(){
   let key = localStorage.getItem(DEVICE_KEY);
 
   if(!/^[a-f0-9]{64}$/.test(key || "")){
+    if(!crypto || !crypto.getRandomValues){
+      throw new Error("المتصفح لا يدعم إنشاء مفتاح آمن");
+    }
+
     const bytes = crypto.getRandomValues(new Uint8Array(32));
-    key = [...bytes].map(x=>x.toString(16).padStart(2,"0")).join("");
+    key = Array.from(bytes,x=>x.toString(16).padStart(2,"0")).join("");
     localStorage.setItem(DEVICE_KEY,key);
   }
 
   return key;
 }
 
+/* الاتصال بالخادم */
 async function api(path,options={}){
-  const response = await fetch(API+path,{
+  const response = await fetch(API + path,{
     ...options,
     cache:"no-store",
     headers:{
@@ -222,9 +252,14 @@ async function api(path,options={}){
     throw new Error(data.error || `HTTP ${response.status}`);
   }
 
+  if(data.success === false){
+    throw new Error(data.error || "فشل الطلب");
+  }
+
   return data;
 }
 
+/* عرض الرسائل */
 function addMessage(role,text){
   const el = document.createElement("div");
   el.className = "msg " + role;
@@ -245,46 +280,15 @@ function renderHistory(){
     return;
   }
 
-  for(const message of history){
+  history.forEach(message=>{
     addMessage(
       message.role === "user" ? "user" : "assistant",
       message.content
     );
-  }
+  });
 }
 
-async function refreshDevice(){
-  if(!localStorage.getItem(DEVICE_KEY)){
-    device = {online:false,paired:false};
-    paintDevice();
-    return;
-  }
-
-  try{
-    device = await api(
-      "/api/device/status?key="+encodeURIComponent(getDeviceKey())
-    );
-  }catch{
-    device = {online:false,paired:false};
-  }
-
-  paintDevice();
-}
-
-function paintDevice(){
-  $("statusDot").className = "dot" + (device.online ? " on" : "");
-  $("modalDot").className = "dot" + (device.online ? " on" : "");
-
-  const text = device.online
-    ? "الجهاز متصل ✓"
-    : device.paired
-      ? "الجهاز مسجل لكنه غير متصل"
-      : "لم يتم ربط الجهاز";
-
-  $("statusText").textContent = text;
-  $("modalStatus").textContent = text;
-}
-
+/* دردشة الذكاء الاصطناعي */
 async function sendMessage(text){
   if(busy || !text.trim()) return;
 
@@ -302,7 +306,7 @@ async function sendMessage(text){
 
   const waiting = addMessage("assistant","جارٍ التفكير...");
 
-  try{
+  try {
     const data = await api("/api/chat",{
       method:"POST",
       body:JSON.stringify({
@@ -318,20 +322,20 @@ async function sendMessage(text){
       data.reply ||
       data.message;
 
-    if(typeof reply !== "string"){
-      throw new Error("لم يصل رد مفهوم من مزود الذكاء الاصطناعي");
+    if(typeof reply !== "string" || !reply.trim()){
+      throw new Error("لم يصل رد صالح من مزود الذكاء الاصطناعي");
     }
 
     waiting.textContent = reply;
     history.push({role:"assistant",content:reply});
     saveHistory();
 
-  }catch(error){
+  } catch(error) {
     waiting.className = "msg error";
     waiting.textContent = "حدث خطأ: " + error.message;
     history.pop();
     saveHistory();
-  }finally{
+  } finally {
     busy = false;
     sendBtn.disabled = false;
     input.focus();
@@ -340,8 +344,10 @@ async function sendMessage(text){
 
 form.addEventListener("submit",async event=>{
   event.preventDefault();
+
   const text = input.value;
   if(!text.trim() || busy) return;
+
   input.value = "";
   input.style.height = "48px";
   await sendMessage(text);
@@ -356,7 +362,7 @@ input.addEventListener("keydown",event=>{
 
 input.addEventListener("input",()=>{
   input.style.height = "auto";
-  input.style.height = Math.min(input.scrollHeight,150)+"px";
+  input.style.height = Math.min(input.scrollHeight,150) + "px";
 });
 
 $("newBtn").addEventListener("click",()=>{
@@ -366,10 +372,11 @@ $("newBtn").addEventListener("click",()=>{
   renderHistory();
 });
 
+/* ربط الجهاز */
 async function pairDevice(){
   const key = getDeviceKey();
 
-  return await api("/api/device/pair",{
+  return api("/api/device/pair",{
     method:"POST",
     body:JSON.stringify({
       key,
@@ -379,14 +386,54 @@ async function pairDevice(){
   });
 }
 
+/* فحص حالة الجهاز */
+async function refreshDevice(){
+  if(!localStorage.getItem(DEVICE_KEY)){
+    device = {online:false,paired:false};
+    paintDevice();
+    return;
+  }
+
+  try {
+    const data = await api(
+      "/api/device/status?key=" + encodeURIComponent(getDeviceKey())
+    );
+
+    device = {
+      online:Boolean(data.online),
+      paired:Boolean(data.paired)
+    };
+  } catch {
+    device = {online:false,paired:false};
+  }
+
+  paintDevice();
+}
+
+function paintDevice(){
+  const online = device.online;
+
+  $("statusDot").className = "dot" + (online ? " on" : "");
+  $("modalDot").className = "dot" + (online ? " on" : "");
+
+  const text = online
+    ? "الجهاز متصل ✓"
+    : device.paired
+      ? "الجهاز مسجل لكنه غير متصل"
+      : "لم يتم ربط الجهاز";
+
+  $("statusText").textContent = text;
+  $("modalStatus").textContent = text;
+}
+
+/* نافذة الجهاز */
 function showDeviceModal(){
   const key = getDeviceKey();
 
   $("deviceKey").textContent = key;
-
   $("agentCommand").textContent =
     `pkg install python curl -y
-curl -sLO ${AGENT}
+curl -fLO ${AGENT}
 NR_SERVER=${API} python agent.py ${key}`;
 
   $("deviceModal").classList.add("show");
@@ -394,6 +441,7 @@ NR_SERVER=${API} python agent.py ${key}`;
 }
 
 $("deviceBtn").addEventListener("click",showDeviceModal);
+
 $("closeModal").addEventListener("click",()=>{
   $("deviceModal").classList.remove("show");
 });
@@ -404,10 +452,11 @@ $("deviceModal").addEventListener("click",event=>{
   }
 });
 
+/* نسخ النصوص */
 async function copyText(text){
-  try{
+  try {
     await navigator.clipboard.writeText(text);
-  }catch{
+  } catch {
     const area = document.createElement("textarea");
     area.value = text;
     document.body.appendChild(area);
@@ -425,15 +474,19 @@ $("copyCommand").addEventListener("click",()=>{
   copyText($("agentCommand").textContent);
 });
 
+/* إرسال مهمة معلوماتية للجهاز */
 async function runDeviceCommand(command){
+  if(checkingJob) return;
+
+  checkingJob = true;
   const result = $("jobResult");
   result.textContent = "جارٍ إرسال الطلب...";
 
-  try{
+  try {
     await refreshDevice();
 
     if(!device.online){
-      throw new Error("الجهاز غير متصل. شغّل الوكيل في Termux أولاً.");
+      throw new Error("الجهاز غير متصل. شغّل Agent في Termux أولاً.");
     }
 
     const key = getDeviceKey();
@@ -443,17 +496,19 @@ async function runDeviceCommand(command){
       body:JSON.stringify({key,command})
     });
 
-    if(!job.id) throw new Error("لم يرجع الخادم رقم المهمة");
+    if(!job.id){
+      throw new Error("لم يرجع الخادم رقم المهمة");
+    }
 
     result.textContent = "تم إرسال الطلب، جارٍ انتظار النتيجة...";
 
     const started = Date.now();
 
-    while(Date.now()-started < 60000){
+    while(Date.now() - started < 60000){
       await new Promise(resolve=>setTimeout(resolve,1500));
 
       const data = await api(
-        `/api/device/result?key=${encodeURIComponent(key)}&id=${job.id}`
+        `/api/device/result?key=${encodeURIComponent(key)}&id=${encodeURIComponent(job.id)}`
       );
 
       if(data.status === "completed"){
@@ -471,8 +526,11 @@ async function runDeviceCommand(command){
     }
 
     throw new Error("انتهت مهلة انتظار النتيجة");
-  }catch(error){
+
+  } catch(error) {
     result.textContent = "خطأ: " + error.message;
+  } finally {
+    checkingJob = false;
   }
 }
 
@@ -482,12 +540,13 @@ document.querySelectorAll("[data-command]").forEach(button=>{
   });
 });
 
+/* تشغيل الموقع */
 async function init(){
   renderHistory();
 
-  try{
+  try {
     await pairDevice();
-  }catch(error){
+  } catch(error) {
     console.warn("Pairing:",error.message);
   }
 
