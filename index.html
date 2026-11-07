@@ -3,565 +3,402 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b0d10">
 <title>NoRestrictions AI</title>
 
 <style>
-:root {
-  --bg:#0b0d10;
-  --panel:#12151a;
-  --line:#252b33;
-  --text:#e8eaed;
-  --muted:#929aa5;
-  --accent:#3ee6a8;
-  --user:#1c3b30;
-  --ai:#191e25;
-  --error:#ff7777;
-}
 *{box-sizing:border-box}
 body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:system-ui,"Segoe UI",sans-serif;
-  height:100dvh;display:flex;justify-content:center;
-}
-.app{
-  width:100%;max-width:850px;height:100%;
-  display:flex;flex-direction:column;background:var(--panel);
-  border-inline:1px solid var(--line);
+ margin:0;background:#0b0d12;color:#eee;
+ font-family:Arial,sans-serif;
 }
 header{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:10px;padding:14px;border-bottom:1px solid var(--line);
+ padding:18px;background:#151923;
+ border-bottom:1px solid #292f3c;
+ display:flex;justify-content:space-between;
+ align-items:center;gap:10px;flex-wrap:wrap;
 }
-.brand{font-weight:800;font-size:17px}
-.badge{font-size:11px;color:var(--muted)}
-button{
-  cursor:pointer;font:inherit;border:1px solid var(--line);
-  border-radius:9px;padding:9px 12px;
-  background:#171c23;color:var(--text);
-}
-button:hover{border-color:var(--accent)}
-button:disabled{opacity:.5;cursor:not-allowed}
-.accent{background:var(--accent);color:#06150e;border:0;font-weight:700}
+h2{margin:0;color:#65e6ad}
+#status{font-size:13px;color:#aaa}
 main{
-  flex:1;overflow-y:auto;padding:18px;
-  display:flex;flex-direction:column;gap:13px;
+ max-width:850px;margin:auto;padding:15px;
 }
-.empty{margin:auto;text-align:center;color:var(--muted);line-height:2}
-.empty h2{color:var(--text)}
+#messages{
+ height:65vh;overflow-y:auto;
+ padding:12px;background:#11151e;
+ border:1px solid #292f3c;border-radius:12px;
+}
 .msg{
-  max-width:90%;padding:12px 15px;border-radius:13px;
-  white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;
+ padding:12px;margin:10px 0;
+ border-radius:10px;white-space:pre-wrap;
+ overflow-wrap:anywhere;line-height:1.7;
 }
-.user{align-self:flex-start;background:var(--user)}
-.assistant{align-self:flex-end;background:var(--ai);border:1px solid var(--line)}
-.error{align-self:center;color:var(--error)}
-footer{padding:12px;border-top:1px solid var(--line)}
-form{display:flex;gap:9px;align-items:end}
+.user{background:#183b32}
+.ai{background:#202635}
+.system{background:#302b1c;color:#ffe4a0}
+pre{
+ direction:ltr;text-align:left;
+ white-space:pre-wrap;overflow-wrap:anywhere;
+ background:#090b10;padding:10px;border-radius:8px;
+}
+.controls{display:flex;gap:8px;margin-top:12px}
 textarea{
-  flex:1;resize:none;min-height:48px;max-height:150px;
-  background:var(--bg);color:var(--text);border:1px solid var(--line);
-  border-radius:11px;padding:12px;font:inherit;outline:none;
+ flex:1;min-width:0;resize:vertical;
+ min-height:55px;padding:13px;
+ color:white;background:#171d29;
+ border:1px solid #343e50;border-radius:10px;
+ font-size:16px;
 }
-textarea:focus{border-color:var(--accent)}
-.status{
-  font-size:12px;color:var(--muted);
-  display:flex;align-items:center;gap:7px;
+button{
+ border:0;border-radius:9px;padding:12px 18px;
+ background:#36bd88;color:#07140e;
+ font-weight:bold;cursor:pointer;
 }
-.dot{width:8px;height:8px;border-radius:50%;background:#777}
-.dot.on{background:var(--accent)}
-.modal{
-  display:none;position:fixed;inset:0;background:#000b;
-  align-items:center;justify-content:center;padding:15px;z-index:5;
+button:disabled{opacity:.5;cursor:wait}
+.panel{
+ background:#151923;border:1px solid #292f3c;
+ border-radius:10px;padding:12px;margin:12px 0;
 }
-.modal.show{display:flex}
-.sheet{
-  width:100%;max-width:480px;max-height:90dvh;overflow:auto;
-  background:var(--panel);border:1px solid var(--line);
-  border-radius:15px;padding:18px;line-height:1.8;
-}
-.sheet h3{margin-top:0}
-.sheet p{color:var(--muted);font-size:14px}
-.code{
-  direction:ltr;text-align:left;overflow-wrap:anywhere;
-  padding:12px;background:var(--bg);border:1px solid var(--line);
-  border-radius:9px;font:13px monospace;white-space:pre-wrap;
-}
-.commands{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
-.commands button{font-size:13px}
-.result{
-  font:13px monospace;direction:ltr;text-align:left;
-  white-space:pre-wrap;overflow-wrap:anywhere;margin-top:12px;
-}
-@media(max-width:550px){
-  header{padding:10px}
-  .msg{max-width:96%}
-  .brand{font-size:14px}
+.small{font-size:12px;color:#aaa}
+input{
+ width:100%;padding:11px;background:#0c1018;
+ color:white;border:1px solid #343e50;
+ border-radius:8px;margin:8px 0;
 }
 </style>
 </head>
 
 <body>
-<div class="app">
 
 <header>
-  <div>
-    <div class="brand">🟢 NoRestrictions AI</div>
-    <div class="badge">notrack-uncensored</div>
-  </div>
-  <div style="display:flex;gap:7px;flex-wrap:wrap">
-    <button id="deviceBtn">📱 Termux</button>
-    <button id="newBtn">محادثة جديدة</button>
-  </div>
+ <h2>NoRestrictions AI</h2>
+ <div id="status">● غير متصل</div>
 </header>
 
-<div style="padding:8px 15px;border-bottom:1px solid var(--line)">
-  <div class="status">
-    <span class="dot" id="statusDot"></span>
-    <span id="statusText">جارٍ فحص الجهاز...</span>
-  </div>
+<main>
+
+<div class="panel">
+ <b>ربط جهاز Termux</b>
+ <div class="small">
+ أنشئ مفتاح الجهاز، ثم استخدم المفتاح نفسه عند تشغيل Agent.
+ </div>
+
+ <button id="pairBtn">إنشاء وربط الجهاز</button>
+ <input id="deviceKey" readonly placeholder="مفتاح الجهاز">
+ <div class="small" id="pairStatus"></div>
 </div>
 
-<main id="chat">
-  <div class="empty">
-    <h2>أهلاً بك 👋</h2>
-    <p>ابدأ محادثة مع NoRestrictions AI</p>
-  </div>
+<div id="messages"></div>
+
+<div class="controls">
+ <textarea id="input" placeholder="اكتب طلبك هنا..."></textarea>
+ <button id="sendBtn">إرسال</button>
+</div>
+
 </main>
 
-<footer>
-  <form id="form">
-    <textarea id="input" rows="1" placeholder="اكتب رسالتك..."></textarea>
-    <button class="accent" id="sendBtn" type="submit">إرسال</button>
-  </form>
-</footer>
-
-</div>
-
-<div class="modal" id="deviceModal">
-  <div class="sheet">
-    <h3>📱 ربط جهاز Termux</h3>
-    <p>شغّل الوكيل في Termux حتى يظهر الجهاز متصلاً.</p>
-
-    <div class="status">
-      <span class="dot" id="modalDot"></span>
-      <span id="modalStatus">غير متصل</span>
-    </div>
-
-    <p>مفتاح الجهاز:</p>
-    <div class="code" id="deviceKey"></div>
-    <button id="copyKey" type="button">نسخ المفتاح</button>
-
-    <p>أمر تشغيل الوكيل:</p>
-    <div class="code" id="agentCommand"></div>
-    <button id="copyCommand" type="button">نسخ الأمر</button>
-
-    <p class="badge">لا تشارك مفتاح الجهاز مع أي شخص.</p>
-    <hr style="border-color:var(--line);margin:15px 0">
-
-    <h3>اختبار الجهاز</h3>
-    <p>عمليات معلوماتية محددة وآمنة.</p>
-
-    <div class="commands">
-      <button data-command="help">المساعدة</button>
-      <button data-command="whoami">هوية المستخدم</button>
-      <button data-command="date">التاريخ والوقت</button>
-      <button data-command="device_info">معلومات الجهاز</button>
-      <button data-command="network_info">معلومات الشبكة</button>
-      <button data-command="internet_check">فحص الإنترنت</button>
-      <button data-command="dns_check">فحص DNS</button>
-    </div>
-
-    <div id="jobResult" class="result"></div>
-    <p><button id="closeModal" type="button">إغلاق</button></p>
-  </div>
-</div>
-
 <script>
-"use strict";
-
-/* إعدادات المشروع */
-const API = "https://norestrictions-api.sdrhaldwane.workers.dev";
-const AGENT = "https://sdrhaldwany-bit.github.io/air/agent.py";
+const API =
+ "https://norestrictions-api.sdrhaldwane.workers.dev";
 
 const $ = id => document.getElementById(id);
 
-const chat = $("chat");
-const input = $("input");
-const form = $("form");
-const sendBtn = $("sendBtn");
-
-const HISTORY_KEY = "nr-chat-history";
-const DEVICE_KEY = "nr-device-key";
-
-let history = [];
+let messages = [];
 let busy = false;
-let device = {online:false,paired:false};
-let checkingJob = false;
 
-/* تحميل المحادثات */
-try {
-  const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-  if(Array.isArray(saved)) {
-    history = saved.filter(m =>
-      m && typeof m.content === "string" &&
-      ["user","assistant"].includes(m.role)
-    ).slice(-40);
-  }
-} catch {
-  history = [];
+const taskInstruction = `
+أنت NoRestrictions AI وتستطيع طلب تنفيذ مهام برمجية
+على جهاز Termux المرتبط.
+
+إذا احتجت تنفيذ مهمة، أرسل المهمة بهذا التنسيق الحرفي:
+
+[[NR_TASK]]
+{"action":"write_file","path":"main.py","content":"print('Hello')"}
+[[/NR_TASK]]
+
+الإجراءات المتاحة:
+write_file
+read_file
+list_files
+mkdir
+run_python
+
+يمكنك إرسال عدة مهام، كل مهمة داخل علامة مستقلة.
+لا تدّعِ نجاح التنفيذ قبل استلام النتيجة من الجهاز.
+بعد وصول النتيجة حللها وحدد الخطوة التالية.
+`;
+
+function addMessage(type, text) {
+ const div = document.createElement("div");
+ div.className = "msg " + type;
+ div.textContent = text;
+ $("messages").appendChild(div);
+ $("messages").scrollTop = $("messages").scrollHeight;
+ return div;
 }
 
-function saveHistory(){
+function getKey() {
+ return localStorage.getItem("nr-device-key") || "";
+}
+
+async function api(path, method="GET", data=null) {
+ const options = {method, headers:{}};
+
+ if (data !== null) {
+  options.headers["Content-Type"] = "application/json";
+  options.body = JSON.stringify(data);
+ }
+
+ const response = await fetch(API + path, options);
+ const text = await response.text();
+
+ let result;
+ try {
+  result = JSON.parse(text);
+ } catch {
+  throw new Error("استجابة غير صالحة من السيرفر: " + text.slice(0,300));
+ }
+
+ if (!response.ok) {
+  throw new Error(result.error || "HTTP " + response.status);
+ }
+
+ return result;
+}
+
+function randomKey() {
+ const bytes = crypto.getRandomValues(new Uint8Array(32));
+ return Array.from(bytes)
+  .map(x => x.toString(16).padStart(2,"0"))
+  .join("");
+}
+
+async function pairDevice() {
+ const key = getKey() || randomKey();
+
+ $("pairBtn").disabled = true;
+ $("pairStatus").textContent = "جارٍ ربط الجهاز...";
+
+ try {
+  const result = await api(
+   "/api/device/pair",
+   "POST",
+   {
+    key,
+    kind:"termux",
+    info:"Android Termux Agent"
+   }
+  );
+
+  if (!result.success) throw new Error("فشل الربط");
+
+  localStorage.setItem("nr-device-key",key);
+  $("deviceKey").value = key;
+  $("pairStatus").textContent =
+   "تم الربط. استخدم المفتاح في تشغيل Agent.";
+
+  await checkStatus();
+
+ } catch(error) {
+  $("pairStatus").textContent = error.message;
+ } finally {
+  $("pairBtn").disabled = false;
+ }
+}
+
+async function checkStatus() {
+ const key = getKey();
+
+ if (!key) {
+  $("status").textContent = "● لم يتم الربط";
+  return;
+ }
+
+ try {
+  const result = await api(
+   "/api/device/status?key=" + encodeURIComponent(key)
+  );
+
+  $("status").textContent =
+   result.online ? "● Termux متصل" : "● Termux غير متصل";
+
+ } catch {
+  $("status").textContent = "● خطأ في الاتصال";
+ }
+}
+
+function extractTasks(text) {
+ const tasks = [];
+ const regex = /\[\[NR_TASK\]\]([\s\S]*?)\[\[\/NR_TASK\]\]/g;
+
+ let match;
+
+ while ((match = regex.exec(text)) !== null) {
   try {
-    localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(-40)));
-  } catch {}
+   tasks.push(JSON.parse(match[1].trim()));
+  } catch {
+   throw new Error("صيغة مهمة التنفيذ غير صحيحة");
+  }
+ }
+
+ return {
+  tasks,
+  visible: text.replace(regex,"").trim()
+ };
 }
 
-/* مفتاح الجهاز */
-function getDeviceKey(){
-  let key = localStorage.getItem(DEVICE_KEY);
+async function waitForResult(id) {
+ const key = getKey();
 
-  if(!/^[a-f0-9]{64}$/.test(key || "")){
-    if(!crypto || !crypto.getRandomValues){
-      throw new Error("المتصفح لا يدعم إنشاء مفتاح آمن");
-    }
+ for (let i=0;i<120;i++) {
+  const result = await api(
+   "/api/device/result?key=" +
+   encodeURIComponent(key) +
+   "&id=" + encodeURIComponent(id)
+  );
 
-    const bytes = crypto.getRandomValues(new Uint8Array(32));
-    key = Array.from(bytes,x=>x.toString(16).padStart(2,"0")).join("");
-    localStorage.setItem(DEVICE_KEY,key);
+  if (result.status === "completed") {
+   return result;
   }
 
-  return key;
+  await new Promise(resolve => setTimeout(resolve,1500));
+ }
+
+ throw new Error("انتهت مهلة انتظار Termux");
 }
 
-/* الاتصال بالخادم */
-async function api(path,options={}){
-  const response = await fetch(API + path,{
-    ...options,
-    cache:"no-store",
-    headers:{
-      "Content-Type":"application/json",
-      ...(options.headers || {})
-    }
-  });
+async function executeTask(task) {
+ const key = getKey();
 
-  const data = await response.json().catch(()=>({}));
+ const queued = await api(
+  "/api/device/run",
+  "POST",
+  {key,task}
+ );
 
-  if(!response.ok){
-    throw new Error(data.error || `HTTP ${response.status}`);
+ addMessage("system",
+  "تم إرسال المهمة رقم " + queued.id + " إلى Termux..."
+ );
+
+ const result = await waitForResult(queued.id);
+
+ const output =
+  "رقم المهمة: " + result.id +
+  "\nرمز الخروج: " + result.exit_code +
+  "\nالنتيجة:\n" + (result.output || "لا توجد نتيجة");
+
+ addMessage("system",output);
+
+ return {
+  task,
+  job_id:result.id,
+  exit_code:result.exit_code,
+  output:result.output
+ };
+}
+
+async function askAI() {
+ const payload = {
+  messages:[
+   {role:"system",content:taskInstruction},
+   ...messages
+  ]
+ };
+
+ const result = await api("/api/chat","POST",payload);
+
+ const content =
+  result.choices?.[0]?.message?.content ||
+  result.reply ||
+  result.message;
+
+ if (typeof content !== "string") {
+  throw new Error("لم يرجع مزود الذكاء الاصطناعي رسالة مفهومة");
+ }
+
+ return content;
+}
+
+async function send() {
+ if (busy) return;
+
+ const input = $("input").value.trim();
+ if (!input) return;
+
+ if (!getKey()) {
+  addMessage("system","اربط جهاز Termux أولاً.");
+  return;
+ }
+
+ busy = true;
+ $("sendBtn").disabled = true;
+
+ $("input").value = "";
+ addMessage("user",input);
+
+ messages.push({role:"user",content:input});
+
+ try {
+  for (let round=0;round<8;round++) {
+
+   const answer = await askAI();
+   const parsed = extractTasks(answer);
+
+   if (parsed.visible) {
+    addMessage("ai",parsed.visible);
+   }
+
+   messages.push({
+    role:"assistant",
+    content:answer
+   });
+
+   if (parsed.tasks.length === 0) break;
+
+   const results = [];
+
+   for (const task of parsed.tasks) {
+    const result = await executeTask(task);
+    results.push(result);
+   }
+
+   const feedback =
+    "نتائج تنفيذ المهام على Termux:\n" +
+    JSON.stringify(results,null,2) +
+    "\nحلل النتائج وأكمل العمل إذا بقيت خطوات.";
+
+   messages.push({
+    role:"user",
+    content:feedback
+   });
+
+   addMessage("system","يراجع الذكاء الاصطناعي نتائج التنفيذ...");
   }
 
-  if(data.success === false){
-    throw new Error(data.error || "فشل الطلب");
-  }
-
-  return data;
+ } catch(error) {
+  addMessage("system","خطأ: " + error.message);
+ } finally {
+  busy = false;
+  $("sendBtn").disabled = false;
+ }
 }
 
-/* عرض الرسائل */
-function addMessage(role,text){
-  const el = document.createElement("div");
-  el.className = "msg " + role;
-  el.textContent = text;
-  chat.appendChild(el);
-  chat.scrollTop = chat.scrollHeight;
-  return el;
-}
+$("pairBtn").addEventListener("click",pairDevice);
+$("sendBtn").addEventListener("click",send);
 
-function renderHistory(){
-  chat.innerHTML = "";
-
-  if(!history.length){
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.innerHTML = "<h2>أهلاً بك 👋</h2><p>ابدأ محادثة مع NoRestrictions AI</p>";
-    chat.appendChild(empty);
-    return;
-  }
-
-  history.forEach(message=>{
-    addMessage(
-      message.role === "user" ? "user" : "assistant",
-      message.content
-    );
-  });
-}
-
-/* دردشة الذكاء الاصطناعي */
-async function sendMessage(text){
-  if(busy || !text.trim()) return;
-
-  busy = true;
-  sendBtn.disabled = true;
-
-  const clean = text.trim();
-
-  const empty = chat.querySelector(".empty");
-  if(empty) empty.remove();
-
-  history.push({role:"user",content:clean});
-  saveHistory();
-  addMessage("user",clean);
-
-  const waiting = addMessage("assistant","جارٍ التفكير...");
-
-  try {
-    const data = await api("/api/chat",{
-      method:"POST",
-      body:JSON.stringify({
-        messages:history.slice(-30).map(m=>({
-          role:m.role,
-          content:m.content
-        }))
-      })
-    });
-
-    const reply =
-      data.choices?.[0]?.message?.content ||
-      data.reply ||
-      data.message;
-
-    if(typeof reply !== "string" || !reply.trim()){
-      throw new Error("لم يصل رد صالح من مزود الذكاء الاصطناعي");
-    }
-
-    waiting.textContent = reply;
-    history.push({role:"assistant",content:reply});
-    saveHistory();
-
-  } catch(error) {
-    waiting.className = "msg error";
-    waiting.textContent = "حدث خطأ: " + error.message;
-    history.pop();
-    saveHistory();
-  } finally {
-    busy = false;
-    sendBtn.disabled = false;
-    input.focus();
-  }
-}
-
-form.addEventListener("submit",async event=>{
+$("input").addEventListener("keydown",event=>{
+ if (event.key==="Enter" && !event.shiftKey) {
   event.preventDefault();
-
-  const text = input.value;
-  if(!text.trim() || busy) return;
-
-  input.value = "";
-  input.style.height = "48px";
-  await sendMessage(text);
+  send();
+ }
 });
 
-input.addEventListener("keydown",event=>{
-  if(event.key === "Enter" && !event.shiftKey && !event.isComposing){
-    event.preventDefault();
-    form.requestSubmit();
-  }
-});
-
-input.addEventListener("input",()=>{
-  input.style.height = "auto";
-  input.style.height = Math.min(input.scrollHeight,150) + "px";
-});
-
-$("newBtn").addEventListener("click",()=>{
-  if(busy) return;
-  history = [];
-  saveHistory();
-  renderHistory();
-});
-
-/* ربط الجهاز */
-async function pairDevice(){
-  const key = getDeviceKey();
-
-  return api("/api/device/pair",{
-    method:"POST",
-    body:JSON.stringify({
-      key,
-      kind:"termux",
-      info:"Android / Termux"
-    })
-  });
+if (getKey()) {
+ $("deviceKey").value = getKey();
+ checkStatus();
 }
 
-/* فحص حالة الجهاز */
-async function refreshDevice(){
-  if(!localStorage.getItem(DEVICE_KEY)){
-    device = {online:false,paired:false};
-    paintDevice();
-    return;
-  }
-
-  try {
-    const data = await api(
-      "/api/device/status?key=" + encodeURIComponent(getDeviceKey())
-    );
-
-    device = {
-      online:Boolean(data.online),
-      paired:Boolean(data.paired)
-    };
-  } catch {
-    device = {online:false,paired:false};
-  }
-
-  paintDevice();
-}
-
-function paintDevice(){
-  const online = device.online;
-
-  $("statusDot").className = "dot" + (online ? " on" : "");
-  $("modalDot").className = "dot" + (online ? " on" : "");
-
-  const text = online
-    ? "الجهاز متصل ✓"
-    : device.paired
-      ? "الجهاز مسجل لكنه غير متصل"
-      : "لم يتم ربط الجهاز";
-
-  $("statusText").textContent = text;
-  $("modalStatus").textContent = text;
-}
-
-/* نافذة الجهاز */
-function showDeviceModal(){
-  const key = getDeviceKey();
-
-  $("deviceKey").textContent = key;
-  $("agentCommand").textContent =
-    `pkg install python curl -y
-curl -fLO ${AGENT}
-NR_SERVER=${API} python agent.py ${key}`;
-
-  $("deviceModal").classList.add("show");
-  refreshDevice();
-}
-
-$("deviceBtn").addEventListener("click",showDeviceModal);
-
-$("closeModal").addEventListener("click",()=>{
-  $("deviceModal").classList.remove("show");
-});
-
-$("deviceModal").addEventListener("click",event=>{
-  if(event.target.id === "deviceModal"){
-    $("deviceModal").classList.remove("show");
-  }
-});
-
-/* نسخ النصوص */
-async function copyText(text){
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch {
-    const area = document.createElement("textarea");
-    area.value = text;
-    document.body.appendChild(area);
-    area.select();
-    document.execCommand("copy");
-    area.remove();
-  }
-}
-
-$("copyKey").addEventListener("click",()=>{
-  copyText($("deviceKey").textContent);
-});
-
-$("copyCommand").addEventListener("click",()=>{
-  copyText($("agentCommand").textContent);
-});
-
-/* إرسال مهمة معلوماتية للجهاز */
-async function runDeviceCommand(command){
-  if(checkingJob) return;
-
-  checkingJob = true;
-  const result = $("jobResult");
-  result.textContent = "جارٍ إرسال الطلب...";
-
-  try {
-    await refreshDevice();
-
-    if(!device.online){
-      throw new Error("الجهاز غير متصل. شغّل Agent في Termux أولاً.");
-    }
-
-    const key = getDeviceKey();
-
-    const job = await api("/api/device/run",{
-      method:"POST",
-      body:JSON.stringify({key,command})
-    });
-
-    if(!job.id){
-      throw new Error("لم يرجع الخادم رقم المهمة");
-    }
-
-    result.textContent = "تم إرسال الطلب، جارٍ انتظار النتيجة...";
-
-    const started = Date.now();
-
-    while(Date.now() - started < 60000){
-      await new Promise(resolve=>setTimeout(resolve,1500));
-
-      const data = await api(
-        `/api/device/result?key=${encodeURIComponent(key)}&id=${encodeURIComponent(job.id)}`
-      );
-
-      if(data.status === "completed"){
-        result.textContent =
-          (data.output || "اكتمل الطلب دون مخرجات") +
-          "\nرمز الخروج: " + data.exit_code;
-        return;
-      }
-
-      if(data.status === "cancelled"){
-        throw new Error("تم إلغاء المهمة");
-      }
-
-      result.textContent = "قيد التنفيذ...";
-    }
-
-    throw new Error("انتهت مهلة انتظار النتيجة");
-
-  } catch(error) {
-    result.textContent = "خطأ: " + error.message;
-  } finally {
-    checkingJob = false;
-  }
-}
-
-document.querySelectorAll("[data-command]").forEach(button=>{
-  button.addEventListener("click",()=>{
-    runDeviceCommand(button.dataset.command);
-  });
-});
-
-/* تشغيل الموقع */
-async function init(){
-  renderHistory();
-
-  try {
-    await pairDevice();
-  } catch(error) {
-    console.warn("Pairing:",error.message);
-  }
-
-  await refreshDevice();
-
-  setInterval(()=>{
-    if(!document.hidden) refreshDevice();
-  },10000);
-
-  document.addEventListener("visibilitychange",()=>{
-    if(!document.hidden) refreshDevice();
-  });
-}
-
-init();
+setInterval(checkStatus,10000);
 </script>
+
 </body>
 </html>
