@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0d10">
-<title>NoRestrictions AI</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
-
-<style>
+<title>NoRestrictions AI</title><link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet"><style>
 :root {
   --bg:#0b0d10;
   --panel:#12151a;
@@ -20,135 +16,339 @@
   --ai:#171c23;
   --error:#ff7777;
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%}
-body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
-.app{width:100%;max-width:900px;height:100dvh;margin:auto;display:flex;flex-direction:column;background:var(--panel);border-inline:1px solid var(--line)}
-header{min-height:65px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:9px;font-weight:700;white-space:nowrap}
-.dot{width:9px;height:9px;background:var(--accent);border-radius:50%;box-shadow:0 0 10px var(--accent)}
+body{
+  font-family:"IBM Plex Sans Arabic",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden
+}
+
+.app{
+  width:100%;
+  max-width:900px;
+  height:100dvh;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  background:var(--panel);
+  border-inline:1px solid var(--line)
+}
+
+header{
+  min-height:65px;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border-bottom:1px solid var(--line)
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-weight:700;
+  white-space:nowrap
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  background:var(--accent);
+  border-radius:50%;
+  box-shadow:0 0 10px var(--accent)
+}
+
 .actions{display:flex;align-items:center;gap:7px}
 button{font-family:inherit;cursor:pointer}
-.ghost,.primary,.danger{border-radius:8px;padding:7px 11px;font-size:13px}
-.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+
+.ghost,.primary,.danger{
+  border-radius:8px;
+  padding:7px 11px;
+  font-size:13px
+}
+
+.ghost{
+  background:transparent;
+  border:1px solid var(--line);
+  color:var(--muted)
+}
+
 .ghost:hover{border-color:var(--accent);color:var(--accent)}
 .primary{background:var(--accent);color:#06150e;border:0;font-weight:700}
 .danger{background:#8d3030;color:white;border:0}
-main{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px}
-.empty{margin:auto;text-align:center;color:var(--muted);max-width:450px;line-height:1.8}
+
+main{
+  flex:1;
+  overflow-y:auto;
+  padding:20px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:14px
+}
+
+.empty{
+  margin:auto;
+  text-align:center;
+  color:var(--muted);
+  max-width:450px;
+  line-height:1.8
+}
+
 .empty h2{color:var(--text);margin-bottom:8px}
-.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:18px}
-.chip{background:var(--ai);border:1px solid var(--line);color:var(--text);border-radius:20px;padding:8px 12px;font-size:13px}
-.msg{max-width:85%;padding:11px 15px;border-radius:14px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin-top:18px
+}
+
+.chip{
+  background:var(--ai);
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:20px;
+  padding:8px 12px;
+  font-size:13px
+}
+
+.msg{
+  max-width:85%;
+  padding:11px 15px;
+  border-radius:14px;
+  line-height:1.8;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere
+}
+
 .msg.user{align-self:flex-start;background:var(--user)}
 .msg.ai{align-self:flex-end;background:var(--ai);border:1px solid var(--line)}
 .msg.error{align-self:center;color:var(--error);text-align:center;font-size:13px}
-.codebox{direction:ltr;text-align:left;margin:10px 0;background:#080b0e;border:1px solid var(--line);border-radius:9px;overflow:hidden}
-.codebar{display:flex;justify-content:space-between;padding:7px 10px;background:#1b2027;color:var(--muted);font-size:12px}
-.copy{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:5px;padding:3px 9px}
-pre{padding:13px;overflow-x:auto;white-space:pre;font-size:13px;line-height:1.6}
+
+.msg a{color:var(--accent);overflow-wrap:anywhere}
+
+.codebox{
+  direction:ltr;
+  text-align:left;
+  margin:10px 0;
+  background:#080b0e;
+  border:1px solid var(--line);
+  border-radius:9px;
+  overflow:hidden
+}
+
+.codebar{
+  display:flex;
+  justify-content:space-between;
+  padding:7px 10px;
+  background:#1b2027;
+  color:var(--muted);
+  font-size:12px
+}
+
+.copy{
+  background:transparent;
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:5px;
+  padding:3px 9px
+}
+
+pre{
+  padding:13px;
+  overflow-x:auto;
+  white-space:pre;
+  font-size:13px;
+  line-height:1.6
+}
+
 .typing{color:var(--muted);font-size:13px}
-.typing span{display:inline-block;width:6px;height:6px;background:var(--muted);border-radius:50%;margin:0 3px;animation:blink 1s infinite}
+
+.typing span{
+  display:inline-block;
+  width:6px;
+  height:6px;
+  background:var(--muted);
+  border-radius:50%;
+  margin:0 3px;
+  animation:blink 1s infinite
+}
+
 .typing span:nth-child(2){animation-delay:.2s}
 .typing span:nth-child(3){animation-delay:.4s}
-@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
-footer{border-top:1px solid var(--line);padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+
+@keyframes blink{
+  0%,100%{opacity:.2}
+  50%{opacity:1}
+}
+
+footer{
+  border-top:1px solid var(--line);
+  padding:12px;
+  padding-bottom:calc(12px + env(safe-area-inset-bottom))
+}
+
 form{display:flex;align-items:flex-end;gap:9px}
-textarea{flex:1;min-width:0;min-height:48px;max-height:150px;resize:none;outline:none;background:var(--bg);border:1px solid var(--line);border-radius:12px;color:var(--text);padding:12px;font:inherit}
+
+textarea{
+  flex:1;
+  min-width:0;
+  min-height:48px;
+  max-height:150px;
+  resize:none;
+  outline:none;
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:12px;
+  color:var(--text);
+  padding:12px;
+  font:inherit
+}
+
 textarea:focus{border-color:var(--accent)}
-.send{height:48px;padding:0 19px;border:0;border-radius:11px;background:var(--accent);color:#06150e;font-weight:700}
-.stop{height:48px;padding:0 13px;border:0;border-radius:10px;background:#d94d4d;color:white}
+
+.send,.stop{
+  height:48px;
+  padding:0 19px;
+  border:0;
+  border-radius:11px;
+  font-weight:700
+}
+
+.send{background:var(--accent);color:#06150e}
+.stop{padding:0 13px;background:#d94d4d;color:white}
+
 .hidden{display:none!important}
-.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:15px;z-index:10}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:#000b;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+  z-index:10
+}
+
 .modal.show{display:flex}
-.sheet{width:100%;max-width:470px;max-height:90dvh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;line-height:1.8}
+
+.sheet{
+  width:100%;
+  max-width:470px;
+  max-height:90dvh;
+  overflow:auto;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:20px;
+  line-height:1.8
+}
+
 .sheet h3{margin-bottom:10px}
 .sheet p,.hint{color:var(--muted);font-size:13px}
-.status{margin-top:13px;padding:10px;border:1px solid var(--line);border-radius:9px;font-size:13px;overflow-wrap:anywhere}
+
+.status{
+  margin-top:13px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  font-size:13px;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap
+}
+
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .row>*{flex:1}
-.field{width:100%;margin-top:8px;background:var(--bg);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:10px;font:inherit}
-.codefield{direction:ltr;text-align:left;word-break:break-all;font-family:monospace;font-size:12px}
-.divider{border:0;border-top:1px solid var(--line);margin:17px 0}
-.toggleline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:9px;font-size:14px}
-.toggleline input{width:20px;height:20px;accent-color:var(--accent)}
-@media(max-width:600px){
- header{padding:10px}
- .brand{font-size:13px}
- .ghost,.primary,.danger{padding:6px 8px;font-size:11px}
- .msg{max-width:95%}
- main{padding:14px 10px}
+
+.field{
+  width:100%;
+  margin-top:8px;
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:9px;
+  color:var(--text);
+  padding:10px;
+  font:inherit
 }
-</style>
-</head>
 
-<body>
-<div class="app">
+.codefield{
+  direction:ltr;
+  text-align:left;
+  word-break:break-all;
+  font-family:monospace;
+  font-size:12px
+}
 
-<header>
+.divider{border:0;border-top:1px solid var(--line);margin:17px 0}
+
+.toggleline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:12px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  font-size:14px
+}
+
+.toggleline input{
+  width:20px;
+  height:20px;
+  accent-color:var(--accent)
+}
+
+@media(max-width:600px){
+  header{padding:10px}
+  .brand{font-size:13px}
+  .ghost,.primary,.danger{padding:6px 8px;font-size:11px}
+  .msg{max-width:95%}
+  main{padding:14px 10px}
+}
+</style></head><body><div class="app"><header>
   <div class="brand">
     <span class="dot"></span>
     NoRestrictions AI
-  </div>
-  <div class="actions">
+  </div>  <div class="actions">
     <button class="ghost" id="connectionBtn">اتصال</button>
     <button class="ghost" id="newChat">محادثة جديدة</button>
   </div>
-</header>
-
-<main id="chat"></main>
-
-<footer>
+</header><main id="chat"></main><footer>
   <form id="form">
     <textarea id="input" rows="1" placeholder="اكتب رسالتك هنا..."></textarea>
     <button class="stop hidden" id="stopBtn" type="button">إيقاف</button>
     <button class="send" id="sendBtn" type="submit">إرسال</button>
   </form>
-</footer>
-</div>
-
-<div class="modal" id="connectionModal">
-<div class="sheet">
-
-<h3>اتصال جهاز Termux</h3>
-<p>أنشئ مفتاحاً خاصاً لهذا الجهاز، ثم انسخ أمر التثبيت إلى Termux. لا تشارك المفتاح مع أي شخص.</p>
-
-<div class="status" id="deviceStatus">
+</footer></div><div class="modal" id="connectionModal">
+<div class="sheet"><h3>اتصال جهاز Termux</h3><p>أنشئ مفتاحاً خاصاً لهذا الجهاز، ثم انسخ أمر التثبيت إلى Termux. لا تشارك المفتاح مع أي شخص.</p><div class="status" id="deviceStatus">
 لم يتم إنشاء مفتاح أو فحص الاتصال بعد.
-</div>
-
-<div class="row">
+</div><div class="row">
 <button class="primary" id="createKeyBtn">إنشاء مفتاح وربط</button>
 <button class="ghost" id="checkDeviceBtn">فحص الحالة</button>
-</div>
-
-<label class="hint">مفتاح الجهاز</label>
+</div><label class="hint">مفتاح الجهاز</label>
 <input class="field codefield" id="deviceKey" readonly placeholder="سيظهر المفتاح هنا">
 
 <label class="hint">أمر التثبيت والاتصال</label>
-<textarea class="field codefield" id="installCommand" rows="3" readonly placeholder="أنشئ المفتاح أولاً"></textarea>
 
-<div class="row">
+<textarea class="field codefield" id="installCommand" rows="3" readonly placeholder="أنشئ المفتاح أولاً"></textarea><div class="row">
 <button class="ghost" id="copyCommandBtn">نسخ الأمر</button>
 <button class="ghost" id="copyKeyBtn">نسخ المفتاح</button>
-</div>
-
-<hr class="divider">
-
-<h3>إدارة المهام</h3>
-<p>التلقائي يتيح تنفيذ المهام الآمنة المحددة دون تأكيد لكل مهمة. لا ينفذ أوامر نظام عشوائية.</p>
-
-<label class="toggleline">
+</div><hr class="divider"><h3>إدارة المهام</h3><p>تقتصر المهام على العمليات الآمنة المحددة في الوكيل.</p><label class="toggleline">
 <span>رد تلقائي على المهام الآمنة</span>
 <input type="checkbox" id="autoMode">
-</label>
-
-<label class="toggleline">
+</label><label class="toggleline">
 <span>تسريع فائق ⚡</span>
 <input type="checkbox" id="turboMode">
-</label>
+</label><label class="hint">اختر مهمة آمنة</label>
 
-<label class="hint">اختر مهمة آمنة</label>
 <select class="field" id="taskSelect">
 <option value="help">مساعدة الوكيل</option>
 <option value="pwd">عرض مجلد العمل</option>
@@ -157,23 +357,13 @@ textarea:focus{border-color:var(--accent)}
 <option value="uname">معلومات النظام</option>
 <option value="python --version">إصدار Python</option>
 <option value="ls">عرض الملفات</option>
-</select>
-
-<div class="row">
+</select><div class="row">
 <button class="primary" id="runTaskBtn">تنفيذ المهمة</button>
 <button class="danger" id="cancelTaskBtn">إيقاف الانتظار</button>
-</div>
-
-<div class="status" id="taskStatus">لا توجد مهمة حالية.</div>
-
-<div class="row">
+</div><div class="status" id="taskStatus">لا توجد مهمة حالية.</div><div class="row">
 <button class="ghost" id="closeModal">إغلاق</button>
-</div>
-
-</div>
-</div>
-
-<script>
+</div></div>
+</div><script>
 "use strict";
 
 const WORKER_URL =
@@ -209,8 +399,11 @@ try {
 
   if (Array.isArray(saved)) {
     history = saved
-      .filter(x => x && ["user","assistant"].includes(x.role)
-      && typeof x.content === "string")
+      .filter(x =>
+        x &&
+        ["user","assistant"].includes(x.role) &&
+        typeof x.content === "string"
+      )
       .slice(-40);
   }
 } catch {
@@ -219,9 +412,12 @@ try {
 
 function saveHistory() {
   try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-40)));
-  } catch (e) {
-    console.error(e);
+    localStorage.setItem(
+      HISTORY_KEY,
+      JSON.stringify(history.slice(-40))
+    );
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -229,10 +425,14 @@ function saveHistory() {
 
 function createMessage(role, content) {
   const element = document.createElement("div");
-  element.className = role === "user" ? "msg user" : "msg ai";
+
+  element.className =
+    role === "user" ? "msg user" : "msg ai";
+
   renderContent(element, content);
   chat.appendChild(element);
   scrollBottom();
+
   return element;
 }
 
@@ -247,7 +447,10 @@ function renderContent(element, content) {
 
   while ((match = regex.exec(text)) !== null) {
     if (match.index > lastIndex) {
-      addTextWithLinks(element, text.slice(lastIndex, match.index));
+      addTextWithLinks(
+        element,
+        text.slice(lastIndex, match.index)
+      );
     }
 
     const box = document.createElement("div");
@@ -269,7 +472,10 @@ function renderContent(element, content) {
       try {
         await navigator.clipboard.writeText(code);
         copy.textContent = "تم النسخ";
-        setTimeout(() => copy.textContent = "نسخ", 1500);
+
+        setTimeout(() => {
+          copy.textContent = "نسخ";
+        }, 1500);
       } catch {
         copy.textContent = "تعذر النسخ";
       }
@@ -293,13 +499,16 @@ function renderContent(element, content) {
 
 function addTextWithLinks(element, text) {
   const regex = /(https?:\/\/[^\s<]+)/g;
+
   let lastIndex = 0;
   let match;
 
   while ((match = regex.exec(text)) !== null) {
     if (match.index > lastIndex) {
       element.appendChild(
-        document.createTextNode(text.slice(lastIndex, match.index))
+        document.createTextNode(
+          text.slice(lastIndex, match.index)
+        )
       );
     }
 
@@ -310,16 +519,22 @@ function addTextWithLinks(element, text) {
 
       if (["https:","http:"].includes(url.protocol)) {
         const link = document.createElement("a");
+
         link.href = url.href;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
         link.textContent = clean;
+
         element.appendChild(link);
       } else {
-        element.appendChild(document.createTextNode(clean));
+        element.appendChild(
+          document.createTextNode(clean)
+        );
       }
     } catch {
-      element.appendChild(document.createTextNode(clean));
+      element.appendChild(
+        document.createTextNode(clean)
+      );
     }
 
     lastIndex = regex.lastIndex;
@@ -341,6 +556,7 @@ function renderEmpty() {
     <div class="empty">
       <h2>أهلاً بك في NoRestrictions AI</h2>
       <p>اكتب سؤالك وسيجيبك الذكاء الاصطناعي.</p>
+
       <div class="chips">
         <button class="chip">اشرح لي الذكاء الاصطناعي</button>
         <button class="chip">ساعدني في البرمجة</button>
@@ -372,52 +588,197 @@ function renderHistory() {
 
 function showTyping() {
   const element = document.createElement("div");
+
   element.className = "msg ai typing";
-  element.innerHTML = "<span></span><span></span><span></span>";
+  element.innerHTML =
+    "<span></span><span></span><span></span>";
+
   chat.appendChild(element);
   scrollBottom();
+
   return element;
 }
 
 function createError(message) {
   const element = document.createElement("div");
+
   element.className = "msg error";
   element.textContent = "⚠️ " + message;
+
   chat.appendChild(element);
   scrollBottom();
 }
 
-/* الدردشة */
+/* طلبات Worker */
+
+async function deviceRequest(path, options = {}) {
+  const response = await fetch(WORKER_URL + path, {
+    ...options,
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data.error || "HTTP " + response.status
+    );
+  }
+
+  return data;
+}
+
+/* انتظار نتيجة Termux */
+
+async function waitForTermux(
+  jobId,
+  key,
+  messageElement,
+  assistantMessage,
+  requestId
+) {
+  const status = document.createElement("div");
+
+  status.style.marginTop = "12px";
+  status.style.color = "var(--muted)";
+  status.textContent =
+    "⏳ تم إرسال المهمة إلى Termux، بانتظار النتيجة...";
+
+  messageElement.appendChild(status);
+
+  const controller = new AbortController();
+  taskPollController = controller;
+
+  const started = Date.now();
+  const maxWait = 180000;
+
+  while (
+    Date.now() - started < maxWait &&
+    requestId === activeRequestId &&
+    !controller.signal.aborted
+  ) {
+    try {
+      const result = await deviceRequest(
+        "/api/device/result?key=" +
+        encodeURIComponent(key) +
+        "&id=" +
+        encodeURIComponent(jobId),
+        {
+          method: "GET",
+          signal: controller.signal
+        }
+      );
+
+      if (requestId !== activeRequestId) return;
+
+      if (result.status === "done") {
+        status.textContent = "✅ اكتملت المهمة في Termux";
+
+        const output = document.createElement("pre");
+
+        output.style.direction = "ltr";
+        output.style.textAlign = "left";
+        output.style.whiteSpace = "pre-wrap";
+        output.style.overflowWrap = "anywhere";
+        output.style.marginTop = "10px";
+        output.style.padding = "12px";
+        output.style.background = "#080b0e";
+        output.style.borderRadius = "9px";
+
+        output.textContent =
+          result.output || "لا يوجد إخراج.";
+
+        messageElement.appendChild(output);
+
+        assistantMessage.content +=
+          "\n\nنتيجة Termux:\n" +
+          (result.output || "لا يوجد إخراج.") +
+          "\nExit code: " + result.exit_code;
+
+        saveHistory();
+        scrollBottom();
+
+        taskPollController = null;
+        return;
+      }
+
+      if (result.status === "cancel") {
+        status.textContent = "تم إلغاء المهمة.";
+        taskPollController = null;
+        return;
+      }
+
+      status.textContent =
+        "⏳ المهمة رقم " + jobId + " قيد التنفيذ...";
+
+    } catch (error) {
+      if (error.name === "AbortError") return;
+
+      status.textContent =
+        "⚠️ تعذر جلب النتيجة: " + error.message;
+
+      taskPollController = null;
+      return;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2500));
+  }
+
+  if (requestId === activeRequestId && !controller.signal.aborted) {
+    status.textContent =
+      "انتهت مهلة الانتظار. قد تكون المهمة ما زالت تعمل في Termux.";
+  }
+
+  taskPollController = null;
+}
+
+/* الدردشة مع الذكاء الاصطناعي وTermux */
 
 async function sendMessage(text) {
   if (busy || !text.trim()) return;
 
   busy = true;
-  const requestId = ++activeRequestId;
 
+  const requestId = ++activeRequestId;
   activeController = new AbortController();
 
   sendBtn.disabled = true;
   stopBtn.classList.remove("hidden");
 
-  if (!history.length) chat.innerHTML = "";
+  if (!history.length) {
+    chat.innerHTML = "";
+  }
 
-  history.push({role:"user", content:text});
+  history.push({
+    role: "user",
+    content: text
+  });
+
   saveHistory();
-
   createMessage("user", text);
 
   const typing = showTyping();
 
   try {
     const messages = history.slice(-20);
+    const deviceKey =
+      localStorage.getItem(DEVICE_KEY_STORAGE) || "";
 
     const response = await fetch(API_URL, {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({messages}),
-      signal:activeController.signal,
-      cache:"no-store"
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messages,
+        deviceKey
+      }),
+      signal: activeController.signal,
+      cache: "no-store"
     });
 
     if (requestId !== activeRequestId) {
@@ -428,28 +789,78 @@ async function sendMessage(text) {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "HTTP " + response.status);
+      throw new Error(
+        data.error || "HTTP " + response.status
+      );
     }
 
-    if (typeof data.reply !== "string" || !data.reply.trim()) {
+    if (
+      typeof data.reply !== "string" ||
+      !data.reply.trim()
+    ) {
       throw new Error("لم تصل إجابة صحيحة من الخادم.");
     }
 
     typing.remove();
 
-    history.push({role:"assistant",content:data.reply});
+    const assistantMessage = {
+      role: "assistant",
+      content: data.reply
+    };
+
+    history.push(assistantMessage);
     saveHistory();
 
-    createMessage("assistant", data.reply);
+    const messageElement = createMessage(
+      "assistant",
+      data.reply
+    );
+
+    if (data.termux?.status === "pending") {
+      await waitForTermux(
+        data.termux.id,
+        deviceKey,
+        messageElement,
+        assistantMessage,
+        requestId
+      );
+
+    } else if (data.termux?.status === "offline") {
+      messageElement.appendChild(
+        document.createTextNode(
+          "\n\n⚠️ جهاز Termux غير متصل. شغّل الوكيل وحاول مجدداً."
+        )
+      );
+
+    } else if (data.termux?.status === "not_paired") {
+      messageElement.appendChild(
+        document.createTextNode(
+          "\n\n⚠️ اربط جهاز Termux أولاً من زر الاتصال."
+        )
+      );
+
+    } else if (data.termux?.status === "rejected") {
+      messageElement.appendChild(
+        document.createTextNode(
+          "\n\n⚠️ هذا الطلب غير متاح ضمن العمليات الآمنة."
+        )
+      );
+    }
 
   } catch (error) {
     typing.remove();
 
-    if (error.name === "AbortError" || requestId !== activeRequestId) {
+    if (
+      error.name === "AbortError" ||
+      requestId !== activeRequestId
+    ) {
       return;
     }
 
-    if (history.length && history[history.length - 1].role === "user") {
+    if (
+      history.length &&
+      history[history.length - 1].role === "user"
+    ) {
       history.pop();
       saveHistory();
     }
@@ -466,6 +877,8 @@ async function sendMessage(text) {
   }
 }
 
+/* إرسال الرسالة */
+
 form.addEventListener("submit", event => {
   event.preventDefault();
 
@@ -480,7 +893,11 @@ form.addEventListener("submit", event => {
 });
 
 input.addEventListener("keydown", event => {
-  if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+  if (
+    event.key === "Enter" &&
+    !event.shiftKey &&
+    !event.isComposing
+  ) {
     event.preventDefault();
     form.requestSubmit();
   }
@@ -488,38 +905,52 @@ input.addEventListener("keydown", event => {
 
 input.addEventListener("input", () => {
   input.style.height = "auto";
-  input.style.height = Math.min(input.scrollHeight, 150) + "px";
+
+  input.style.height =
+    Math.min(input.scrollHeight, 150) + "px";
 });
+
+/* إيقاف الطلب والانتظار */
 
 stopBtn.addEventListener("click", () => {
   if (!busy) return;
 
   activeRequestId++;
+
   activeController?.abort();
+  taskPollController?.abort();
 
   activeController = null;
+  taskPollController = null;
   busy = false;
 
   sendBtn.disabled = false;
   stopBtn.classList.add("hidden");
 
-  createError("تم إيقاف الطلب.");
+  createError(
+    "تم إيقاف الانتظار من الموقع. قد تستمر المهمة التي بدأت بالفعل داخل Termux."
+  );
 });
+
+/* محادثة جديدة */
 
 document.getElementById("newChat").addEventListener("click", () => {
   if (busy) {
     activeRequestId++;
     activeController?.abort();
+    taskPollController?.abort();
   }
 
   busy = false;
   activeController = null;
+  taskPollController = null;
 
   sendBtn.disabled = false;
   stopBtn.classList.add("hidden");
 
   history = [];
   saveHistory();
+
   renderEmpty();
   input.focus();
 });
@@ -542,53 +973,46 @@ document.getElementById("closeModal").addEventListener("click", () => {
   modal.classList.remove("show");
 });
 
-/* مفتاح الجهاز */
+/* إعداد مفتاح الجهاز */
 
 function updateInstallCommand(key) {
   installCommandInput.value =
-    "pkg install python curl -y && curl -fsSLo agent.py https://sdrhaldwany-bit.github.io/air/agent.py && NR_SERVER=" +
-    WORKER_URL + " python agent.py " + key;
+    "pkg install python curl -y && " +
+    "curl -fsSLo agent.py https://sdrhaldwany-bit.github.io/air/agent.py && " +
+    "NR_SERVER=" + WORKER_URL +
+    " python agent.py " + key;
 }
 
-async function deviceRequest(path, options = {}) {
-  const response = await fetch(WORKER_URL + path, {
-    ...options,
-    cache:"no-store",
-    headers:{
-      "Content-Type":"application/json",
-      ...(options.headers || {})
-    }
-  });
-
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(data.error || "HTTP " + response.status);
-  }
-
-  return data;
-}
+/* إنشاء مفتاح وربط الجهاز */
 
 async function createAndPair() {
-  deviceStatus.textContent = "جارٍ إنشاء مفتاح الجهاز...";
+  deviceStatus.textContent =
+    "جارٍ إنشاء مفتاح الجهاز...";
 
   try {
     let key = localStorage.getItem(DEVICE_KEY_STORAGE);
 
     if (!key) {
-      const bytes = crypto.getRandomValues(new Uint8Array(32));
+      const bytes = crypto.getRandomValues(
+        new Uint8Array(32)
+      );
 
       key = Array.from(bytes, byte =>
         byte.toString(16).padStart(2, "0")
       ).join("");
     }
 
-    const result = await deviceRequest("/api/device/pair", {
-      method:"POST",
-      body:JSON.stringify({key})
-    });
+    const result = await deviceRequest(
+      "/api/device/pair",
+      {
+        method: "POST",
+        body: JSON.stringify({ key })
+      }
+    );
 
-    if (!result.ok) throw new Error("لم يكتمل الربط.");
+    if (!result.ok) {
+      throw new Error("لم يكتمل الربط.");
+    }
 
     localStorage.setItem(DEVICE_KEY_STORAGE, key);
 
@@ -599,24 +1023,30 @@ async function createAndPair() {
       "✓ تم تسجيل مفتاح الجهاز. انسخ أمر التثبيت وشغّله في Termux.";
 
   } catch (error) {
-    deviceStatus.textContent = "تعذر الربط: " + error.message;
+    deviceStatus.textContent =
+      "تعذر الربط: " + error.message;
   }
 }
+
+/* فحص الجهاز */
 
 async function checkDevice() {
   const key = localStorage.getItem(DEVICE_KEY_STORAGE);
 
   if (!key) {
-    deviceStatus.textContent = "أنشئ مفتاح الجهاز أولاً.";
+    deviceStatus.textContent =
+      "أنشئ مفتاح الجهاز أولاً.";
     return;
   }
 
-  deviceStatus.textContent = "جارٍ فحص حالة الجهاز...";
+  deviceStatus.textContent =
+    "جارٍ فحص حالة الجهاز...";
 
   try {
     const data = await deviceRequest(
-      "/api/device/status?key=" + encodeURIComponent(key),
-      {method:"GET"}
+      "/api/device/status?key=" +
+      encodeURIComponent(key),
+      { method: "GET" }
     );
 
     deviceStatus.textContent = data.online
@@ -624,7 +1054,8 @@ async function checkDevice() {
       : "✓ المفتاح مسجل، لكن Termux غير متصل حالياً.";
 
   } catch (error) {
-    deviceStatus.textContent = "فشل الفحص: " + error.message;
+    deviceStatus.textContent =
+      "فشل الفحص: " + error.message;
   }
 }
 
@@ -634,68 +1065,95 @@ document.getElementById("createKeyBtn")
 document.getElementById("checkDeviceBtn")
 .addEventListener("click", checkDevice);
 
-/* النسخ */
+/* نسخ النصوص */
 
 async function copyText(text, message) {
   if (!text) {
-    deviceStatus.textContent = "لا يوجد نص للنسخ.";
+    deviceStatus.textContent =
+      "لا يوجد نص للنسخ.";
     return;
   }
 
   try {
     await navigator.clipboard.writeText(text);
+
     deviceStatus.textContent = message;
+
   } catch {
-    deviceStatus.textContent = "تعذر النسخ. انسخ النص يدوياً.";
+    deviceStatus.textContent =
+      "تعذر النسخ. انسخ النص يدوياً.";
   }
 }
 
-document.getElementById("copyCommandBtn").addEventListener("click", () => {
-  copyText(installCommandInput.value, "تم نسخ أمر التثبيت.");
+document.getElementById("copyCommandBtn")
+.addEventListener("click", () => {
+  copyText(
+    installCommandInput.value,
+    "تم نسخ أمر التثبيت."
+  );
 });
 
-document.getElementById("copyKeyBtn").addEventListener("click", () => {
-  copyText(deviceKeyInput.value, "تم نسخ المفتاح.");
+document.getElementById("copyKeyBtn")
+.addEventListener("click", () => {
+  copyText(
+    deviceKeyInput.value,
+    "تم نسخ المفتاح."
+  );
 });
 
-/* أوضاع التشغيل */
+/* إعدادات الواجهة */
 
 const autoMode = document.getElementById("autoMode");
 const turboMode = document.getElementById("turboMode");
 
-autoMode.checked = localStorage.getItem("nr-auto-mode") === "true";
-turboMode.checked = localStorage.getItem("nr-turbo-mode") === "true";
+autoMode.checked =
+  localStorage.getItem("nr-auto-mode") === "true";
+
+turboMode.checked =
+  localStorage.getItem("nr-turbo-mode") === "true";
 
 autoMode.addEventListener("change", () => {
-  localStorage.setItem("nr-auto-mode", String(autoMode.checked));
+  localStorage.setItem(
+    "nr-auto-mode",
+    String(autoMode.checked)
+  );
 });
 
 turboMode.addEventListener("change", () => {
-  localStorage.setItem("nr-turbo-mode", String(turboMode.checked));
+  localStorage.setItem(
+    "nr-turbo-mode",
+    String(turboMode.checked)
+  );
 });
 
-/* إرسال مهمة آمنة */
+/* تنفيذ مهمة يدوية آمنة */
 
 async function runTask() {
   const key = localStorage.getItem(DEVICE_KEY_STORAGE);
 
   if (!key) {
-    taskStatus.textContent = "أنشئ مفتاح الجهاز واربط Termux أولاً.";
+    taskStatus.textContent =
+      "أنشئ مفتاح الجهاز واربط Termux أولاً.";
     return;
   }
 
-  const command = document.getElementById("taskSelect").value;
+  const command =
+    document.getElementById("taskSelect").value;
 
-  taskStatus.textContent = "جارٍ إرسال المهمة...";
+  taskStatus.textContent =
+    "جارٍ إرسال المهمة...";
 
   try {
-    const result = await deviceRequest("/api/device/run", {
-      method:"POST",
-      body:JSON.stringify({
-        key,
-        command
-      })
-    });
+    const result = await deviceRequest(
+      "/api/device/run",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          key,
+          command
+        })
+      }
+    );
 
     taskStatus.textContent =
       "تم إرسال المهمة رقم " + result.id +
@@ -704,29 +1162,41 @@ async function runTask() {
     pollTask(result.id, key);
 
   } catch (error) {
-    taskStatus.textContent = "تعذر إرسال المهمة: " + error.message;
+    taskStatus.textContent =
+      "تعذر إرسال المهمة: " + error.message;
   }
 }
 
+/* انتظار المهمة اليدوية */
+
 async function pollTask(jobId, key) {
-  if (taskPollController) taskPollController.abort();
+  if (taskPollController) {
+    taskPollController.abort();
+  }
 
-  taskPollController = new AbortController();
+  const controller = new AbortController();
+  taskPollController = controller;
 
-  const interval = turboMode.checked ? 1200 : 3000;
+  const interval =
+    turboMode.checked ? 1200 : 3000;
+
   const started = Date.now();
   const maxWait = 180000;
 
   while (
-    taskPollController &&
-    !taskPollController.signal.aborted &&
+    !controller.signal.aborted &&
     Date.now() - started < maxWait
   ) {
     try {
       const result = await deviceRequest(
-        "/api/device/result?key=" + encodeURIComponent(key) +
-        "&id=" + encodeURIComponent(jobId),
-        {method:"GET",signal:taskPollController.signal}
+        "/api/device/result?key=" +
+        encodeURIComponent(key) +
+        "&id=" +
+        encodeURIComponent(jobId),
+        {
+          method: "GET",
+          signal: controller.signal
+        }
       );
 
       if (result.status === "done") {
@@ -734,32 +1204,39 @@ async function pollTask(jobId, key) {
           "اكتملت المهمة.\n\n" +
           (result.output || "لا يوجد إخراج") +
           "\n\nExit code: " + result.exit_code;
+
         taskPollController = null;
         return;
       }
 
       if (result.status === "cancel") {
-        taskStatus.textContent = "تم إلغاء المهمة.";
+        taskStatus.textContent =
+          "تم إلغاء المهمة.";
+
         taskPollController = null;
         return;
       }
 
       taskStatus.textContent =
-        "المهمة رقم " + jobId + " قيد التنفيذ...";
+        "المهمة رقم " + jobId +
+        " قيد التنفيذ...";
 
     } catch (error) {
       if (error.name === "AbortError") return;
 
       taskStatus.textContent =
         "تعذر جلب النتيجة: " + error.message;
+
       taskPollController = null;
       return;
     }
 
-    await new Promise(resolve => setTimeout(resolve, interval));
+    await new Promise(resolve =>
+      setTimeout(resolve, interval)
+    );
   }
 
-  if (taskPollController && !taskPollController.signal.aborted) {
+  if (!controller.signal.aborted) {
     taskStatus.textContent =
       "انتهت مهلة انتظار النتيجة. افحص حالة الجهاز وحاول مجدداً.";
   }
@@ -769,6 +1246,8 @@ async function pollTask(jobId, key) {
 
 document.getElementById("runTaskBtn")
 .addEventListener("click", runTask);
+
+/* إيقاف انتظار المهمة اليدوية */
 
 document.getElementById("cancelTaskBtn")
 .addEventListener("click", () => {
@@ -781,10 +1260,9 @@ document.getElementById("cancelTaskBtn")
     "تم إيقاف انتظار النتيجة من الموقع. هذا لا يوقف عملية تعمل بالفعل داخل Termux.";
 });
 
-/* بدء الصفحة */
+/* تشغيل الواجهة */
 
 renderHistory();
 
-</script>
-</body>
-</html>
+</script></body>
+  </html>
