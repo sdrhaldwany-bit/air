@@ -1,23 +1,18 @@
-#!/usr/bin/env python3
-# NoRestrictions AI - Termux Agent 4.1
-
 import os
 import sys
-import time
 import json
-import shlex
-import signal
+import time
 import secrets
-import platform
 import pathlib
-import argparse
+import subprocess
+import shlex
 import urllib.request
 import urllib.error
 from datetime import datetime
 
-# ==============================
-# CONFIGURATION
-# ==============================
+# =====================================
+# NoRestrictions AI - Termux Agent 4.2
+# =====================================
 
 SERVER = "https://norestrictions-api.sdrhaldwane.workers.dev"
 
@@ -26,29 +21,14 @@ KEY_FILE = HOME / ".nr_agent_key"
 
 POLL_INTERVAL = 2
 PING_INTERVAL = 10
-MAX_OUTPUT = 12000
 REQUEST_TIMEOUT = 20
 
 running = True
 
 
-# ==============================
-# STOP HANDLER
-# ==============================
-
-def stop_agent(signum, frame):
-    global running
-    running = False
-    print("\nStopping agent...")
-
-
-signal.signal(signal.SIGINT, stop_agent)
-signal.signal(signal.SIGTERM, stop_agent)
-
-
-# ==============================
-# DEVICE KEY
-# ==============================
+# =====================================
+# KEY
+# =====================================
 
 def get_key():
     if KEY_FILE.exists():
@@ -58,8 +38,8 @@ def get_key():
             return key
 
     key = secrets.token_hex(32)
-
     KEY_FILE.write_text(key)
+
     try:
         KEY_FILE.chmod(0o600)
     except OSError:
@@ -68,344 +48,382 @@ def get_key():
     return key
 
 
-# ==============================
-# HTTP REQUEST
-# ==============================
+KEY = get_key()
 
-def request_api(endpoint, data=None, method="POST"):
-    url = SERVER + "/api/device/" + endpoint
+
+# =====================================
+# HTTP
+# =====================================
+
+def request(path, data=None, method="POST"):
+    url = SERVER + path
 
     headers = {
         "Content-Type": "application/json",
-        "User-Agent": "NoRestrictions-Termux-Agent/4.1"
+        "User-Agent": "NoRestrictions-Agent/4.2"
     }
 
-    body = None
+    payload = None
 
     if data is not None:
-        body = json.dumps(data).encode("utf-8")
+        payload = json.dumps(data).encode("utf-8")
 
-    request = urllib.request.Request(
+    req = urllib.request.Request(
         url,
-        data=body,
+        data=payload,
         headers=headers,
         method=method
     )
 
     try:
         with urllib.request.urlopen(
-            request,
+            req,
             timeout=REQUEST_TIMEOUT
         ) as response:
+            raw = response.read().decode("utf-8", errors="replace")
 
-            raw = response.read().decode("utf-8")
-            return json.loads(raw) if raw else {}
+            if not raw:
+                return {}
 
-    except urllib.error.HTTPError as error:
-        message = error.read().decode("utf-8", errors="replace")
-        print("HTTP error:", error.code, message[:300])
-        return None
+            return json.loads(raw)
 
-    except Exception as error:
-        print("Connection error:", str(error))
-        return None
+    except urllib.error.HTTPError as e:
+        message = e.read().decode("utf-8", errors="replace")
+        raise Exception(
+            f"HTTP {e.code}: {message[:300]}"
+        )
+
+    except urllib.error.URLError as e:
+        raise Exception(f"Network error: {e.reason}")
 
 
-# ==============================
+# =====================================
 # PAIR DEVICE
-# ==============================
+# =====================================
 
-def pair_device(key):
-    result = request_api(
-        "pair",
+def pair_device():
+    print("\n[*] Connecting device...")
+
+    result = request(
+        "/api/device/pair",
         {
-            "key": key,
+            "key": KEY,
             "kind": "Termux",
-            "info": (
-                "Android Termux | " +
-                platform.machine()
-            )
+            "info": "Android Termux Agent 4.2"
         }
     )
 
-    if result is None:
-        print("Pairing failed.")
+    if not result.get("ok"):
+        raise Exception("Device pairing failed")
+
+    print("[+] Device paired successfully.")
+
+    print("\n" + "=" * 45)
+    print("DEVICE KEY - COPY THIS INTO YOUR WEBSITE")
+    print("=" * 45)
+    print(KEY)
+    print("=" * 45 + "\n")
+
+
+# =====================================
+# PING
+# =====================================
+
+def ping():
+    try:
+        request(
+            "/api/device/ping",
+            {
+                "key": KEY,
+                "info": "Online - Agent 4.2"
+            }
+        )
+
+        return True
+
+    except Exception as e:
+        print("[PING ERROR]", e)
         return False
 
-    if result.get("error"):
-        print("Pairing rejected:", result["error"])
-        return False
 
-    print("Device pairing checked.")
-    return True
-
-
-# ==============================
+# =====================================
 # SAFE PATH
-# ==============================
+# =====================================
 
-def safe_path(value):
+def safe_path(path):
+    if not isinstance(path, str):
+        raise ValueError("Invalid path")
+
+    if not path or len(path) > 300:
+        raise ValueError("Invalid path length")
+
+    if ".." in pathlib.PurePosixPath(path).parts:
+        raise ValueError("Parent directory access is blocked")
+
+    candidate = (HOME / path).resolve()
+
     try:
-        path = pathlib.Path(value).expanduser()
+        candidate.relative_to(HOME)
+    except ValueError:
+        raise ValueError("Access outside Termux home is blocked")
 
-        if not path.is_absolute():
-            path = HOME / path
-
-        resolved = path.resolve()
-
-        resolved.relative_to(HOME)
-
-        return resolved
-
-    except (ValueError, OSError):
-        raise ValueError("Path is outside the allowed home directory.")
+    return candidate
 
 
-# ==============================
-# COMMAND EXECUTION
-# ==============================
+# =====================================
+# COMMAND EXECUTOR
+# =====================================
 
-def execute(command):
+def execute_command(command):
+    if not isinstance(command, str):
+        return "Invalid command", 1
+
     try:
-        parts = shlex.split(command)
+        args = shlex.split(command)
+    except ValueError:
+        return "Invalid command format", 1
 
-        if not parts:
-            return "Empty command.", 1
+    if not args:
+        return "Empty command", 1
 
-        name = parts[0]
+    operation = args[0]
 
-        # HELP
-        if name == "help" and len(parts) == 1:
-            return (
-                "Available operations:\n"
-                "pwd\n"
-                "whoami\n"
-                "date\n"
-                "uname\n"
-                "python --version\n"
-                "ls [path]\n"
-                "cat [file]\n"
-                "help"
-            ), 0
+    # pwd
+    if operation == "pwd" and len(args) == 1:
+        return str(HOME), 0
 
-        # PWD
-        if name == "pwd" and len(parts) == 1:
-            return os.getcwd(), 0
+    # whoami
+    if operation == "whoami" and len(args) == 1:
+        try:
+            result = subprocess.run(
+                ["whoami"],
+                cwd=str(HOME),
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            return result.stdout or result.stderr, result.returncode
+        except Exception as e:
+            return str(e), 1
 
-        # WHOAMI
-        if name == "whoami" and len(parts) == 1:
-            return os.getenv("USER", "unknown"), 0
+    # date
+    if operation == "date" and len(args) == 1:
+        return datetime.now().astimezone().isoformat(), 0
 
-        # DATE
-        if name == "date" and len(parts) == 1:
-            return datetime.now().astimezone().isoformat(), 0
+    # uname
+    if operation == "uname" and len(args) == 1:
+        try:
+            result = subprocess.run(
+                ["uname"],
+                cwd=str(HOME),
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            return result.stdout or result.stderr, result.returncode
+        except Exception as e:
+            return str(e), 1
 
-        # UNAME
-        if name == "uname" and len(parts) == 1:
-            return platform.platform(), 0
-
-        # PYTHON VERSION
-        if (
-            name == "python"
-            and len(parts) == 2
-            and parts[1] == "--version"
-        ):
-            return sys.version, 0
-
-        # LIST FILES
-        if name == "ls" and len(parts) <= 2:
-            target = safe_path(parts[1] if len(parts) == 2 else ".")
-
-            if not target.exists():
-                return "Path does not exist.", 1
-
-            if not target.is_dir():
-                return target.name, 0
-
-            entries = sorted(
-                target.iterdir(),
-                key=lambda item: item.name.lower()
+    # python --version
+    if operation == "python" and args == ["python", "--version"]:
+        try:
+            result = subprocess.run(
+                [sys.executable, "--version"],
+                cwd=str(HOME),
+                capture_output=True,
+                text=True,
+                timeout=10
             )
 
-            lines = []
+            output = result.stdout or result.stderr
+            return output, result.returncode
 
-            for item in entries[:300]:
-                suffix = "/" if item.is_dir() else ""
-                lines.append(item.name + suffix)
+        except Exception as e:
+            return str(e), 1
 
-            return "\n".join(lines) or "Directory is empty.", 0
+    # help
+    if operation == "help" and len(args) == 1:
+        return (
+            "Available operations:\n"
+            "pwd\n"
+            "whoami\n"
+            "date\n"
+            "uname\n"
+            "python --version\n"
+            "ls [path]\n"
+            "cat [path]\n"
+            "help",
+            0
+        )
 
-        # READ FILE
-        if name == "cat" and len(parts) == 2:
-            target = safe_path(parts[1])
+    # ls
+    if operation == "ls" and len(args) <= 2:
+        path = args[1] if len(args) == 2 else "."
+
+        try:
+            target = safe_path(path)
 
             if not target.exists():
-                return "File does not exist.", 1
+                return "Path does not exist", 1
+
+            if not target.is_dir():
+                return "Path is not a directory", 1
+
+            entries = sorted(os.listdir(target))
+
+            if not entries:
+                return "Directory is empty", 0
+
+            return "\n".join(entries[:300]), 0
+
+        except Exception as e:
+            return str(e), 1
+
+    # cat
+    if operation == "cat" and len(args) == 2:
+        try:
+            target = safe_path(args[1])
+
+            if not target.exists():
+                return "File does not exist", 1
 
             if not target.is_file():
-                return "Not a regular file.", 1
+                return "Not a file", 1
 
-            if target.stat().st_size > MAX_OUTPUT:
-                return "File is too large to read.", 1
+            if target.stat().st_size > 50000:
+                return "File is too large (50 KB limit)", 1
 
             content = target.read_text(
                 encoding="utf-8",
                 errors="replace"
             )
 
-            return content[:MAX_OUTPUT], 0
+            return content[:12000], 0
 
-        return (
-            "Operation not allowed.\n"
-            "Use help to see available operations."
-        ), 1
+        except Exception as e:
+            return str(e), 1
 
-    except ValueError as error:
-        return str(error), 1
-
-    except Exception as error:
-        return "Execution error: " + str(error), 1
+    return "Operation not allowed by Agent 4.2", 1
 
 
-# ==============================
+# =====================================
+# POLL JOB
+# =====================================
+
+def poll_job():
+    result = request(
+        "/api/device/poll",
+        {"key": KEY}
+    )
+
+    return result.get("job")
+
+
+# =====================================
 # SEND RESULT
-# ==============================
+# =====================================
 
-def send_result(key, job_id, output, exit_code):
-    return request_api(
-        "done",
+def send_result(job_id, output, exit_code):
+    return request(
+        "/api/device/done",
         {
-            "key": key,
-            "id": job_id,
-            "output": str(output)[-MAX_OUTPUT:],
+            "key": KEY,
+            "id": int(job_id),
+            "output": str(output)[:12000],
             "exit_code": int(exit_code)
         }
     )
 
 
-# ==============================
-# HANDLE JOB
-# ==============================
+# =====================================
+# PROCESS JOB
+# =====================================
 
-def handle_job(key, job):
-    if not isinstance(job, dict):
-        return
-
+def process_job(job):
     job_id = job.get("id")
     command = job.get("command")
 
-    if job_id is None or not isinstance(command, str):
-        print("Invalid job received.")
+    if not job_id or not command:
+        print("[!] Invalid job received")
         return
 
-    print("\nNew task:", command)
+    print("\n[JOB]", job_id)
+    print("[COMMAND]", command)
 
-    output, exit_code = execute(command)
+    try:
+        output, exit_code = execute_command(command)
 
-    print(output)
+    except Exception as e:
+        output = str(e)
+        exit_code = 1
 
-    result = send_result(
-        key,
-        job_id,
-        output,
-        exit_code
-    )
+    try:
+        send_result(job_id, output, exit_code)
 
-    if result is not None:
-        print("Result submitted.")
-    else:
-        print("Could not submit result.")
+        print("[+] Result sent successfully")
+        print(output[:1000])
 
-
-# ==============================
-# HEARTBEAT
-# ==============================
-
-def ping_device(key):
-    return request_api(
-        "ping",
-        {
-            "key": key,
-            "kind": "Termux",
-            "info": platform.platform()
-        }
-    )
+    except Exception as e:
+        print("[RESULT ERROR]", e)
 
 
-# ==============================
-# POLL JOB
-# ==============================
-
-def poll_job(key):
-    return request_api(
-        "poll",
-        {
-            "key": key
-        }
-    )
-
-
-# ==============================
+# =====================================
 # MAIN LOOP
-# ==============================
+# =====================================
 
 def main():
-    print("=" * 40)
-    print(" NoRestrictions AI - Termux Agent 4.1")
-    print("=" * 40)
+    global running
 
-    key = get_key()
+    print("=" * 45)
+    print(" NoRestrictions AI - Agent 4.2")
+    print("=" * 45)
 
-    print("Connecting to server...")
+    print("[*] Server:", SERVER)
+    print("[*] Home:", HOME)
 
-    if not pair_device(key):
-        print("Unable to pair device.")
+    try:
+        pair_device()
+    except Exception as e:
+        print("[PAIR ERROR]", e)
+        print("Check your internet and Worker deployment.")
         return
-
-    print("Agent started successfully.")
-    print("Waiting for tasks...\n")
 
     last_ping = 0
 
+    print("[+] Agent started.")
+    print("[*] Waiting for jobs...\n")
+
     while running:
+        try:
+            now = time.time()
 
-        current_time = time.time()
+            if now - last_ping >= PING_INTERVAL:
+                if ping():
+                    print("[ONLINE] Device heartbeat OK")
 
-        # HEARTBEAT
-        if current_time - last_ping >= PING_INTERVAL:
-            ping_device(key)
-            last_ping = current_time
+                last_ping = now
 
-        # POLL
-        result = poll_job(key)
+            job = poll_job()
 
-        if result is None:
+            if job:
+                process_job(job)
+
             time.sleep(POLL_INTERVAL)
-            continue
 
-        # IMPORTANT:
-        # Worker returns a singular "job", not "jobs".
+        except KeyboardInterrupt:
+            print("\n[!] Agent stopped by user.")
+            running = False
 
-        job = result.get("job")
+        except Exception as e:
+            print("[AGENT ERROR]", e)
+            time.sleep(5)
 
-        if job and running:
-            handle_job(key, job)
-
-        time.sleep(POLL_INTERVAL)
-
-    print("Agent stopped.")
+    print("[*] Agent stopped.")
 
 
-# ==============================
+# =====================================
 # START
-# ==============================
+# =====================================
 
 if __name__ == "__main__":
-    try:
-        main()
-
-    except KeyboardInterrupt:
-        print("\nAgent stopped.")
-
-    except Exception as error:
-        print("Fatal error:", error)
+    main()
