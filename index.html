@@ -312,7 +312,8 @@ font-size:13px
 text-align:center;
 font-size:11px;
 color:#64748b;
-margin-top:9px
+margin-top:9px;
+line-height:1.7
 }
 
 @media(max-width:500px){
@@ -432,7 +433,8 @@ onclick="send()">
 </div>
 
 <div class="footer-note">
-NoRestrictions AI · AI Assistant
+NoRestrictions AI · AI Assistant<br>
+تُسجّل معلومات الاتصال والمتصفح لأغراض الأمان.
 </div>
 
 </div>
@@ -466,18 +468,44 @@ const systemPrompt = `
 `;
 
 
+/* تسجيل زيارة الموقع */
+
+(async function registerVisit(){
+
+try{
+
+await fetch(
+API + "/visit?page=" + encodeURIComponent(location.pathname),
+{
+method:"POST"
+}
+);
+
+}catch(error){
+
+console.error("Visit registration failed");
+
+}
+
+})();
+
+
 /* اقتراحات البداية */
 
 function suggest(text){
+
 $("input").value = text;
 $("input").focus();
+
 }
 
 
 /* النزول لآخر المحادثة */
 
 function scrollBottom(){
+
 $("main").scrollTop = $("main").scrollHeight;
+
 }
 
 
@@ -519,6 +547,7 @@ $("messages").appendChild(div);
 scrollBottom();
 
 return div;
+
 }
 
 
@@ -902,7 +931,9 @@ return null;
 
 async function requestAI(){
 
-const response = await fetch(API + "/api/chat",{
+/* المسار /chat متوافق مع Worker 17.0 */
+
+const response = await fetch(API + "/chat",{
 
 method:"POST",
 
@@ -930,7 +961,7 @@ data = await response.json();
 }catch{
 
 throw new Error(
-"الخادم أرجع استجابة غير مفهومة. تحقق من مسار /api/chat."
+"الخادم أرجع استجابة غير مفهومة. تحقق من Worker."
 );
 
 }
@@ -976,6 +1007,8 @@ const imageFile = selectedImage;
 
 $("input").value = "";
 
+$("input").style.height = "auto";
+
 let typing = null;
 
 try{
@@ -983,8 +1016,6 @@ try{
 let content;
 
 if(imageFile){
-
-/* قراءة الصورة قبل إزالة المعاينة */
 
 const dataUrl = await imageToBase64(imageFile);
 
@@ -1005,8 +1036,6 @@ detail:"auto"
 }
 
 ];
-
-/* نستخدم Base64 في الرسالة حتى لا تختفي الصورة */
 
 addMessage(
 "user",
