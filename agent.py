@@ -1,172 +1,166 @@
-import os
-import sys
-import json
-import time
-import hashlib
-import urllib.request
-import urllib.error
-import subprocess
-from pathlib import Path
+// ======================================
+// NORESTRICTIONS AGENT v1.0
+// ======================================
 
-VERSION = "8.0"
-SERVER = os.environ.get(
-    "NR_SERVER",
-    "https://norestrictions-api.sdrhaldwane.workers.dev"
-).rstrip("/")
+class Agent {
 
-WORKSPACE = Path.home() / "nr_workspace"
-WORKSPACE.mkdir(exist_ok=True)
+  static VERSION = "1.0";
 
-if len(sys.argv) > 1:
-    KEY = sys.argv[1]
-else:
-    KEY = input("Device Key: ").strip()
+  // فحص الصورة
+  static async inspect(imageData) {
+    try {
+      if (!imageData) {
+        throw new Error("Image is required");
+      }
 
-if len(KEY) < 32:
-    print("Invalid device key")
-    sys.exit(1)
+      const image = decodeImage(imageData);
+      const result = Work.inspect(image);
 
+      return {
+        success: true,
+        agent: "NoRestrictions Agent",
+        version: this.VERSION,
 
-def request(method, endpoint, data=None):
-    url = SERVER + endpoint
-    body = json.dumps(data).encode() if data is not None else None
+        image: {
+          format: "PNG",
+          size: image.length
+        },
 
-    req = urllib.request.Request(
-        url,
-        data=body,
-        method=method,
-        headers={"Content-Type": "application/json"}
-    )
+        metadata: result.metadata,
 
-    with urllib.request.urlopen(req, timeout=30) as response:
-        return json.loads(response.read().decode())
+        message: "Image inspected successfully"
+      };
 
+    } catch (error) {
+      return this.error(error);
+    }
+  }
 
-def safe_path(filename):
-    path = (WORKSPACE / filename).resolve()
+  // تجهيز معاينة التعديل دون تسليم الصورة المعدّلة
+  static async prepareEdit(imageData, operations) {
+    try {
+      if (!imageData) {
+        throw new Error("Image is required");
+      }
 
-    if path != WORKSPACE and WORKSPACE not in path.parents:
-        raise ValueError("Path outside workspace")
+      if (!Array.isArray(operations) || operations.length === 0) {
+        throw new Error("No operations provided");
+      }
 
-    return path
+      const image = decodeImage(imageData);
 
+      const before = Work.inspect(image).metadata;
 
-def execute_task(task):
-    action = task.get("action")
+      const result = Work.process(
+        image,
+        operations
+      );
 
-    if action == "help":
-        return "Supported: write_file, read_file, list_files, mkdir, run_python"
+      return {
+        success: true,
+        agent: "NoRestrictions Agent",
+        version: this.VERSION,
 
-    if action == "write_file":
-        path = safe_path(task["path"])
-        content = task.get("content", "")
+        status: "awaiting_confirmation",
 
-        if len(content) > 500_000:
-            raise ValueError("File too large")
+        preview: {
+          before,
+          after: result.metadata,
+          operations
+        },
 
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content, encoding="utf-8")
-        return f"File created: {path.name}"
+        message: "Review the changes before applying them"
+      };
 
-    if action == "read_file":
-        path = safe_path(task["path"])
+    } catch (error) {
+      return this.error(error);
+    }
+  }
 
-        if not path.is_file():
-            raise FileNotFoundError(path.name)
+  // تنفيذ التعديلات بعد التأكيد
+  static async applyEdit(imageData, operations, confirmed) {
+    try {
+      if (confirmed !== true) {
+        throw new Error("User confirmation is required");
+      }
 
-        if path.stat().st_size > 500_000:
-            raise ValueError("File too large")
+      if (!imageData) {
+        throw new Error("Image is required");
+      }
 
-        return path.read_text(encoding="utf-8")
+      if (!Array.isArray(operations) || operations.length === 0) {
+        throw new Error("No operations provided");
+      }
 
-    if action == "list_files":
-        folder = safe_path(task.get("path", "."))
-        if not folder.is_dir():
-            raise NotADirectoryError(folder.name)
+      const image = decodeImage(imageData);
 
-        return "\n".join(
-            str(p.relative_to(WORKSPACE))
-            for p in sorted(folder.rglob("*"))
-            if p.is_file()
-        )[:20000]
+      const result = Work.process(
+        image,
+        operations
+      );
 
-    if action == "mkdir":
-        path = safe_path(task["path"])
-        path.mkdir(parents=True, exist_ok=True)
-        return f"Directory created: {path.name}"
+      return {
+        success: true,
+        agent: "NoRestrictions Agent",
+        version: this.VERSION,
 
-    if action == "run_python":
-        path = safe_path(task["path"])
+        status: "completed",
 
-        if not path.is_file() or path.suffix != ".py":
-            raise ValueError("A Python file inside the workspace is required")
+        image: encodeImage(result.image),
 
-        result = subprocess.run(
-            [sys.executable, str(path)],
-            cwd=str(WORKSPACE),
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
+        format: "image/png",
 
-        return json.dumps({
-            "stdout": result.stdout[-12000:],
-            "stderr": result.stderr[-12000:],
-            "exit_code": result.returncode
-        }, ensure_ascii=False)
+        metadata: result.metadata,
 
-    raise ValueError("Unsupported action")
+        message: "Image metadata updated successfully"
+      };
 
+    } catch (error) {
+      return this.error(error);
+    }
+  }
 
-def send_result(job_id, output, exit_code):
-    request("POST", "/api/device/done", {
-        "key": KEY,
-        "id": job_id,
-        "output": str(output)[:20000],
-        "exit_code": exit_code
-    })
+  // استقبال المهمة وتوجيهها
+  static async run(task) {
+    try {
+      if (!task || typeof task !== "object") {
+        throw new Error("Invalid task");
+      }
 
+      switch (task.action) {
 
-def main():
-    print(f"NoRestrictions Agent {VERSION}")
-    print("Workspace:", WORKSPACE)
-    print("Connecting to server...")
+        case "inspect":
+          return await this.inspect(task.image);
 
-    while True:
-        try:
-            data = request(
-                "GET",
-                "/api/device/poll?key=" + KEY
-            )
+        case "preview":
+          return await this.prepareEdit(
+            task.image,
+            task.operations
+          );
 
-            for job in data.get("jobs", []):
-                job_id = job.get("id")
+        case "apply":
+          return await this.applyEdit(
+            task.image,
+            task.operations,
+            task.confirmed
+          );
 
-                try:
-                    raw = job.get("command", "{}")
-                    task = json.loads(raw) if isinstance(raw, str) else raw
+        default:
+          throw new Error("Unknown agent action");
+      }
 
-                    print("\n[JOB]", job_id)
-                    print("[ACTION]", task.get("action"))
+    } catch (error) {
+      return this.error(error);
+    }
+  }
 
-                    output = execute_task(task)
-                    send_result(job_id, output, 0)
-
-                    print("[DONE]", job_id)
-
-                except Exception as error:
-                    send_result(job_id, str(error), 1)
-                    print("[ERROR]", error)
-
-        except KeyboardInterrupt:
-            print("\nAgent stopped.")
-            break
-
-        except Exception as error:
-            print("[CONNECTION ERROR]", error)
-
-        time.sleep(3)
-
-
-if __name__ == "__main__":
-    main()
+  // معالجة الأخطاء
+  static error(error) {
+    return {
+      success: false,
+      agent: "NoRestrictions Agent",
+      version: this.VERSION,
+      error: error.message || "Agent error"
+    };
+  }
+}
