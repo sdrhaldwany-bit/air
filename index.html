@@ -1,8 +1,10 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NoRestrictions AI</title><style>
+<title>NoRestrictions AI</title>
+<style>
 :root{
 --bg:#090d14;
 --panel:#111824;
@@ -12,279 +14,144 @@
 --text:#f0f4fa;
 --muted:#8b9aaf;
 }
-
 *{box-sizing:border-box}
-
 body{
-margin:0;
-background:var(--bg);
-color:var(--text);
-font-family:Arial,sans-serif;
-height:100dvh;
-display:flex;
-flex-direction:column;
-overflow:hidden;
+margin:0;background:var(--bg);color:var(--text);
+font-family:Arial,sans-serif;height:100dvh;
+display:flex;flex-direction:column;overflow:hidden
 }
-
 header{
-height:65px;
-flex-shrink:0;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 18px;
-background:#101722;
-border-bottom:1px solid var(--border);
+height:65px;flex-shrink:0;display:flex;
+align-items:center;justify-content:space-between;
+padding:0 18px;background:#101722;
+border-bottom:1px solid var(--border)
 }
-
-.logo{
-font-size:20px;
-font-weight:bold;
-color:var(--green);
-}
-
-.status{
-font-size:12px;
-color:var(--green);
-}
-
-main{
-flex:1;
-overflow-y:auto;
-width:100%;
-}
-
-.container{
-max-width:850px;
-margin:auto;
-padding:20px 15px 30px;
-}
-
-#welcome{
-text-align:center;
-padding:70px 10px 35px;
-}
-
-#welcome h1{
-font-size:30px;
-margin:0 0 12px;
-color:var(--green);
-}
-
-#welcome p{
-color:var(--muted);
-line-height:1.8;
-}
-
+.logo{font-size:20px;font-weight:bold;color:var(--green)}
+.status{font-size:12px;color:var(--green)}
+main{flex:1;overflow-y:auto;width:100%}
+.container{max-width:850px;margin:auto;padding:20px 15px 30px}
+#welcome{text-align:center;padding:70px 10px 35px}
+#welcome h1{font-size:30px;margin:0 0 12px;color:var(--green)}
+#welcome p{color:var(--muted);line-height:1.8}
 .suggestions{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-margin-top:25px;
+display:grid;grid-template-columns:repeat(2,1fr);
+gap:10px;margin-top:25px
 }
-
 .suggestion{
-background:var(--panel);
-border:1px solid var(--border);
-border-radius:12px;
-padding:15px;
-color:#dce5f2;
-cursor:pointer;
-text-align:right;
+background:var(--panel);border:1px solid var(--border);
+border-radius:12px;padding:15px;color:#dce5f2;
+cursor:pointer;text-align:right
 }
-
-.suggestion:hover{
-border-color:var(--green);
-}
-
-#messages{
-display:flex;
-flex-direction:column;
-gap:18px;
-}
-
+.suggestion:hover{border-color:var(--green)}
+#messages{display:flex;flex-direction:column;gap:18px}
 .message{
-max-width:95%;
-padding:14px;
-border-radius:15px;
-line-height:1.8;
-overflow-wrap:anywhere;
+max-width:95%;padding:14px;border-radius:15px;
+line-height:1.8;overflow-wrap:anywhere
 }
-
 .user{
-align-self:flex-start;
-background:#18392f;
-border:1px solid #285b48;
+align-self:flex-start;background:#18392f;
+border:1px solid #285b48
 }
-
 .ai{
-align-self:flex-end;
-background:var(--panel);
-border:1px solid var(--border);
-width:100%;
+align-self:flex-end;background:var(--panel);
+border:1px solid var(--border);width:100%
 }
-
 .message img{
-display:block;
-max-width:100%;
-max-height:300px;
-border-radius:12px;
-margin-bottom:10px;
+display:block;max-width:100%;max-height:300px;
+border-radius:12px;margin-bottom:10px
 }
-
 .message pre{
-direction:ltr;
-text-align:left;
-overflow-x:auto;
-white-space:pre;
-background:#080c13;
-border:1px solid #29364a;
-border-radius:0 0 9px 9px;
-padding:15px;
-margin:0;
-font-family:monospace;
-font-size:13px;
+direction:ltr;text-align:left;overflow-x:auto;
+white-space:pre;background:#080c13;
+border:1px solid #29364a;border-radius:0 0 9px 9px;
+padding:15px;margin:0;font-family:monospace;font-size:13px
 }
-
 .code-header{
-direction:ltr;
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:7px;
-background:#202c3c;
-padding:9px 12px;
-border-radius:9px 9px 0 0;
-font-size:12px;
-color:#a9bdd4;
+direction:ltr;display:flex;justify-content:space-between;
+align-items:center;flex-wrap:wrap;gap:7px;
+background:#202c3c;padding:9px 12px;
+border-radius:9px 9px 0 0;font-size:12px;color:#a9bdd4
 }
-
 .code-header button{
-background:#34475d;
-color:white;
-padding:7px 12px;
-border-radius:6px;
-border:0;
-cursor:pointer;
+background:#34475d;color:white;padding:7px 12px;
+border-radius:6px;border:0;cursor:pointer
 }
-
-.code-box{
-margin:12px 0;
-direction:ltr;
-}
-
+.code-box{margin:12px 0;direction:ltr}
 .save-image-btn{
 background:var(--green)!important;
-color:#07150f!important;
-font-weight:bold;
+color:#07150f!important;font-weight:bold
 }
-
 .composer-area{
-flex-shrink:0;
-background:#0d131d;
-border-top:1px solid var(--border);
-padding:12px;
+flex-shrink:0;background:#0d131d;
+border-top:1px solid var(--border);padding:12px
 }
-
 .composer{
-max-width:850px;
-margin:auto;
-background:var(--panel);
-border:1px solid var(--border);
-border-radius:16px;
-padding:10px;
+max-width:850px;margin:auto;background:var(--panel);
+border:1px solid var(--border);border-radius:16px;padding:10px
 }
-
 #input{
-width:100%;
-resize:none;
-min-height:48px;
-max-height:150px;
-background:transparent;
-border:0;
-outline:0;
-color:white;
-font-size:16px;
-padding:10px;
-font-family:Arial;
+width:100%;resize:none;min-height:48px;max-height:150px;
+background:transparent;border:0;outline:0;color:white;
+font-size:16px;padding:10px;font-family:Arial
 }
-
 .actions{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:8px;
+display:flex;align-items:center;
+justify-content:space-between;gap:8px
 }
-
-.action-left{
-display:flex;
-gap:8px;
-align-items:center;
-}
-
-button{
-cursor:pointer;
-border:0;
-font-weight:bold;
-}
-
+.action-left{display:flex;gap:8px;align-items:center}
+button{cursor:pointer;border:0;font-weight:bold}
 .icon-btn{
-background:#253246;
-color:white;
-padding:11px 14px;
-border-radius:10px;
-font-size:17px;
+background:#253246;color:white;padding:11px 14px;
+border-radius:10px;font-size:17px;display:inline-block
 }
-
 .send-btn{
-background:var(--green);
-color:#07150f;
-padding:12px 22px;
-border-radius:10px;
+background:var(--green);color:#07150f;
+padding:12px 22px;border-radius:10px
 }
-
-button:disabled{
-opacity:.5;
-cursor:wait;
-}
-
-#imageInput{
-display:none;
-}
-
-#preview{
-display:none;
-padding:8px;
-}
-
+button:disabled{opacity:.5;cursor:wait}
+#imageInput{display:none}
+#preview{display:none;padding:8px}
 #preview img{
-width:75px;
-height:75px;
-object-fit:cover;
-border-radius:10px;
+width:75px;height:75px;object-fit:cover;border-radius:10px
 }
-
-#preview button{
-background:#a33e3e;
-color:white;
-padding:7px;
-border-radius:7px;
+.preview-actions{
+display:flex;gap:7px;flex-wrap:wrap;margin-top:8px
 }
-
-.typing{
-color:var(--muted);
-padding:12px;
-font-size:13px;
+.preview-actions button{
+padding:8px 11px;border-radius:8px;
+background:#253246;color:white;font-size:12px
 }
-
+.preview-actions .metadata-btn{
+background:#24553f;color:#eafff4
+}
+.preview-hint{
+font-size:11px;color:var(--muted);
+margin-top:7px;line-height:1.6
+}
+.typing{color:var(--muted);padding:12px;font-size:13px}
 .footer-note{
-text-align:center;
-font-size:11px;
-color:#64748b;
-margin-top:9px;
+text-align:center;font-size:11px;
+color:#64748b;margin-top:9px
 }
-
+.result-image{
+width:100%;max-height:420px;object-fit:contain;
+background:#080c13;border:1px solid var(--border);padding:6px
+}
+.result-actions{
+display:flex;gap:8px;flex-wrap:wrap;margin:10px 0
+}
+.result-actions button{
+padding:10px 14px;border-radius:9px;
+background:var(--green);color:#07150f
+}
+.result-actions .secondary{background:#253246;color:white}
+.metadata-output{
+direction:ltr;text-align:left;white-space:pre-wrap;
+overflow-wrap:anywhere;background:#080c13;
+border:1px solid var(--border);padding:12px;
+border-radius:9px;font:12px/1.6 monospace;
+max-height:260px;overflow:auto
+}
 @media(max-width:500px){
 .container{padding:12px 10px}
 #welcome{padding-top:45px}
@@ -292,69 +159,129 @@ margin-top:9px;
 .suggestions{grid-template-columns:1fr}
 .message{max-width:100%}
 }
-</style></head><body><header>
+</style>
+</head>
+
+<body>
+
+<header>
 <div class="logo">✦ NoRestrictions AI</div>
 <div class="status" id="status">● متصل</div>
-</header><main id="main">
-<div class="container"><div id="welcome">
-<h1>مرحباً بك 👋</h1><p>
+</header>
+
+<main id="main">
+<div class="container">
+
+<div id="welcome">
+<h1>مرحباً بك 👋</h1>
+<p>
 أنا NoRestrictions AI<br>
-اسألني، اطلب مني كتابة الأكواد، أو أرسل صورة لتحليلها وتعديل الأكواد الموجودة فيها.
-</p><div class="suggestions"><button class="suggestion" onclick="suggest('اكتب لي برنامج Python احترافي')">
+اسألني، اطلب مني كتابة الأكواد، أو أرسل صورة لتحليلها وتعديل البيانات المضمّنة داخل PNG.
+</p>
+
+<div class="suggestions">
+<button class="suggestion" onclick="suggest('اكتب لي برنامج Python احترافي')">
 💻 كتابة الأكواد
-</button><button class="suggestion" onclick="suggest('اشرح لي كيف تعمل واجهات API')">
+</button>
+
+<button class="suggestion" onclick="suggest('اشرح لي كيف تعمل واجهات API')">
 🧠 شرح البرمجة
-</button><button class="suggestion" onclick="suggest('صمم لي موقع HTML احترافي')">
+</button>
+
+<button class="suggestion" onclick="suggest('صمم لي موقع HTML احترافي')">
 🌐 تصميم المواقع
-</button><button class="suggestion" onclick="suggest('سأرسل لك صورة تحتوي على كود، اقرأه وعدّله حسب طلبي')">
-🖼️ تعديل كود من صورة
-</button></div>
-</div><div id="messages"></div></div>
-</main><div class="composer-area"><div class="composer"><div id="preview">
-<img id="previewImg">
-<button onclick="removeImage()">إزالة الصورة</button>
-</div><textarea id="input" placeholder="اكتب رسالتك إلى NoRestrictions AI..."></textarea><div class="actions"><div class="action-left">
+</button>
+
+<button class="suggestion" onclick="suggest('سأرسل لك صورة PNG. افحص بيانات NoRestrictions المضمّنة فيها.')">
+🖼️ فحص بيانات صورة
+</button>
+</div>
+</div>
+
+<div id="messages"></div>
+</div>
+</main>
+
+<div class="composer-area">
+<div class="composer">
+
+<div id="preview">
+<img id="previewImg" alt="معاينة الصورة">
+
+<div class="preview-actions">
+<button type="button" onclick="removeImage()">إزالة الصورة</button>
+
+<button type="button" class="metadata-btn"
+id="readMetadataBtn" onclick="readImageMetadata()">
+🔎 فحص البيانات المخفية
+</button>
+
+<button type="button" class="metadata-btn"
+id="editMetadataBtn" onclick="editImageMetadata()">
+✏️ تعديل البيانات وإخراج PNG
+</button>
+</div>
+
+<div class="preview-hint">
+ميزة البيانات المضمّنة تعمل على PNG فقط.
+اكتب طلب التعديل في مربع الرسالة ثم اضغط تعديل البيانات وإخراج PNG.
+</div>
+</div>
+
+<textarea id="input"
+placeholder="اكتب رسالتك إلى NoRestrictions AI..."></textarea>
+
+<div class="actions">
+<div class="action-left">
 <label for="imageInput" class="icon-btn">📎</label>
-<input type="file" id="imageInput" accept="image/*">
-</div><button class="send-btn" id="sendBtn" onclick="send()">
+<input type="file" id="imageInput"
+accept="image/png,image/jpeg,image/webp">
+</div>
+
+<button class="send-btn" id="sendBtn" onclick="send()">
 إرسال ↑
-</button></div>
-</div><div class="footer-note">
+</button>
+</div>
+
+</div>
+
+<div class="footer-note">
 NoRestrictions AI · AI Assistant
-</div></div><script>
+</div>
+</div>
+
+<script>
+"use strict";
 
 const API="https://norestrictions-api.sdrhaldwane.workers.dev";
-
 const $=id=>document.getElementById(id);
 
 let messages=[];
 let busy=false;
 let selectedImage=null;
+let selectedImageUrl=null;
 
 const systemPrompt=`
 أنت NoRestrictions AI، مساعد ذكاء اصطناعي عام ومتخصص في البرمجة.
 
 قواعد مهمة:
-
-1. عندما يطلب المستخدم كتابة كود، اكتب الكود كاملاً مباشرة داخل ردك.
-2. لا تقل إنك سترسل الكود إلى Termux أو ستنفذه على جهاز المستخدم.
-3. لا تستخدم نظام المهام أو أوامر NR_TASK.
-4. لا تدّع أنك نفذت برنامجاً على جهاز المستخدم.
-5. اعرض الأكواد داخل Markdown code blocks مع تحديد لغة البرمجة.
-6. إذا طلب المستخدم مشروعاً كاملاً، اكتب الملفات المطلوبة ومحتوياتها.
-7. أجب عن الأسئلة المتعلقة بالصور المرسلة وحلل محتواها.
-8. استخدم اللغة العربية عند التحدث مع المستخدم بالعربية.
-9. لا تختصر الأكواد عندما يطلب المستخدم كوداً كاملاً.
-10. كن واضحاً ومنظماً ومباشراً.
-11. إذا أرسل المستخدم صورة تحتوي على أكواد برمجية وطلب تعديلها، اقرأ الأكواد الموجودة في الصورة، وافهم طلبه، ثم اكتب النسخة المعدّلة كاملة.
-12. لا تكتفِ بشرح التعديلات؛ اعرض الكود المعدّل كاملاً داخل code block.
-13. لا تخترع أجزاء غير واضحة في الصورة؛ اطلب صورة أوضح إذا تعذرت قراءة الكود.
-14. اجعل الكود قابلاً للنسخ والحفظ.
+1. عندما يطلب المستخدم كتابة كود، اكتب الكود كاملاً مباشرة.
+2. لا تدّع أنك نفذت برنامجاً على جهاز المستخدم.
+3. اعرض الأكواد داخل Markdown code blocks مع تحديد لغة البرمجة.
+4. أجب عن الأسئلة المتعلقة بالصور المرسلة وحلل محتواها.
+5. استخدم اللغة العربية عند التحدث مع المستخدم بالعربية.
+6. لا تختصر الأكواد عندما يطلب المستخدم كوداً كاملاً.
+7. إذا أرسل المستخدم صورة تحتوي على أكواد برمجية وطلب تعديلها، اقرأها واكتب النسخة المعدّلة كاملة.
+8. لا تخترع أجزاء غير واضحة في الصورة.
 `;
 
 function suggest(text){
 $("input").value=text;
 $("input").focus();
+}
+
+function scrollBottom(){
+$("main").scrollTop=$("main").scrollHeight;
 }
 
 function addMessage(type,content,image=null){
@@ -365,6 +292,7 @@ div.className="message "+type;
 if(image){
 const img=document.createElement("img");
 img.src=image;
+img.alt="الصورة المرسلة";
 div.appendChild(img);
 }
 
@@ -378,7 +306,6 @@ div.appendChild(text);
 
 $("messages").appendChild(div);
 scrollBottom();
-
 }
 
 function renderAI(container,text){
@@ -412,7 +339,6 @@ const copy=document.createElement("button");
 copy.textContent="نسخ الكود";
 
 copy.onclick=async()=>{
-
 try{
 await navigator.clipboard.writeText(codeText);
 copy.textContent="تم النسخ ✓";
@@ -420,31 +346,23 @@ setTimeout(()=>copy.textContent="نسخ الكود",1500);
 }catch{
 copy.textContent="تعذر النسخ";
 }
-
 };
 
 const save=document.createElement("button");
 save.className="save-image-btn";
 save.textContent="💾 حفظ كصورة";
-
-save.onclick=()=>{
-saveCodeAsImage(codeText,language);
-};
+save.onclick=()=>saveCodeAsImage(codeText,language);
 
 const pre=document.createElement("pre");
 const code=document.createElement("code");
-
 code.textContent=codeText;
-
 pre.appendChild(code);
 
 header.append(lang,copy,save);
 box.append(header,pre);
-
 container.appendChild(box);
 
 last=regex.lastIndex;
-
 }
 
 if(last<text.length){
@@ -452,7 +370,6 @@ const p=document.createElement("div");
 p.textContent=text.slice(last);
 container.appendChild(p);
 }
-
 }
 
 function saveCodeAsImage(codeText,language){
@@ -471,39 +388,31 @@ const maxWidth=width-padding*2;
 const lines=[];
 
 codeText.split("\n").forEach(line=>{
-
 let current="";
 
 for(const char of line){
-
 const test=current+char;
 
-if(ctx.measureText(test).width>maxWidth && current){
+if(ctx.measureText(test).width>maxWidth&&current){
 lines.push(current);
 current=char;
 }else{
 current=test;
 }
-
 }
-
 lines.push(current);
-
 });
 
-const height=padding*2+75+lines.length*lineHeight;
-
 canvas.width=width;
-canvas.height=height;
+canvas.height=padding*2+75+lines.length*lineHeight;
 
 ctx.fillStyle="#090d14";
-ctx.fillRect(0,0,width,height);
+ctx.fillRect(0,0,width,canvas.height);
 
 ctx.fillStyle="#65e6ad";
 ctx.font="bold 27px Arial";
 ctx.direction="ltr";
 ctx.textAlign="left";
-
 ctx.fillText("NoRestrictions AI",padding,55);
 
 ctx.fillStyle="#8b9aaf";
@@ -512,7 +421,6 @@ ctx.fillText(language.toUpperCase(),width-180,55);
 
 ctx.strokeStyle="#273448";
 ctx.lineWidth=2;
-
 ctx.beginPath();
 ctx.moveTo(padding,80);
 ctx.lineTo(width-padding,80);
@@ -520,29 +428,17 @@ ctx.stroke();
 
 ctx.font=`${fontSize}px monospace`;
 ctx.fillStyle="#f0f4fa";
-ctx.textAlign="left";
-ctx.direction="ltr";
 
 lines.forEach((line,index)=>{
-
-ctx.fillText(
-line,
-padding,
-125+index*lineHeight
-);
-
+ctx.fillText(line,padding,125+index*lineHeight);
 });
 
 canvas.toBlob(blob=>{
-
-if(!blob){
-alert("تعذر إنشاء الصورة");
-return;
-}
+if(!blob)return alert("تعذر إنشاء الصورة");
 
 const url=URL.createObjectURL(blob);
-
 const link=document.createElement("a");
+
 link.href=url;
 link.download="NoRestrictions-Code.png";
 
@@ -553,11 +449,244 @@ link.remove();
 setTimeout(()=>URL.revokeObjectURL(url),3000);
 
 },"image/png");
-
 }
 
-function scrollBottom(){
-$("main").scrollTop=$("main").scrollHeight;
+function imageToBase64(file){
+
+return new Promise((resolve,reject)=>{
+const reader=new FileReader();
+
+reader.onload=()=>resolve(reader.result);
+reader.onerror=()=>reject(new Error("تعذر قراءة الصورة"));
+
+reader.readAsDataURL(file);
+});
+}
+
+function setBusy(value,label="إرسال ↑"){
+
+busy=value;
+$("sendBtn").disabled=value;
+$("readMetadataBtn").disabled=value;
+$("editMetadataBtn").disabled=value;
+
+$("sendBtn").textContent=value?label:"إرسال ↑";
+}
+
+$("imageInput").addEventListener("change",event=>{
+
+const file=event.target.files[0];
+if(!file)return;
+
+if(!file.type.startsWith("image/")){
+alert("اختر صورة صحيحة");
+event.target.value="";
+return;
+}
+
+if(file.size>7*1024*1024){
+alert("حجم الصورة أكبر من 7MB");
+event.target.value="";
+return;
+}
+
+selectedImage=file;
+
+if(selectedImageUrl){
+URL.revokeObjectURL(selectedImageUrl);
+}
+
+selectedImageUrl=URL.createObjectURL(file);
+$("previewImg").src=selectedImageUrl;
+$("preview").style.display="block";
+
+const isPNG=file.type==="image/png";
+
+$("readMetadataBtn").disabled=!isPNG;
+$("editMetadataBtn").disabled=!isPNG;
+
+$("preview").querySelector(".preview-hint").textContent=
+isPNG
+?"اكتب طلب التعديل في مربع الرسالة ثم اضغط تعديل البيانات وإخراج PNG."
+:"فحص وتعديل البيانات المضمّنة يتطلب صورة PNG أصلية.";
+});
+
+function removeImage(){
+
+selectedImage=null;
+$("imageInput").value="";
+$("preview").style.display="none";
+$("previewImg").src="";
+
+if(selectedImageUrl){
+URL.revokeObjectURL(selectedImageUrl);
+}
+
+selectedImageUrl=null;
+}
+
+async function postJSON(path,payload){
+
+const response=await fetch(API+path,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(payload)
+});
+
+let data;
+
+try{
+data=await response.json();
+}catch{
+throw new Error("استجابة غير مفهومة من الخادم");
+}
+
+if(!response.ok||data.success===false){
+throw new Error(data.error||"HTTP "+response.status);
+}
+
+return data;
+}
+
+async function readImageMetadata(){
+
+if(busy||!selectedImage)return;
+
+if(selectedImage.type!=="image/png"){
+return alert("فحص البيانات المضمّنة متاح لصور PNG فقط.");
+}
+
+setBusy(true,"جارٍ الفحص...");
+
+try{
+
+const image=await imageToBase64(selectedImage);
+const data=await postJSON("/api/image/read",{image});
+
+const box=document.createElement("div");
+box.className="message ai";
+
+const title=document.createElement("div");
+
+title.textContent=data.found
+?"تم العثور على بيانات NoRestrictions داخل الصورة:"
+:"لم يتم العثور على بيانات NoRestrictions داخل هذه الصورة.";
+
+box.appendChild(title);
+
+if(data.found){
+const pre=document.createElement("pre");
+pre.className="metadata-output";
+pre.textContent=JSON.stringify(data.metadata,null,2);
+box.appendChild(pre);
+}
+
+$("messages").appendChild(box);
+$("welcome").style.display="none";
+scrollBottom();
+
+}catch(error){
+addMessage("ai","تعذر فحص الصورة: "+error.message);
+}finally{
+setBusy(false);
+}
+}
+
+function showModifiedImage(data){
+
+const box=document.createElement("div");
+box.className="message ai";
+
+const heading=document.createElement("div");
+heading.textContent=data.summary||"تم إنشاء صورة PNG بالبيانات المعدّلة.";
+box.appendChild(heading);
+
+const img=document.createElement("img");
+img.className="result-image";
+img.src=data.image;
+img.alt="الصورة الناتجة مع البيانات المضمّنة";
+box.appendChild(img);
+
+const actions=document.createElement("div");
+actions.className="result-actions";
+
+const download=document.createElement("button");
+download.textContent="💾 حفظ صورة PNG";
+
+download.onclick=()=>{
+const link=document.createElement("a");
+link.href=data.image;
+link.download=data.filename||"NoRestrictions-Modified.png";
+document.body.appendChild(link);
+link.click();
+link.remove();
+};
+
+const details=document.createElement("button");
+details.className="secondary";
+details.textContent="عرض البيانات المضمّنة";
+
+details.onclick=()=>{
+const existing=box.querySelector(".metadata-output");
+
+if(existing){
+existing.remove();
+details.textContent="عرض البيانات المضمّنة";
+return;
+}
+
+const pre=document.createElement("pre");
+pre.className="metadata-output";
+pre.textContent=JSON.stringify(data.metadata||{},null,2);
+
+box.appendChild(pre);
+details.textContent="إخفاء البيانات";
+};
+
+actions.append(download,details);
+box.appendChild(actions);
+
+$("messages").appendChild(box);
+scrollBottom();
+}
+
+async function editImageMetadata(){
+
+if(busy||!selectedImage)return;
+
+if(selectedImage.type!=="image/png"){
+return alert("هذه الميزة تتطلب صورة PNG أصلية.");
+}
+
+const instruction=$("input").value.trim();
+
+if(!instruction){
+return alert("اكتب أولاً ما البيانات التي تريد تعديلها أو إضافتها.");
+}
+
+setBusy(true,"جارٍ تعديل البيانات...");
+$("welcome").style.display="none";
+
+try{
+
+const image=await imageToBase64(selectedImage);
+
+addMessage("user",instruction,selectedImageUrl);
+
+const data=await postJSON("/api/image/metadata",{
+image,
+instruction
+});
+
+$("input").value="";
+showModifiedImage(data);
+removeImage();
+
+}catch(error){
+addMessage("ai","تعذر تعديل بيانات الصورة: "+error.message);
+}finally{
+setBusy(false);
+}
 }
 
 async function requestAI(){
@@ -577,7 +706,7 @@ body:JSON.stringify(payload)
 
 const data=await response.json();
 
-if(!response.ok){
+if(!response.ok||data.success===false){
 throw new Error(data.error||"HTTP "+response.status);
 }
 
@@ -596,54 +725,6 @@ return content
 }
 
 throw new Error("لم يصل رد مفهوم من النموذج");
-
-}
-
-function imageToBase64(file){
-
-return new Promise((resolve,reject)=>{
-
-const reader=new FileReader();
-
-reader.onload=()=>resolve(reader.result);
-reader.onerror=()=>reject(new Error("تعذر قراءة الصورة"));
-
-reader.readAsDataURL(file);
-
-});
-
-}
-
-$("imageInput").addEventListener("change",event=>{
-
-const file=event.target.files[0];
-
-if(!file)return;
-
-if(!file.type.startsWith("image/")){
-alert("اختر صورة صحيحة");
-return;
-}
-
-if(file.size>10*1024*1024){
-alert("حجم الصورة أكبر من 10MB");
-return;
-}
-
-selectedImage=file;
-
-$("previewImg").src=URL.createObjectURL(file);
-$("preview").style.display="block";
-
-});
-
-function removeImage(){
-
-selectedImage=null;
-$("imageInput").value="";
-$("preview").style.display="none";
-$("previewImg").src="";
-
 }
 
 async function send(){
@@ -654,14 +735,10 @@ const text=$("input").value.trim();
 
 if(!text&&!selectedImage)return;
 
-busy=true;
-$("sendBtn").disabled=true;
-$("sendBtn").textContent="جارٍ الإرسال...";
-
+setBusy(true,"جارٍ الإرسال...");
 $("welcome").style.display="none";
 
 const image=selectedImage;
-
 $("input").value="";
 
 try{
@@ -673,22 +750,11 @@ if(image){
 const base64=await imageToBase64(image);
 
 content=[
-{
-type:"text",
-text:text||"حلل هذه الصورة."
-},
-{
-type:"image_url",
-image_url:{url:base64}
-}
+{type:"text",text:text||"حلل هذه الصورة."},
+{type:"image_url",image_url:{url:base64}}
 ];
 
-addMessage(
-"user",
-text||"حلل هذه الصورة",
-URL.createObjectURL(image)
-);
-
+addMessage("user",text||"حلل هذه الصورة",selectedImageUrl);
 removeImage();
 
 }else{
@@ -698,25 +764,19 @@ addMessage("user",text);
 
 }
 
-messages.push({
-role:"user",
-content
-});
+messages.push({role:"user",content});
 
 const typing=document.createElement("div");
 typing.className="typing";
 typing.textContent="NoRestrictions AI يفكر...";
+
 $("messages").appendChild(typing);
 
 const answer=await requestAI();
 
 typing.remove();
 
-messages.push({
-role:"assistant",
-content:answer
-});
-
+messages.push({role:"assistant",content:answer});
 addMessage("ai",answer);
 
 }catch(error){
@@ -726,31 +786,24 @@ console.error(error);
 
 }finally{
 
-busy=false;
-$("sendBtn").disabled=false;
-$("sendBtn").textContent="إرسال ↑";
-
+setBusy(false);
 scrollBottom();
 
 }
-
 }
 
 $("input").addEventListener("keydown",event=>{
-
 if(event.key==="Enter"&&!event.shiftKey){
 event.preventDefault();
 send();
 }
-
 });
 
 $("input").addEventListener("input",function(){
-
 this.style.height="auto";
 this.style.height=Math.min(this.scrollHeight,150)+"px";
-
 });
 
-</script></body>
+</script>
+</body>
 </html>
