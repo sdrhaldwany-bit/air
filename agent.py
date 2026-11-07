@@ -1,335 +1,171 @@
 import os
 import sys
-import time
 import json
-import socket
-import platform
-import getpass
-import shutil
+import time
+import hashlib
 import urllib.request
 import urllib.error
+import subprocess
+from pathlib import Path
 
-from datetime import datetime
-
-VERSION = "7.0"
-
+VERSION = "8.0"
 SERVER = os.environ.get(
     "NR_SERVER",
     "https://norestrictions-api.sdrhaldwane.workers.dev"
 ).rstrip("/")
 
-POLL_INTERVAL = 3
-REQUEST_TIMEOUT = 20
-MAX_OUTPUT = 10000
+WORKSPACE = Path.home() / "nr_workspace"
+WORKSPACE.mkdir(exist_ok=True)
 
-DEVICE_KEY = ""
+if len(sys.argv) > 1:
+    KEY = sys.argv[1]
+else:
+    KEY = input("Device Key: ").strip()
+
+if len(KEY) < 32:
+    print("Invalid device key")
+    sys.exit(1)
 
 
-def api_request(path, method="GET", data=None):
+def request(method, endpoint, data=None):
+    url = SERVER + endpoint
+    body = json.dumps(data).encode() if data is not None else None
 
-    url = SERVER + path
-
-    headers = {
-        "Content-Type": "application/json",
-        "User-Agent": "NoRestrictions-Agent/" + VERSION
-    }
-
-    body = None
-
-    if data is not None:
-        body = json.dumps(data).encode("utf-8")
-
-    request = urllib.request.Request(
+    req = urllib.request.Request(
         url,
         data=body,
-        headers=headers,
-        method=method
+        method=method,
+        headers={"Content-Type": "application/json"}
     )
 
-    with urllib.request.urlopen(
-        request,
-        timeout=REQUEST_TIMEOUT
-    ) as response:
-
-        raw = response.read().decode("utf-8")
-
-        if not raw:
-            return {}
-
-        return json.loads(raw)
+    with urllib.request.urlopen(req, timeout=30) as response:
+        return json.loads(response.read().decode())
 
 
-def device_info():
+def safe_path(filename):
+    path = (WORKSPACE / filename).resolve()
 
-    return "\n".join([
-        "Device: " + socket.gethostname(),
-        "System: " + platform.system(),
-        "Release: " + platform.release(),
-        "Architecture: " + platform.machine(),
-        "Python: " + platform.python_version(),
-        "Processor: " + (platform.processor() or "Unknown"),
-        "User: " + getpass.getuser()
-    ])
+    if path != WORKSPACE and WORKSPACE not in path.parents:
+        raise ValueError("Path outside workspace")
+
+    return path
 
 
-def network_info():
+def execute_task(task):
+    action = task.get("action")
 
-    hostname = socket.gethostname()
+    if action == "help":
+        return "Supported: write_file, read_file, list_files, mkdir, run_python"
 
-    try:
-        ip = socket.gethostbyname(hostname)
-    except Exception:
-        ip = "Unavailable"
+    if action == "write_file":
+        path = safe_path(task["path"])
+        content = task.get("content", "")
 
-    return (
-        "Hostname: " + hostname +
-        "\nLocal IP: " + ip
-    )
+        if len(content) > 500_000:
+            raise ValueError("File too large")
 
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+        return f"File created: {path.name}"
 
-def internet_check():
+    if action == "read_file":
+        path = safe_path(task["path"])
 
-    try:
+        if not path.is_file():
+            raise FileNotFoundError(path.name)
 
-        request = urllib.request.Request(
-            "https://www.google.com/generate_204"
+        if path.stat().st_size > 500_000:
+            raise ValueError("File too large")
+
+        return path.read_text(encoding="utf-8")
+
+    if action == "list_files":
+        folder = safe_path(task.get("path", "."))
+        if not folder.is_dir():
+            raise NotADirectoryError(folder.name)
+
+        return "\n".join(
+            str(p.relative_to(WORKSPACE))
+            for p in sorted(folder.rglob("*"))
+            if p.is_file()
+        )[:20000]
+
+    if action == "mkdir":
+        path = safe_path(task["path"])
+        path.mkdir(parents=True, exist_ok=True)
+        return f"Directory created: {path.name}"
+
+    if action == "run_python":
+        path = safe_path(task["path"])
+
+        if not path.is_file() or path.suffix != ".py":
+            raise ValueError("A Python file inside the workspace is required")
+
+        result = subprocess.run(
+            [sys.executable, str(path)],
+            cwd=str(WORKSPACE),
+            capture_output=True,
+            text=True,
+            timeout=30
         )
 
-        with urllib.request.urlopen(
-            request,
-            timeout=8
-        ) as response:
+        return json.dumps({
+            "stdout": result.stdout[-12000:],
+            "stderr": result.stderr[-12000:],
+            "exit_code": result.returncode
+        }, ensure_ascii=False)
 
-            return "Internet connection: OK"
-
-    except Exception as error:
-
-        return "Internet error: " + str(error)
-
-
-def dns_check():
-
-    try:
-
-        results = socket.getaddrinfo(
-            "example.com",
-            443,
-            type=socket.SOCK_STREAM
-        )
-
-        addresses = sorted(set(
-            item[4][0] for item in results
-        ))
-
-        return "DNS results:\n" + "\n".join(addresses[:5])
-
-    except Exception as error:
-
-        return "DNS error: " + str(error)
-
-
-def storage_info():
-
-    try:
-
-        usage = shutil.disk_usage(os.path.expanduser("~"))
-
-        return (
-            "Total: " + str(round(usage.total / 1024**3, 2)) + " GB\n"
-            "Used: " + str(round(usage.used / 1024**3, 2)) + " GB\n"
-            "Free: " + str(round(usage.free / 1024**3, 2)) + " GB"
-        )
-
-    except Exception as error:
-
-        return str(error)
-
-
-def execute_command(command):
-
-    command = str(command).strip().lower()
-
-    if command == "help":
-
-        return (
-            "Available operations:\n"
-            "help\n"
-            "whoami\n"
-            "date\n"
-            "device_info\n"
-            "network_info\n"
-            "internet_check\n"
-            "dns_check\n"
-            "storage_info"
-        ), 0
-
-    if command == "whoami":
-
-        return getpass.getuser(), 0
-
-    if command == "date":
-
-        return datetime.now().astimezone().isoformat(), 0
-
-    if command == "device_info":
-
-        return device_info(), 0
-
-    if command == "network_info":
-
-        return network_info(), 0
-
-    if command == "internet_check":
-
-        return internet_check(), 0
-
-    if command == "dns_check":
-
-        return dns_check(), 0
-
-    if command == "storage_info":
-
-        return storage_info(), 0
-
-    return "Unsupported operation.", 1
-
-
-def poll_tasks():
-
-    path = "/api/device/poll?key=" + DEVICE_KEY
-
-    return api_request(path)
+    raise ValueError("Unsupported action")
 
 
 def send_result(job_id, output, exit_code):
-
-    return api_request(
-        "/api/device/done",
-        method="POST",
-        data={
-            "key": DEVICE_KEY,
-            "id": job_id,
-            "output": str(output)[:MAX_OUTPUT],
-            "exit_code": int(exit_code)
-        }
-    )
-
-
-def validate_key(key):
-
-    if len(key) != 64:
-        return False
-
-    return all(
-        char in "0123456789abcdefABCDEF"
-        for char in key
-    )
+    request("POST", "/api/device/done", {
+        "key": KEY,
+        "id": job_id,
+        "output": str(output)[:20000],
+        "exit_code": exit_code
+    })
 
 
 def main():
-
-    global DEVICE_KEY
-
-    if len(sys.argv) >= 2:
-        DEVICE_KEY = sys.argv[1].strip()
-    else:
-        DEVICE_KEY = input("Device key: ").strip()
-
-    if not validate_key(DEVICE_KEY):
-
-        print("[!] Invalid device key.")
-        return
-
-    print("=" * 45)
-    print("NoRestrictions AI Agent")
-    print("Version:", VERSION)
-    print("Server:", SERVER)
-    print("Device key: Loaded")
-    print("=" * 45)
-
-    print("[+] Connecting...")
-
-    try:
-
-        result = poll_tasks()
-
-        if not result.get("success"):
-
-            print("[!] Server rejected connection.")
-            return
-
-    except Exception as error:
-
-        print("[!] Connection failed:", error)
-        return
-
-    print("[+] Agent connected")
-    print("[+] Waiting for tasks...")
+    print(f"NoRestrictions Agent {VERSION}")
+    print("Workspace:", WORKSPACE)
+    print("Connecting to server...")
 
     while True:
-
         try:
+            data = request(
+                "GET",
+                "/api/device/poll?key=" + KEY
+            )
 
-            result = poll_tasks()
-
-            if not result.get("success"):
-
-                time.sleep(POLL_INTERVAL)
-                continue
-
-            jobs = result.get("jobs", [])
-
-            for job in jobs:
-
+            for job in data.get("jobs", []):
                 job_id = job.get("id")
-                command = job.get("command", "")
-
-                if not job_id:
-                    continue
-
-                print("\n" + "=" * 45)
-                print("[+] Task:", job_id)
-                print("[+] Operation:", command)
 
                 try:
+                    raw = job.get("command", "{}")
+                    task = json.loads(raw) if isinstance(raw, str) else raw
 
-                    output, exit_code = execute_command(command)
+                    print("\n[JOB]", job_id)
+                    print("[ACTION]", task.get("action"))
 
-                except Exception as error:
+                    output = execute_task(task)
+                    send_result(job_id, output, 0)
 
-                    output = "Execution error: " + str(error)
-                    exit_code = 1
-
-                print(output)
-
-                try:
-
-                    send_result(
-                        job_id,
-                        output,
-                        exit_code
-                    )
-
-                    print("[+] Result delivered")
+                    print("[DONE]", job_id)
 
                 except Exception as error:
-
-                    print("[!] Result delivery failed:", error)
+                    send_result(job_id, str(error), 1)
+                    print("[ERROR]", error)
 
         except KeyboardInterrupt:
-
-            print("\n[+] Agent stopped.")
+            print("\nAgent stopped.")
             break
 
-        except urllib.error.HTTPError as error:
-
-            print("[!] HTTP:", error.code)
-            time.sleep(POLL_INTERVAL)
-
         except Exception as error:
+            print("[CONNECTION ERROR]", error)
 
-            print("[!] Connection error:", error)
-            time.sleep(POLL_INTERVAL)
+        time.sleep(3)
 
 
 if __name__ == "__main__":
