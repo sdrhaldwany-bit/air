@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NoRestrictions AI</title>
-
-<style>
+<title>NoRestrictions AI</title><style>
 *{box-sizing:border-box}
 body{
  margin:0;background:#0b0d12;color:#eee;
@@ -19,9 +16,7 @@ header{
 }
 h2{margin:0;color:#65e6ad}
 #status{font-size:13px;color:#aaa}
-main{
- max-width:850px;margin:auto;padding:15px;
-}
+main{max-width:850px;margin:auto;padding:15px}
 #messages{
  height:65vh;overflow-y:auto;
  padding:12px;background:#11151e;
@@ -35,12 +30,12 @@ main{
 .user{background:#183b32}
 .ai{background:#202635}
 .system{background:#302b1c;color:#ffe4a0}
-pre{
- direction:ltr;text-align:left;
- white-space:pre-wrap;overflow-wrap:anywhere;
- background:#090b10;padding:10px;border-radius:8px;
+.msg img{
+ display:block;max-width:100%;
+ max-height:300px;object-fit:contain;
+ border-radius:9px;margin-bottom:9px;
 }
-.controls{display:flex;gap:8px;margin-top:12px}
+.controls{display:flex;gap:8px;margin-top:12px;align-items:flex-end}
 textarea{
  flex:1;min-width:0;resize:vertical;
  min-height:55px;padding:13px;
@@ -64,39 +59,48 @@ input{
  color:white;border:1px solid #343e50;
  border-radius:8px;margin:8px 0;
 }
-</style>
-</head>
-
-<body>
-
-<header>
+.attach{
+ background:#252d3c;color:white;
+ font-size:21px;padding:13px;
+ border-radius:10px;cursor:pointer;
+}
+#imageInput{display:none}
+#imagePreview{
+ display:none;margin-top:10px;
+ padding:10px;background:#171d29;
+ border-radius:10px;
+}
+#imagePreview img{
+ max-width:130px;max-height:130px;
+ border-radius:8px;
+}
+#removeImage{
+ background:#a83e3e;color:white;
+ padding:7px 12px;margin-right:10px;
+}
+</style></head><body><header>
  <h2>NoRestrictions AI</h2>
  <div id="status">● غير متصل</div>
-</header>
-
-<main>
-
-<div class="panel">
+</header><main><div class="panel">
  <b>ربط جهاز Termux</b>
  <div class="small">
  أنشئ مفتاح الجهاز، ثم استخدم المفتاح نفسه عند تشغيل Agent.
- </div>
+ </div><button id="pairBtn">إنشاء وربط الجهاز</button>
+<input id="deviceKey" readonly placeholder="مفتاح الجهاز">
 
- <button id="pairBtn">إنشاء وربط الجهاز</button>
- <input id="deviceKey" readonly placeholder="مفتاح الجهاز">
  <div class="small" id="pairStatus"></div>
-</div>
+</div><div id="messages"></div><div id="imagePreview">
+ <img id="previewImg">
+ <button id="removeImage">إزالة الصورة</button>
+ <div class="small" id="imageName"></div>
+</div><div class="controls"><label for="imageInput" class="attach">📎</label>
+<input type="file" id="imageInput" accept="image/*">
 
-<div id="messages"></div>
+ <textarea id="input" placeholder="اكتب رسالتك أو اسأل عن صورة..."></textarea><button id="sendBtn">إرسال</button>
 
-<div class="controls">
- <textarea id="input" placeholder="اكتب طلبك هنا..."></textarea>
- <button id="sendBtn">إرسال</button>
-</div>
-
-</main>
-
-<script>
+</div><div class="small">
+ يدعم إرسال الصور مع الأسئلة النصية.
+</div></main><script>
 const API =
  "https://norestrictions-api.sdrhaldwane.workers.dev";
 
@@ -104,6 +108,7 @@ const $ = id => document.getElementById(id);
 
 let messages = [];
 let busy = false;
+let selectedImage = null;
 
 const taskInstruction = `
 أنت NoRestrictions AI وتستطيع طلب تنفيذ مهام برمجية
@@ -125,14 +130,31 @@ run_python
 يمكنك إرسال عدة مهام، كل مهمة داخل علامة مستقلة.
 لا تدّعِ نجاح التنفيذ قبل استلام النتيجة من الجهاز.
 بعد وصول النتيجة حللها وحدد الخطوة التالية.
+
+عند استلام صورة:
+حلل محتواها وأجب عن أسئلة المستخدم المتعلقة بها.
+لا تدّعِ رؤية صورة إذا لم تصلك بياناتها فعلياً.
 `;
 
-function addMessage(type, text) {
- const div = document.createElement("div");
- div.className = "msg " + type;
- div.textContent = text;
+function addMessage(type,text,image=null) {
+
+ const div=document.createElement("div");
+ div.className="msg "+type;
+
+ if(image) {
+  const img=document.createElement("img");
+  img.src=image;
+  div.appendChild(img);
+ }
+
+ const content=document.createElement("div");
+ content.textContent=text;
+
+ div.appendChild(content);
+
  $("messages").appendChild(div);
- $("messages").scrollTop = $("messages").scrollHeight;
+ $("messages").scrollTop=$("messages").scrollHeight;
+
  return div;
 }
 
@@ -140,46 +162,51 @@ function getKey() {
  return localStorage.getItem("nr-device-key") || "";
 }
 
-async function api(path, method="GET", data=null) {
- const options = {method, headers:{}};
+async function api(path,method="GET",data=null) {
 
- if (data !== null) {
-  options.headers["Content-Type"] = "application/json";
-  options.body = JSON.stringify(data);
+ const options={method,headers:{}};
+
+ if(data!==null) {
+  options.headers["Content-Type"]="application/json";
+  options.body=JSON.stringify(data);
  }
 
- const response = await fetch(API + path, options);
- const text = await response.text();
+ const response=await fetch(API+path,options);
+ const text=await response.text();
 
  let result;
+
  try {
-  result = JSON.parse(text);
+  result=JSON.parse(text);
  } catch {
-  throw new Error("استجابة غير صالحة من السيرفر: " + text.slice(0,300));
+  throw new Error("استجابة غير صالحة من السيرفر: "+text.slice(0,300));
  }
 
- if (!response.ok) {
-  throw new Error(result.error || "HTTP " + response.status);
+ if(!response.ok) {
+  throw new Error(result.error||"HTTP "+response.status);
  }
 
  return result;
 }
 
 function randomKey() {
- const bytes = crypto.getRandomValues(new Uint8Array(32));
+ const bytes=crypto.getRandomValues(new Uint8Array(32));
+
  return Array.from(bytes)
-  .map(x => x.toString(16).padStart(2,"0"))
+  .map(x=>x.toString(16).padStart(2,"0"))
   .join("");
 }
 
 async function pairDevice() {
- const key = getKey() || randomKey();
 
- $("pairBtn").disabled = true;
- $("pairStatus").textContent = "جارٍ ربط الجهاز...";
+ const key=getKey()||randomKey();
+
+ $("pairBtn").disabled=true;
+ $("pairStatus").textContent="جارٍ ربط الجهاز...";
 
  try {
-  const result = await api(
+
+  const result=await api(
    "/api/device/pair",
    "POST",
    {
@@ -189,102 +216,176 @@ async function pairDevice() {
    }
   );
 
-  if (!result.success) throw new Error("فشل الربط");
+  if(!result.success) throw new Error("فشل الربط");
 
   localStorage.setItem("nr-device-key",key);
-  $("deviceKey").value = key;
-  $("pairStatus").textContent =
+  $("deviceKey").value=key;
+
+  $("pairStatus").textContent=
    "تم الربط. استخدم المفتاح في تشغيل Agent.";
 
   await checkStatus();
 
  } catch(error) {
-  $("pairStatus").textContent = error.message;
+  $("pairStatus").textContent=error.message;
  } finally {
-  $("pairBtn").disabled = false;
+  $("pairBtn").disabled=false;
  }
 }
 
 async function checkStatus() {
- const key = getKey();
 
- if (!key) {
-  $("status").textContent = "● لم يتم الربط";
+ const key=getKey();
+
+ if(!key) {
+  $("status").textContent="● لم يتم الربط";
   return;
  }
 
  try {
-  const result = await api(
-   "/api/device/status?key=" + encodeURIComponent(key)
+
+  const result=await api(
+   "/api/device/status?key="+encodeURIComponent(key)
   );
 
-  $("status").textContent =
-   result.online ? "● Termux متصل" : "● Termux غير متصل";
+  $("status").textContent=
+   result.online?"● Termux متصل":"● Termux غير متصل";
 
  } catch {
-  $("status").textContent = "● خطأ في الاتصال";
+  $("status").textContent="● خطأ في الاتصال";
  }
 }
 
+// اختيار الصور
+
+$("imageInput").addEventListener("change",event=>{
+
+ const file=event.target.files[0];
+
+ if(!file)return;
+
+ if(!file.type.startsWith("image/")) {
+  alert("الرجاء اختيار صورة صحيحة");
+  return;
+ }
+
+ if(file.size>10*1024*1024) {
+  alert("حجم الصورة يجب ألا يتجاوز 10MB");
+  $("imageInput").value="";
+  return;
+ }
+
+ selectedImage=file;
+
+ $("previewImg").src=URL.createObjectURL(file);
+ $("imageName").textContent=file.name;
+ $("imagePreview").style.display="block";
+});
+
+function removeImage() {
+
+ selectedImage=null;
+
+ $("imageInput").value="";
+ $("imagePreview").style.display="none";
+ $("previewImg").src="";
+}
+
+$("removeImage").addEventListener("click",removeImage);
+
+// تحويل الصورة إلى Base64
+
+function imageToBase64(file) {
+
+ return new Promise((resolve,reject)=>{
+
+  const reader=new FileReader();
+
+  reader.onload=()=>{
+   resolve(reader.result);
+  };
+
+  reader.onerror=()=>{
+   reject(new Error("تعذر قراءة الصورة"));
+  };
+
+  reader.readAsDataURL(file);
+
+ });
+}
+
+// استخراج المهام
+
 function extractTasks(text) {
- const tasks = [];
- const regex = /\[\[NR_TASK\]\]([\s\S]*?)\[\[\/NR_TASK\]\]/g;
+
+ const tasks=[];
+
+ const regex=/\[NR_TASK\]([\s\S]*?)\[\/NR_TASK\]/g;
 
  let match;
 
- while ((match = regex.exec(text)) !== null) {
+ while((match=regex.exec(text))!==null) {
+
   try {
    tasks.push(JSON.parse(match[1].trim()));
   } catch {
    throw new Error("صيغة مهمة التنفيذ غير صحيحة");
   }
+
  }
 
  return {
   tasks,
-  visible: text.replace(regex,"").trim()
+  visible:text.replace(regex,"").trim()
  };
 }
 
-async function waitForResult(id) {
- const key = getKey();
+// انتظار نتيجة Termux
 
- for (let i=0;i<120;i++) {
-  const result = await api(
-   "/api/device/result?key=" +
-   encodeURIComponent(key) +
-   "&id=" + encodeURIComponent(id)
+async function waitForResult(id) {
+
+ const key=getKey();
+
+ for(let i=0;i<120;i++) {
+
+  const result=await api(
+   "/api/device/result?key="+
+   encodeURIComponent(key)+
+   "&id="+encodeURIComponent(id)
   );
 
-  if (result.status === "completed") {
+  if(result.status==="completed") {
    return result;
   }
 
-  await new Promise(resolve => setTimeout(resolve,1500));
+  await new Promise(resolve=>setTimeout(resolve,1500));
+
  }
 
  throw new Error("انتهت مهلة انتظار Termux");
 }
 
 async function executeTask(task) {
- const key = getKey();
 
- const queued = await api(
+ const key=getKey();
+
+ const queued=await api(
   "/api/device/run",
   "POST",
   {key,task}
  );
 
- addMessage("system",
-  "تم إرسال المهمة رقم " + queued.id + " إلى Termux..."
+ addMessage(
+  "system",
+  "تم إرسال المهمة رقم "+queued.id+" إلى Termux..."
  );
 
- const result = await waitForResult(queued.id);
+ const result=await waitForResult(queued.id);
 
- const output =
-  "رقم المهمة: " + result.id +
-  "\nرمز الخروج: " + result.exit_code +
-  "\nالنتيجة:\n" + (result.output || "لا توجد نتيجة");
+ const output=
+  "رقم المهمة: "+result.id+
+  "\nرمز الخروج: "+result.exit_code+
+  "\nالنتيجة:\n"+(result.output||"لا توجد نتيجة");
 
  addMessage("system",output);
 
@@ -296,54 +397,110 @@ async function executeTask(task) {
  };
 }
 
+// الاتصال بالذكاء الاصطناعي
+
 async function askAI() {
- const payload = {
+
+ const payload={
   messages:[
    {role:"system",content:taskInstruction},
    ...messages
   ]
  };
 
- const result = await api("/api/chat","POST",payload);
+ const result=await api("/api/chat","POST",payload);
 
- const content =
-  result.choices?.[0]?.message?.content ||
-  result.reply ||
+ const content=
+  result.choices?.[0]?.message?.content||
+  result.reply||
   result.message;
 
- if (typeof content !== "string") {
-  throw new Error("لم يرجع مزود الذكاء الاصطناعي رسالة مفهومة");
+ if(typeof content==="string")return content;
+
+ // دعم بعض صيغ ردود النماذج متعددة الوسائط
+
+ if(Array.isArray(content)) {
+  return content
+   .filter(item=>item.type==="text")
+   .map(item=>item.text)
+   .join("\n");
  }
 
- return content;
+ throw new Error("لم يرجع مزود الذكاء الاصطناعي رسالة مفهومة");
 }
 
+// إرسال الرسائل والصور
+
 async function send() {
- if (busy) return;
 
- const input = $("input").value.trim();
- if (!input) return;
+ if(busy)return;
 
- if (!getKey()) {
+ const input=$("input").value.trim();
+
+ if(!input&&!selectedImage)return;
+
+ if(!getKey()) {
   addMessage("system","اربط جهاز Termux أولاً.");
   return;
  }
 
- busy = true;
- $("sendBtn").disabled = true;
+ busy=true;
+ $("sendBtn").disabled=true;
 
- $("input").value = "";
- addMessage("user",input);
+ const image=selectedImage;
 
- messages.push({role:"user",content:input});
+ $("input").value="";
 
  try {
-  for (let round=0;round<8;round++) {
 
-   const answer = await askAI();
-   const parsed = extractTasks(answer);
+  let userContent;
 
-   if (parsed.visible) {
+  if(image) {
+
+   const base64=await imageToBase64(image);
+
+   // صيغة OpenAI-compatible Vision
+
+   userContent=[
+    {
+     type:"text",
+     text:input||"حلل هذه الصورة وأخبرني بمحتواها."
+    },
+    {
+     type:"image_url",
+     image_url:{
+      url:base64
+     }
+    }
+   ];
+
+   addMessage(
+    "user",
+    input||"حلل هذه الصورة",
+    URL.createObjectURL(image)
+   );
+
+  } else {
+
+   userContent=input;
+   addMessage("user",input);
+
+  }
+
+  removeImage();
+
+  messages.push({
+   role:"user",
+   content:userContent
+  });
+
+  for(let round=0;round<8;round++) {
+
+   const answer=await askAI();
+
+   const parsed=extractTasks(answer);
+
+   if(parsed.visible) {
     addMessage("ai",parsed.visible);
    }
 
@@ -352,18 +509,18 @@ async function send() {
     content:answer
    });
 
-   if (parsed.tasks.length === 0) break;
+   if(parsed.tasks.length===0)break;
 
-   const results = [];
+   const results=[];
 
-   for (const task of parsed.tasks) {
-    const result = await executeTask(task);
+   for(const task of parsed.tasks) {
+    const result=await executeTask(task);
     results.push(result);
    }
 
-   const feedback =
-    "نتائج تنفيذ المهام على Termux:\n" +
-    JSON.stringify(results,null,2) +
+   const feedback=
+    "نتائج تنفيذ المهام على Termux:\n"+
+    JSON.stringify(results,null,2)+
     "\nحلل النتائج وأكمل العمل إذا بقيت خطوات.";
 
    messages.push({
@@ -371,34 +528,45 @@ async function send() {
     content:feedback
    });
 
-   addMessage("system","يراجع الذكاء الاصطناعي نتائج التنفيذ...");
+   addMessage(
+    "system",
+    "يراجع الذكاء الاصطناعي نتائج التنفيذ..."
+   );
+
   }
 
  } catch(error) {
-  addMessage("system","خطأ: " + error.message);
+
+  addMessage("system","خطأ: "+error.message);
+  console.error(error);
+
  } finally {
-  busy = false;
-  $("sendBtn").disabled = false;
+
+  busy=false;
+  $("sendBtn").disabled=false;
+
  }
+
 }
 
 $("pairBtn").addEventListener("click",pairDevice);
 $("sendBtn").addEventListener("click",send);
 
 $("input").addEventListener("keydown",event=>{
- if (event.key==="Enter" && !event.shiftKey) {
+
+ if(event.key==="Enter"&&!event.shiftKey) {
   event.preventDefault();
   send();
  }
+
 });
 
-if (getKey()) {
- $("deviceKey").value = getKey();
+if(getKey()) {
+ $("deviceKey").value=getKey();
  checkStatus();
 }
 
 setInterval(checkStatus,10000);
-</script>
 
-</body>
+</script></body>
 </html>
