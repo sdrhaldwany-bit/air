@@ -55,6 +55,24 @@ background:#b91c1c;color:#fff;padding:10px 13px;border-radius:10px;
 font-size:13px;border:1px solid #ef4444
 }
 .new-chat-btn:hover{background:#dc2626}
+
+/* نافذة اتصال Termux */
+.termux-btn{background:#7f1d1d;color:#fff;border:1px solid #ef4444;padding:9px 12px;border-radius:10px;font-size:12px}
+.termux-btn:hover{background:#991b1b}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000}
+.modal-backdrop.open{display:flex}
+.termux-modal{width:min(100%,390px);background:#151515;border:1px solid #692323;border-radius:18px;padding:22px;box-shadow:0 20px 70px #000b}
+.termux-modal h2{margin:0 0 8px;color:#ff4545;font-size:20px}
+.termux-modal p{color:#aaa;font-size:13px;line-height:1.8}
+.termux-modal input{width:100%;padding:13px;margin:10px 0;background:#090909;color:#fff;border:1px solid #543030;border-radius:10px;font-size:16px;outline:none}
+.termux-modal input:focus{border-color:#ef4444}
+.termux-modal-actions{display:flex;gap:9px;margin-top:12px}
+.termux-modal-actions button{flex:1;padding:11px;border-radius:10px}
+.termux-confirm{background:#b91c1c;color:white}
+.termux-cancel{background:#292929;color:#ddd}
+.termux-notice{min-height:20px;color:#ff9b9b;font-size:12px;margin-top:10px}
+@media(max-width:500px){header>div:last-child{gap:6px!important}.termux-btn{font-size:10px;padding:8px 7px}.new-chat-btn{font-size:10px;padding:8px 7px}.status{font-size:10px}}
+
 @media(max-width:500px){
 .new-chat-btn{font-size:11px;padding:9px 10px}
 header{padding:0 10px}
@@ -341,10 +359,28 @@ line-height:1.7
 <header>
 <div class="logo">✦ NoRestrictions AI</div>
 <div style="display:flex;align-items:center;gap:12px">
+<button type="button" class="termux-btn" onclick="openTermuxModal()">اتصال Termux (المالك فقط)</button>
 <button type="button" class="new-chat-btn" onclick="newChat()">＋ محادثة جديدة</button>
 <div class="status" id="status">● جاري الاتصال...</div>
 </div>
 </header>
+
+
+<div class="modal-backdrop" id="termuxModal" role="dialog" aria-modal="true" aria-labelledby="termuxTitle" onclick="if(event.target===this)closeTermuxModal()">
+  <section class="termux-modal">
+    <h2 id="termuxTitle">اتصال Termux — المالك فقط</h2>
+    <p>هذه واجهة تحقق أولية. لن يتم إنشاء اتصال بالجهاز حتى إعداد تحقق آمن على الخادم وخدمة الربط المحلية.</p>
+    <form onsubmit="submitTermuxAuth(event)">
+      <label for="termuxPassword">كلمة مرور المالك</label>
+      <input id="termuxPassword" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور" required>
+      <div class="termux-modal-actions">
+        <button class="termux-confirm" type="submit">تحقق</button>
+        <button class="termux-cancel" type="button" onclick="closeTermuxModal()">إلغاء</button>
+      </div>
+    </form>
+    <div class="termux-notice" id="termuxNotice" role="status">التحقق غير مفعّل بعد.</div>
+  </section>
+</div>
 
 <main id="main">
 <div class="container">
@@ -515,6 +551,25 @@ removeImage();
 $("input").focus();
 $("main").scrollTop = 0;
 }
+
+
+/* واجهة تحقق Termux — لا تتحقق من كلمة المرور داخل المتصفح */
+function openTermuxModal(){
+  $("termuxModal").classList.add("open");
+  $("termuxNotice").textContent = "التحقق غير مفعّل بعد.";
+  $("termuxPassword").value = "";
+  setTimeout(()=>$("termuxPassword").focus(),50);
+}
+function closeTermuxModal(){
+  $("termuxModal").classList.remove("open");
+}
+function submitTermuxAuth(event){
+  event.preventDefault();
+  $("termuxNotice").textContent = "لم يتم التحقق: يلزم إعداد مصادقة آمنة على الخادم أولاً. لم يتم الاتصال بـ Termux.";
+}
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape") closeTermuxModal();
+});
 
 /* اقتراحات البداية */
 
