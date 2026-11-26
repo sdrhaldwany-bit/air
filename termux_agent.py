@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""NoRestrictions Termux companion: locally approved workspace file writes only."""
+"""NoRestrictions Termux companion: bounded workspace and device-info tasks."""
 import asyncio
+import json
+import platform
+import shutil
 from pathlib import Path
 import httpx
 
 BASE = "https://norestrictions-agent.sdrhaldwane.workers.dev"
-DEVICE_ID = "huawei-termux-01"
 ROOT = Path.home() / "norestrictions-agent"
 WORKSPACE = ROOT / "workspace"
 KEY_FILE = ROOT / ".agent_key"
-ALLOWED = {".py", ".js", ".mjs", ".cjs", ".html", ".css", ".json", ".md", ".txt", ".toml", ".yaml", ".yml", ".xml", ".svg", ".mjs", ".cjs"}
+ALLOWED = {".py", ".js", ".mjs", ".cjs", ".html", ".css", ".json", ".md", ".txt", ".toml", ".yaml", ".yml", ".xml", ".svg"}
 
 def safe_target(relative: str) -> Path:
     p = Path(relative)
@@ -22,6 +24,57 @@ def safe_target(relative: str) -> Path:
         raise ValueError("Path escapes workspace")
     return target
 
+def device_info() -> str:
+    usage = shutil.disk_usage(str(Path.home()))
+    return json.dumps({
+        "platform": platform.platform(),
+        "system": platform.system(),
+        "machine": platform.machine(),
+        "python": platform.python_version(),
+        "home": str(Path.home()),
+        "workspace": str(WORKSPACE),
+        "disk_total_bytes": usage.total,
+        "disk_free_bytes": usage.free,
+    }, ensure_ascii=False)
+
+def list_files(relative: str = "") -> str:
+    base = WORKSPACE.resolve()
+    folder = base if not relative else safe_target(relative).parent if Path(relative).suffix else (base / relative).resolve()
+    if base != folder and base not in folder.parents:
+        raise ValueError("Path escapes workspace")
+    if not folder.exists() or not folder.is_dir():
+        raise ValueError("Directory not found")
+    items = []
+    for p in sorted(folder.rglob("*")):
+        if len(items) >= 200:
+            break
+        if p.is_file() and base in p.resolve().parents and not any(part.startswith(".") for part in p.relative_to(base).parts):
+            items.append({"path": p.relative_to(base).as_posix(), "bytes": p.stat().st_size})
+    return json.dumps(items, ensure_ascii=False)
+
+def handle_task(task):
+    kind = task.get("kind")
+    if kind == "device_info":
+        return device_info()
+    if kind == "list_files":
+        return list_files(str(task.get("path", "")))
+    if kind == "read_file":
+        target = safe_target(task.get("path", ""))
+        if not target.is_file():
+            raise ValueError("File not found")
+        if target.stat().st_size > 24000:
+            raise ValueError("File exceeds the 24 KB read limit")
+        return target.read_text(encoding="utf-8")[:24000]
+    if kind == "write_file":
+        target = safe_target(task.get("path", ""))
+        body = task.get("content", "")
+        if not isinstance(body, str) or len(body) > 24000:
+            raise ValueError("Content exceeds the allowed size")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(body, encoding="utf-8")
+        return f"Wrote {target.relative_to(WORKSPACE)}"
+    raise ValueError("Unsupported task type")
+
 async def main():
     if not KEY_FILE.is_file():
         raise SystemExit("Missing .agent_key. Do not share its contents.")
@@ -31,7 +84,7 @@ async def main():
     WORKSPACE.mkdir(parents=True, exist_ok=True)
     headers = {"Authorization": f"Bearer {token}"}
     print("NoRestrictions Agent connected. Workspace:", WORKSPACE)
-    print("Automatic workspace file writes enabled. No remote shell commands are supported.")
+    print("Enabled tasks: device_info, list_files, read_file, write_file. No remote shell execution.")
     async with httpx.AsyncClient(timeout=25) as client:
         last_heartbeat = 0.0
         while True:
@@ -46,31 +99,21 @@ async def main():
                 r.raise_for_status()
                 task = r.json().get("task")
                 if not task:
-                    await asyncio.sleep(5)
+                    await asyncio.sleep(4)
                     continue
                 task_id = task.get("id", "")
                 try:
-                    if task.get("kind") != "write_file":
-                        raise ValueError("Unsupported task type")
-                    target = safe_target(task.get("path", ""))
-                    body = task.get("content", "")
-                    if not isinstance(body, str) or len(body) > 24000:
-                        raise ValueError("Content exceeds the allowed size")
-                    print("\nAutomatic file-write task")
-                    print("Task:", task_id)
-                    print("Target:", target.relative_to(WORKSPACE))
-                    print("Characters:", len(body))
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(body, encoding="utf-8")
-                    status, result = "completed", f"Wrote {target.relative_to(WORKSPACE)}"
-                    print(result)
+                    result = handle_task(task)
+                    success = True
+                    print(f"Task {task_id} completed: {task.get('kind')}")
                 except Exception as exc:
-                    status, result = "failed", str(exc)[:300]
+                    result = str(exc)[:500]
+                    success = False
                     print("Task failed:", result)
-                await client.post(BASE + "/tasks/complete",
-                                  headers=headers,
-                                  json={"task_id": task_id, "success": status == "completed", "result": result})
-            except (httpx.HTTPError, ValueError) as exc:
+                done = await client.post(BASE + "/tasks/complete", headers=headers,
+                    json={"task_id": task_id, "success": success, "result": result})
+                done.raise_for_status()
+            except httpx.HTTPError as exc:
                 print("Connection/task error:", str(exc)[:200])
                 await asyncio.sleep(8)
             except (KeyboardInterrupt, asyncio.CancelledError):
