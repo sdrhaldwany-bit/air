@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """NoRestrictions Termux companion: bounded workspace and device-info tasks."""
+import argparse
 import asyncio
 import json
 import platform
+import secrets
 import shutil
 from pathlib import Path
 import httpx
@@ -27,14 +29,10 @@ def safe_target(relative: str) -> Path:
 def device_info() -> str:
     usage = shutil.disk_usage(str(Path.home()))
     return json.dumps({
-        "platform": platform.platform(),
-        "system": platform.system(),
-        "machine": platform.machine(),
-        "python": platform.python_version(),
-        "home": str(Path.home()),
-        "workspace": str(WORKSPACE),
-        "disk_total_bytes": usage.total,
-        "disk_free_bytes": usage.free,
+        "platform": platform.platform(), "system": platform.system(),
+        "machine": platform.machine(), "python": platform.python_version(),
+        "home": str(Path.home()), "workspace": str(WORKSPACE),
+        "disk_total_bytes": usage.total, "disk_free_bytes": usage.free,
     }, ensure_ascii=False)
 
 def list_files(relative: str = "") -> str:
@@ -76,8 +74,30 @@ def handle_task(task):
     raise ValueError("Unsupported task type")
 
 async def main():
+    parser = argparse.ArgumentParser(description="NoRestrictions Termux Agent")
+    parser.add_argument("--pair-code", help="One-time code from the owner pairing panel")
+    parser.add_argument("--device-id", help="Device ID supplied by the pairing panel")
+    args = parser.parse_args()
+    ROOT.mkdir(parents=True, exist_ok=True)
+    if args.pair_code:
+        if not args.device_id or len(args.pair_code) > 32:
+            raise SystemExit("Pairing code and device ID are required.")
+        new_token = secrets.token_hex(32)
+        async with httpx.AsyncClient(timeout=20) as pairing_client:
+            response = await pairing_client.post(BASE + "/pair", json={
+                "code": args.pair_code, "device_id": args.device_id, "device_token": new_token
+            })
+            if response.status_code != 200:
+                try:
+                    detail = response.json().get("error", "pair_failed")
+                except Exception:
+                    detail = "pair_failed"
+                raise SystemExit("Pairing failed: " + str(detail))
+        KEY_FILE.write_text(new_token, encoding="utf-8")
+        KEY_FILE.chmod(0o600)
+        print("Pairing successful. Device key saved locally with restricted permissions.")
     if not KEY_FILE.is_file():
-        raise SystemExit("Missing .agent_key. Do not share its contents.")
+        raise SystemExit("Missing .agent_key. Pair this device from the website first.")
     token = KEY_FILE.read_text().strip()
     if len(token) < 32:
         raise SystemExit("Local device key is invalid.")
