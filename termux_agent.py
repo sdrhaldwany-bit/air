@@ -31,7 +31,7 @@ async def main():
     WORKSPACE.mkdir(parents=True, exist_ok=True)
     headers = {"Authorization": f"Bearer {token}"}
     print("NoRestrictions Agent connected. Workspace:", WORKSPACE)
-    print("Only file-write tasks are supported. Each task requires local approval.")
+    print("Automatic workspace file writes enabled. No remote shell commands are supported.")
     async with httpx.AsyncClient(timeout=25) as client:
         last_heartbeat = 0.0
         while True:
@@ -56,20 +56,14 @@ async def main():
                     body = task.get("content", "")
                     if not isinstance(body, str) or len(body) > 24000:
                         raise ValueError("Content exceeds the allowed size")
-                    print("\nIncoming file-write request")
+                    print("\nAutomatic file-write task")
                     print("Task:", task_id)
                     print("Target:", target.relative_to(WORKSPACE))
                     print("Characters:", len(body))
-                    print("Preview:")
-                    print("\n".join(body.splitlines()[:8])[:700])
-                    answer = input("Approve this file write? [y/N]: ").strip().lower()
-                    if answer not in ("y", "yes"):
-                        status, result = "rejected", "Declined locally"
-                    else:
-                        target.parent.mkdir(parents=True, exist_ok=True)
-                        target.write_text(body, encoding="utf-8")
-                        status, result = "completed", f"Wrote {target.relative_to(WORKSPACE)}"
-                        print(result)
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_text(body, encoding="utf-8")
+                    status, result = "completed", f"Wrote {target.relative_to(WORKSPACE)}"
+                    print(result)
                 except Exception as exc:
                     status, result = "failed", str(exc)[:300]
                     print("Task failed:", result)
