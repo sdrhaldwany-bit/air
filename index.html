@@ -366,7 +366,7 @@ line-height:1.7
 <div style="display:flex;align-items:center;gap:12px">
 <button type="button" class="termux-btn" onclick="openTermuxModal()">اتصال Termux (المالك فقط)</button>
 <button type="button" class="new-chat-btn" onclick="newChat()">＋ محادثة جديدة</button>
-<div class="status" id="status">● جاري الاتصال...</div>
+<div class="status" id="status">● الخادم: جاري الاتصال...</div><div class="status" id="termuxStatus" style="color:#ff8585">● Termux: غير مربوط</div>
 </div>
 </header>
 
@@ -580,7 +580,7 @@ async function connectTermuxDevice(){
     if(!response.ok || !data.success) throw new Error("لم يتم قبول مفتاح الجهاز.");
     termuxDeviceToken = token;
     $("termuxToken").value = "";
-    notice.textContent = "تم ربط الجهاز: " + data.device_id + ". يمكنك إرسال ملفات الكود إليه بعد موافقتك في Termux.";
+    notice.textContent = "تم ربط الجهاز: " + data.device_id + "."; $("termuxStatus").textContent = "● Termux: مرتبط"; $("termuxStatus").style.color = "#65e6ad";
   }catch(error){ notice.textContent = error.message || "تعذر ربط الجهاز."; }
 }
 async function waitForTermuxTask(taskId){
@@ -595,24 +595,19 @@ async function waitForTermuxTask(taskId){
       if(task.status==="complete"||task.status==="failed"){
         let result="";
         try{result=JSON.parse(task.result||"{}").result||"";}catch{}
-        const summary=(task.status==="complete"?"اكتملت مهمة Termux":"فشلت مهمة Termux")+": "+result;
-        addMessage("ai",summary);
-        messages.push({role:"system",content:"نتيجة حقيقية من جهاز Termux للمهمة "+taskId+": "+summary+". استخدم هذه النتيجة في متابعة المحادثة ولا تدّعِ نتائج أخرى."});
-        if(task.status==="complete"){
-          try{
-            const followup=await requestAI();
-            messages.push({role:"assistant",content:followup});
-            suppressTermuxQueue=true;
-            addMessage("ai",followup);
-            suppressTermuxQueue=false;
-          }catch(error){addMessage("ai","تعذر تحليل نتيجة Termux: "+error.message);}
+        // Keep successful file-write acknowledgements out of the conversation.
+        if(task.status==="failed"){
+          const safeError = result && !result.startsWith("Wrote ") ? result : "تعذر حفظ الملف على جهاز Termux.";
+          addMessage("ai","تعذر حفظ الملف على Termux: "+safeError);
         }
         return;
       }
       notice.textContent=task.status==="running"?"Termux ينفذ المهمة...":"المهمة في قائمة الانتظار داخل Termux...";
-    }catch(error){notice.textContent=error.message;return;}
+    }catch(error){notice.textContent=error.message; $("termuxStatus").textContent="● Termux: غير متصل"; $("termuxStatus").style.color="#ff8585"; return;}
   }
-  const timeoutText="لم يصل رد Termux بعد؛ تأكد أن الوكيل يعمل في Termux.";
+  const timeoutText="انقطع الاتصال عن Termux أو لم يصل رد الوكيل خلال المهلة.";
+  $("termuxStatus").textContent = "● Termux: غير متصل";
+  $("termuxStatus").style.color = "#ff8585";
   addMessage("ai",timeoutText);
   messages.push({role:"system",content:timeoutText});
   notice.textContent=timeoutText;
