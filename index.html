@@ -581,6 +581,29 @@ async function connectTermuxDevice(){
     notice.textContent = "تم ربط الجهاز: " + data.device_id + ". يمكنك إرسال ملفات الكود إليه بعد موافقتك في Termux.";
   }catch(error){ notice.textContent = error.message || "تعذر ربط الجهاز."; }
 }
+async function waitForTermuxTask(taskId){
+  const notice = $("termuxNotice");
+  for(let attempt=0;attempt<40;attempt++){
+    await new Promise(resolve=>setTimeout(resolve,3000));
+    try{
+      const response=await fetch(TERMUX_AGENT_API+"/tasks/"+encodeURIComponent(taskId),{headers:{Authorization:"Bearer "+termuxDeviceToken},cache:"no-store"});
+      const data=await response.json();
+      if(!response.ok) throw new Error(data.error||"تعذر قراءة حالة المهمة");
+      const task=data.task;
+      if(task.status==="complete"||task.status==="failed"){
+        let result="";
+        try{result=JSON.parse(task.result||"{}").result||"";}catch{}
+        notice.textContent=(task.status==="complete"?"اكتملت المهمة: ":"فشلت المهمة: ")+result;
+        alert(notice.textContent);
+        return;
+      }
+      notice.textContent=task.status==="running"?"المهمة قيد التنفيذ؛ وافق عليها في Termux إذا ظهر طلب الموافقة.":"المهمة في قائمة الانتظار...";
+    }catch(error){notice.textContent=error.message;return;}
+  }
+  notice.textContent="ما زالت المهمة تنتظر Termux. يمكنك متابعة حالتها لاحقاً.";
+}
+window.addEventListener("pagehide",()=>{termuxDeviceToken=null;});
+
 async function queueCodeToTermux(codeText, language){
   if(!termuxDeviceToken){ openTermuxModal(); $("termuxNotice").textContent = "اربط جهاز Termux أولاً."; return; }
   const ext = ({python:"py",py:"py",javascript:"js",js:"js",html:"html",css:"css",json:"json"})[String(language).toLowerCase()] || "txt";
@@ -590,7 +613,8 @@ async function queueCodeToTermux(codeText, language){
     const response = await fetch(TERMUX_AGENT_API + "/tasks",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer " + termuxDeviceToken},body:JSON.stringify({kind:"write_file",payload:{path,content:codeText}})});
     const data = await response.json();
     if(!response.ok || !data.success) throw new Error(data.error || "تعذر إرسال المهمة");
-    alert("وصلت المهمة إلى قائمة Termux. وافق عليها من شاشة Termux لإتمام كتابة الملف. رقم المهمة: " + data.task_id);
+    alert("وصلت المهمة إلى Termux. وافق عليها من شاشة Termux لإتمام كتابة الملف. سأتابع النتيجة هنا.");
+    await waitForTermuxTask(data.task_id);
   }catch(error){ alert("فشل إرسال المهمة: " + error.message); }
 }
 function closeTermuxModal(){
