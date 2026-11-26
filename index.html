@@ -509,6 +509,8 @@ let busy = false;
 let selectedImage = null;
 let selectedImageUrl = null;
 let termuxDeviceToken = null;
+let suppressTermuxQueue = false;
+let codeTaskQueuedForReply = false;
 
 const systemPrompt = `
 أنت NoRestrictions AI، مساعد ذكاء اصطناعي عام.
@@ -593,26 +595,39 @@ async function waitForTermuxTask(taskId){
       if(task.status==="complete"||task.status==="failed"){
         let result="";
         try{result=JSON.parse(task.result||"{}").result||"";}catch{}
-        notice.textContent=(task.status==="complete"?"اكتملت المهمة: ":"فشلت المهمة: ")+result;
-        alert(notice.textContent);
+        const summary=(task.status==="complete"?"اكتملت مهمة Termux":"فشلت مهمة Termux")+": "+result;
+        addMessage("ai",summary);
+        messages.push({role:"system",content:"نتيجة حقيقية من جهاز Termux للمهمة "+taskId+": "+summary+". استخدم هذه النتيجة في متابعة المحادثة ولا تدّعِ نتائج أخرى."});
+        if(task.status==="complete"){
+          try{
+            const followup=await requestAI();
+            messages.push({role:"assistant",content:followup});
+            suppressTermuxQueue=true;
+            addMessage("ai",followup);
+            suppressTermuxQueue=false;
+          }catch(error){addMessage("ai","تعذر تحليل نتيجة Termux: "+error.message);}
+        }
         return;
       }
-      notice.textContent=task.status==="running"?"المهمة قيد التنفيذ؛ وافق عليها في Termux إذا ظهر طلب الموافقة.":"المهمة في قائمة الانتظار...";
+      notice.textContent=task.status==="running"?"Termux ينفذ المهمة...":"المهمة في قائمة الانتظار داخل Termux...";
     }catch(error){notice.textContent=error.message;return;}
   }
-  notice.textContent="ما زالت المهمة تنتظر Termux. يمكنك متابعة حالتها لاحقاً.";
+  const timeoutText="لم يصل رد Termux بعد؛ تأكد أن الوكيل يعمل في Termux.";
+  addMessage("ai",timeoutText);
+  messages.push({role:"system",content:timeoutText});
+  notice.textContent=timeoutText;
 }
 window.addEventListener("pagehide",()=>{termuxDeviceToken=null;});
 
 async function queueCodeToTermux(codeText, language){
-  if(!termuxDeviceToken){ $("termuxNotice").textContent = "اربط جهاز Termux مرة واحدة من زر الاتصال أولاً."; return; }
+  if(!termuxDeviceToken){ addMessage("ai","لإرسال الملفات إلى جهازك، اربط Termux أولاً من زر الاتصال أعلى الصفحة."); return; }
   const ext = ({python:"py",py:"py",javascript:"js",js:"js",html:"html",css:"css",json:"json"})[String(language).toLowerCase()] || "txt";
   const path = "generated_" + Date.now() + "." + ext;
   try{
     const response = await fetch(TERMUX_AGENT_API + "/tasks",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer " + termuxDeviceToken},body:JSON.stringify({kind:"write_file",payload:{path,content:codeText}})});
     const data = await response.json();
     if(!response.ok || !data.success) throw new Error(data.error || "تعذر إرسال المهمة");
-    $("termuxNotice").textContent = "أُرسلت تلقائياً إلى Termux: " + path;
+    $("termuxNotice").textContent = "المهمة أُرسلت إلى Termux؛ النتيجة ستظهر داخل المحادثة.";
     await waitForTermuxTask(data.task_id);
   }catch(error){ $("termuxNotice").textContent = "فشل الإرسال التلقائي: " + error.message; }
 }
@@ -700,6 +715,7 @@ return div;
 
 function renderAI(container, text){
 
+codeTaskQueuedForReply = false;
 const regex = /```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g;
 
 let last = 0;
@@ -774,7 +790,8 @@ code.textContent = codeText;
 pre.appendChild(code);
 
 header.append(lang, copy, save);
-if(termuxDeviceToken){
+if(termuxDeviceToken && !suppressTermuxQueue && !codeTaskQueuedForReply){
+  codeTaskQueuedForReply = true;
   queueCodeToTermux(codeText, language);
 }
 
