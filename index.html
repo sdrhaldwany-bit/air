@@ -378,9 +378,11 @@ line-height:1.7
     <h2 id="termuxTitle">اتصال Termux</h2>
     <p class="termux-description">لوحة اتصال مخصصة لمالك الموقع. تحقّق من الهوية قبل متابعة إعداد ربط جهازك.</p>
     <div class="termux-security-note"><strong>حماية الحساب</strong><span>لن تُرسل كلمة المرور إلى واجهة الموقع أو تُحفظ فيها.</span></div>
-    <div class="termux-security-note"><strong>حالة خدمة Termux</strong><span>التحقق هنا يفحص توفر خدمة الوكيل فقط. لا تُدخل كلمة مرور أو مفتاح جهاز في الموقع.</span></div>
+    <div class="termux-security-note"><strong>مفتاح جهاز Termux</strong><span>الصق محتوى .agent_key محلياً هنا لربط لوحة الموقع بجهازك. يُحفظ في ذاكرة الصفحة فقط ويُمسح عند إغلاقها؛ لا ترسله في المحادثة.</span></div>
+    <label for="termuxToken">مفتاح الجهاز</label><input id="termuxToken" type="password" autocomplete="off" spellcheck="false" placeholder="الصق المفتاح المحلي هنا">
     <div class="termux-modal-actions">
-      <button class="termux-confirm" type="button" onclick="checkTermuxService()">فحص الاتصال</button>
+      <button class="termux-confirm" type="button" onclick="connectTermuxDevice()">ربط الجهاز</button>
+      <button class="termux-cancel" type="button" onclick="checkTermuxService()">فحص الخدمة</button>
       <button class="termux-cancel" type="button" onclick="closeTermuxModal()">إغلاق</button>
     </div>
     <div class="termux-notice" id="termuxNotice" role="status">لم يتم فحص الخدمة بعد.</div>
@@ -506,6 +508,7 @@ let messages = [];
 let busy = false;
 let selectedImage = null;
 let selectedImageUrl = null;
+let termuxDeviceToken = null;
 
 const systemPrompt = `
 أنت NoRestrictions AI، مساعد ذكاء اصطناعي عام.
@@ -562,7 +565,33 @@ $("main").scrollTop = 0;
 const TERMUX_AGENT_API = "https://norestrictions-agent.sdrhaldwane.workers.dev";
 function openTermuxModal(){
   $("termuxModal").classList.add("open");
-  $("termuxNotice").textContent = "اضغط فحص الاتصال للتحقق من خدمة الوكيل.";
+  $("termuxNotice").textContent = termuxDeviceToken ? "مفتاح الجهاز محفوظ مؤقتاً في ذاكرة الصفحة." : "الصق مفتاح الجهاز ثم اضغط ربط الجهاز.";
+}
+async function connectTermuxDevice(){
+  const token = $("termuxToken").value.trim();
+  const notice = $("termuxNotice");
+  if(token.length < 32){ notice.textContent = "المفتاح غير مكتمل."; return; }
+  notice.textContent = "جارٍ التحقق من الجهاز...";
+  try{
+    const response = await fetch(TERMUX_AGENT_API + "/heartbeat",{method:"POST",headers:{Authorization:"Bearer " + token}});
+    const data = await response.json();
+    if(!response.ok || !data.success) throw new Error("لم يتم قبول مفتاح الجهاز.");
+    termuxDeviceToken = token;
+    $("termuxToken").value = "";
+    notice.textContent = "تم ربط الجهاز: " + data.device_id + ". يمكنك إرسال ملفات الكود إليه بعد موافقتك في Termux.";
+  }catch(error){ notice.textContent = error.message || "تعذر ربط الجهاز."; }
+}
+async function queueCodeToTermux(codeText, language){
+  if(!termuxDeviceToken){ openTermuxModal(); $("termuxNotice").textContent = "اربط جهاز Termux أولاً."; return; }
+  const ext = ({python:"py",py:"py",javascript:"js",js:"js",html:"html",css:"css",json:"json"})[String(language).toLowerCase()] || "txt";
+  const path = prompt("اسم الملف داخل مجلد workspace (مثال: main.py):", "main." + ext);
+  if(!path) return;
+  try{
+    const response = await fetch(TERMUX_AGENT_API + "/tasks",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer " + termuxDeviceToken},body:JSON.stringify({kind:"write_file",payload:{path,content:codeText}})});
+    const data = await response.json();
+    if(!response.ok || !data.success) throw new Error(data.error || "تعذر إرسال المهمة");
+    alert("وصلت المهمة إلى قائمة Termux. وافق عليها من شاشة Termux لإتمام كتابة الملف. رقم المهمة: " + data.task_id);
+  }catch(error){ alert("فشل إرسال المهمة: " + error.message); }
 }
 function closeTermuxModal(){
   $("termuxModal").classList.remove("open");
@@ -721,7 +750,10 @@ code.textContent = codeText;
 
 pre.appendChild(code);
 
-header.append(lang, copy, save);
+const sendToTermux = document.createElement("button");
+sendToTermux.textContent = "إرسال إلى Termux";
+sendToTermux.onclick = () => queueCodeToTermux(codeText, language);
+header.append(lang, copy, save, sendToTermux);
 
 box.append(header, pre);
 
