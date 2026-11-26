@@ -61,9 +61,14 @@ font-size:13px;border:1px solid #ef4444
 .termux-btn:hover{background:#991b1b}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000}
 .modal-backdrop.open{display:flex}
-.termux-modal{width:min(100%,390px);background:#151515;border:1px solid #692323;border-radius:18px;padding:22px;box-shadow:0 20px 70px #000b}
-.termux-modal h2{margin:0 0 8px;color:#ff4545;font-size:20px}
-.termux-modal p{color:#aaa;font-size:13px;line-height:1.8}
+.termux-modal{width:min(100%,410px);background:linear-gradient(155deg,#1b1111,#101010 58%);border:1px solid #783030;border-radius:20px;padding:25px;box-shadow:0 24px 90px #000d;text-align:right}
+.termux-modal-icon{width:52px;height:52px;display:grid;place-items:center;border-radius:15px;background:#351414;border:1px solid #7f2525;color:#ff5555;font-size:27px;margin-bottom:13px}
+.termux-owner-tag{display:inline-block;color:#ff8b8b;background:#351414;border:1px solid #642525;border-radius:20px;padding:5px 10px;font-size:10px;letter-spacing:1px;margin-bottom:12px}
+.termux-modal h2{margin:0 0 8px;color:#ff4545;font-size:22px}
+.termux-modal p{color:#aaa;font-size:13px;line-height:1.9}
+.termux-security-note{display:flex;flex-direction:column;gap:4px;background:#211616;border:1px solid #482626;border-radius:11px;padding:11px 13px;margin:15px 0;color:#ddd;font-size:12px}
+.termux-security-note span{color:#aaa;line-height:1.7}
+.termux-modal label{display:block;color:#ddd;font-size:13px;margin-top:12px}
 .termux-modal input{width:100%;padding:13px;margin:10px 0;background:#090909;color:#fff;border:1px solid #543030;border-radius:10px;font-size:16px;outline:none}
 .termux-modal input:focus{border-color:#ef4444}
 .termux-modal-actions{display:flex;gap:9px;margin-top:12px}
@@ -368,17 +373,20 @@ line-height:1.7
 
 <div class="modal-backdrop" id="termuxModal" role="dialog" aria-modal="true" aria-labelledby="termuxTitle" onclick="if(event.target===this)closeTermuxModal()">
   <section class="termux-modal">
-    <h2 id="termuxTitle">اتصال Termux — المالك فقط</h2>
-    <p>هذه واجهة تحقق أولية. لن يتم إنشاء اتصال بالجهاز حتى إعداد تحقق آمن على الخادم وخدمة الربط المحلية.</p>
+    <div class="termux-modal-icon" aria-hidden="true">⌘</div>
+    <div class="termux-owner-tag">🔒 OWNER ONLY</div>
+    <h2 id="termuxTitle">اتصال Termux</h2>
+    <p class="termux-description">لوحة اتصال مخصصة لمالك الموقع. تحقّق من الهوية قبل متابعة إعداد ربط جهازك.</p>
+    <div class="termux-security-note"><strong>حماية الحساب</strong><span>لن تُرسل كلمة المرور إلى واجهة الموقع أو تُحفظ فيها.</span></div>
     <form onsubmit="submitTermuxAuth(event)">
       <label for="termuxPassword">كلمة مرور المالك</label>
       <input id="termuxPassword" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور" required>
       <div class="termux-modal-actions">
-        <button class="termux-confirm" type="submit">تحقق</button>
+        <button class="termux-confirm" type="submit">متابعة التحقق</button>
         <button class="termux-cancel" type="button" onclick="closeTermuxModal()">إلغاء</button>
       </div>
     </form>
-    <div class="termux-notice" id="termuxNotice" role="status">التحقق غير مفعّل بعد.</div>
+    <div class="termux-notice" id="termuxNotice" role="status">ميزة التحقق والاتصال لم تُفعّل على الخادم بعد.</div>
   </section>
 </div>
 
