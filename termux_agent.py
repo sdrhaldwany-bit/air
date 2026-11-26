@@ -9,7 +9,7 @@ DEVICE_ID = "huawei-termux-01"
 ROOT = Path.home() / "norestrictions-agent"
 WORKSPACE = ROOT / "workspace"
 KEY_FILE = ROOT / ".agent_key"
-ALLOWED = {".py", ".js", ".mjs", ".cjs", ".html", ".css", ".json", ".md", ".txt", ".toml", ".yaml", ".yml", ".xml", ".svg"}
+ALLOWED = {".py", ".js", ".mjs", ".cjs", ".html", ".css", ".json", ".md", ".txt", ".toml", ".yaml", ".yml", ".xml", ".svg", ".mjs", ".cjs"}
 
 def safe_target(relative: str) -> Path:
     p = Path(relative)
@@ -75,7 +75,7 @@ async def main():
                     print("Task failed:", result)
                 await client.post(BASE + "/tasks/complete",
                                   headers=headers,
-                                  json={"id": task_id, "status": status, "result": result})
+                                  json={"task_id": task_id, "success": status == "completed", "result": result})
             except (httpx.HTTPError, ValueError) as exc:
                 print("Connection/task error:", str(exc)[:200])
                 await asyncio.sleep(8)
