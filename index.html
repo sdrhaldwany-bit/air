@@ -99,6 +99,16 @@ font-size:13px;border:1px solid #ef4444
 .owner-notice{min-height:20px;color:#f0b2b2;font-size:12px;margin-top:10px}
 .owner-state{padding:13px;border:1px solid #315b49;background:#0a1510;border-radius:10px;color:#c7f6dc;font-size:14px;margin:14px 0}
 .owner-state.off{border-color:#8e3038;color:#ffb8bd}
+.security-card{margin-top:18px;padding:14px;background:#0a1510;border:1px solid #315b49;border-radius:13px}
+.security-card h3{margin:2px 0 6px;color:#8af0bf;font-size:17px}
+.security-card p{margin:4px 0 10px}
+.security-actions{display:flex;gap:8px;flex-wrap:wrap}
+.security-actions button{flex:1;min-width:110px;padding:10px;border-radius:9px;font-size:12px}
+.security-summary,.security-ai{margin-top:10px;padding:10px;background:#101e17;border-radius:9px;color:#d5e8dd;font-size:12px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.security-events{display:grid;gap:7px;margin-top:9px;max-height:220px;overflow:auto}
+.security-event{padding:9px;background:#111c17;border:1px solid #263d30;border-radius:8px;color:#d9e8df;font-size:11px;line-height:1.7;overflow-wrap:anywhere}
+.security-event strong{color:#8af0bf}
+
 @media(max-width:500px){.owner-btn{font-size:10px;padding:8px 7px}.owner-actions{flex-wrap:wrap}}
 
 .termux-btn:hover{background:#991b1b}
@@ -461,6 +471,18 @@ line-height:1.7
       <div class="owner-actions">
         <button class="owner-secondary" type="button" onclick="refreshOwnerStatus()">تحديث الحالة</button>
         <button class="owner-secondary" type="button" onclick="ownerLogout()">تسجيل خروج</button>
+      </div>
+      <div class="security-card" dir="rtl">
+        <div class="owner-tag">GHOST SECURITY AI</div>
+        <h3>مركز الحماية الذكي</h3>
+        <p>مراقبة الأحداث الأمنية وعناوين IP والدول التقريبية والحظر النشط.</p>
+        <div class="security-actions">
+          <button class="owner-secondary" type="button" onclick="loadSecurityDashboard()">تحديث السجل</button>
+          <button class="owner-primary" type="button" onclick="analyzeSecurity()">تحليل بالذكاء الاصطناعي</button>
+        </div>
+        <div id="securitySummary" class="security-summary">اضغط تحديث السجل لعرض آخر الأحداث.</div>
+        <div id="securityEvents" class="security-events"></div>
+        <div id="securityAI" class="security-ai" hidden></div>
       </div>
       <div id="ownerPanelNotice" role="status" class="owner-notice"></div>
     </div>
@@ -1463,6 +1485,44 @@ async function setOwnerAI(enabled){
     renderOwnerState(d.enabled);
     $("ownerPanelNotice").textContent=d.enabled?"تم تشغيل الذكاء الاصطناعي.":"تم إطفاء الذكاء الاصطناعي على مستوى الموقع.";
   }catch(e){$("ownerPanelNotice").textContent=e.message;}
+}
+async function loadSecurityDashboard(){
+  if(!ownerToken) return;
+  const summary=$("securitySummary"), list=$("securityEvents"), ai=$("securityAI");
+  summary.textContent="جارٍ تحميل الأحداث الأمنية...";
+  list.innerHTML=""; ai.hidden=true;
+  try{
+    const r=await fetch(API+"/owner/security",{headers:{Authorization:"Bearer "+ownerToken},cache:"no-store"});
+    const d=await r.json();
+    if(r.status===401){ownerLogout();throw new Error("انتهت صلاحية التحقق.");}
+    if(!r.ok||!d.success) throw new Error(d.error||"تعذر تحميل السجل الأمني.");
+    summary.textContent="أحداث آخر 24 ساعة: "+d.events_24h+" | الحظر النشط: "+d.active_blocks.length+" | أحدث السجلات: "+d.events.length;
+    for(const e of d.events){
+      const item=document.createElement("div"); item.className="security-event";
+      const when=e.created_at||"وقت غير متاح";
+      item.innerHTML="<strong>"+String(e.event||"EVENT").replace(/[<>]/g,"")+"</strong><br>";
+      const details=[when,e.ip||"",[e.city,e.country].filter(Boolean).join("، "),e.method||"",e.path||"",e.user_agent||""].filter(Boolean);
+      item.textContent=String(e.event||"EVENT")+" — "+details.join(" | ");
+      list.appendChild(item);
+    }
+    if(!d.events.length) list.textContent="لا توجد أحداث مسجلة حتى الآن.";
+    if(d.active_blocks.length){
+      const block=document.createElement("div");block.className="security-event";
+      block.textContent="عناوين محظورة مؤقتاً: "+d.active_blocks.map(x=>x.ip+" ("+x.reason+")").join("، ");
+      list.prepend(block);
+    }
+  }catch(e){summary.textContent=e.message;}
+}
+async function analyzeSecurity(){
+  if(!ownerToken) return;
+  const ai=$("securityAI");ai.hidden=false;ai.textContent="الذكاء الاصطناعي يحلل بيانات الأحداث الأمنية...";
+  try{
+    const r=await fetch(API+"/owner/security/analyze",{method:"POST",headers:{Authorization:"Bearer "+ownerToken},cache:"no-store"});
+    const d=await r.json();
+    if(r.status===401){ownerLogout();throw new Error("انتهت صلاحية التحقق.");}
+    if(!r.ok||!d.success) throw new Error(d.error||"تعذر تحليل الأحداث.");
+    ai.textContent="النموذج: "+d.model+"\nالأحداث المحللة: "+d.events_analyzed+"\nالحظر النشط: "+d.active_blocks+"\n\n"+d.analysis;
+  }catch(e){ai.textContent=e.message;}
 }
 function ownerLogout(){
   ownerToken=null;
