@@ -1224,7 +1224,9 @@ async function requestAI(){
       ? lastUserMessage.content.find(part=>part.type==="text")?.text||""
       : "";
   // طلبات إنشاء المواقع تُرسل مباشرة إلى خدمة النشر بدلاً من الاعتماد على تخمين النموذج للأداة.
-  if(isWebsiteCreationRequest(lastUserText)){
+  const lastUserHasImage=Array.isArray(lastUserMessage?.content) &&
+    lastUserMessage.content.some(part=>part && part.type==="image_url");
+  if(isWebsiteCreationRequest(lastUserText) && !lastUserHasImage){
     return await createWebsiteFromChat(lastUserText);
   }
   const toolGuide = `
@@ -1400,7 +1402,7 @@ scrollBottom();
 
 /* طلب الإجابة */
 
-const answer = imageFile ? await callGhostModel() : await requestAI();
+const answer = await requestAI();
 
 typing.remove();
 
