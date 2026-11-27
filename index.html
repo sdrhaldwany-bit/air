@@ -426,6 +426,44 @@ line-height:1.7
 </div>
 </header>
 
+<main id="main">
+  <div class="container">
+    <section id="welcome">
+      <h1>مرحباً بك في Ghost 👋</h1>
+      <p>أنا Ghost، مساعدك الذكي. اكتب سؤالك أو اطلب كتابة كود أو أرسل صورة لتحليلها.</p>
+      <div class="suggestions">
+        <button class="suggestion" type="button" onclick="suggest('اكتب لي برنامج Python احترافي')">💻 كتابة الأكواد</button>
+        <button class="suggestion" type="button" onclick="suggest('اشرح لي كيف تعمل واجهات API')">🧠 شرح البرمجة</button>
+        <button class="suggestion" type="button" onclick="suggest('صمم لي موقع HTML احترافي')">🌐 تصميم المواقع</button>
+        <button class="suggestion" type="button" onclick="suggest('سأرسل لك صورة تحتوي على كود، اقرأه وعدّله حسب طلبي')">🖼️ تحليل الصور والأكواد</button>
+      </div>
+    </section>
+    <div id="messages" aria-live="polite"></div>
+  </div>
+</main>
+
+<div class="composer-area">
+  <div class="composer">
+    <div id="preview">
+      <img id="previewImg" alt="معاينة الصورة المرفقة">
+      <span id="previewName"></span>
+      <div class="preview-actions">
+        <button type="button" onclick="removeImage()">إزالة الصورة</button>
+      </div>
+      <div class="preview-hint">الصورة جاهزة للإرسال مع رسالتك.</div>
+    </div>
+    <textarea id="input" aria-label="اكتب رسالتك" placeholder="اكتب رسالتك إلى Ghost..." rows="1"></textarea>
+    <div class="actions">
+      <div class="action-left">
+        <button class="icon-btn" id="imageBtn" type="button" onclick="$('imageInput').click()" aria-label="إرفاق صورة">📎 صورة</button>
+        <input type="file" id="imageInput" accept="image/png,image/jpeg,image/webp">
+      </div>
+      <button class="send-btn" id="sendBtn" type="button" onclick="send()">إرسال ↑</button>
+    </div>
+  </div>
+  <div class="footer-note">Ghost AI · مساعدك الذكي</div>
+</div>
+
 
 <div class="modal-backdrop" id="termuxModal" role="dialog" aria-modal="true" aria-labelledby="termuxTitle" onclick="if(event.target===this)closeTermuxModal()">
   <section class="termux-modal">
@@ -539,7 +577,8 @@ line-height:1.7
    </div>
    <iframe id="sitePreview" class="site-studio-preview" title="معاينة الموقع الذي أنشأه Ghost" sandbox="allow-scripts"></iframe>
    <pre id="siteCode" hidden></pre>
-
+</div>
+</section>
 </div>
 
 <script>
@@ -1351,7 +1390,7 @@ Math.min(this.scrollHeight,150) + "px";
 
 
 /* لوحة الأونر — المصادقة والتحكم تتم على Worker */
-let ownerToken = null;
+var ownerToken = null; // Avoid temporal-dead-zone errors in inline owner handlers
 function openOwnerModal(){
   $("ownerModal").classList.add("open");
   $("ownerLogin").hidden = !!ownerToken;
