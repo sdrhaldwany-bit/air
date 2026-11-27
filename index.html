@@ -410,21 +410,6 @@ line-height:1.7
 .message{max-width:100%}
 }
 
-.site-studio-btn{background:#173b32;color:#d8fff0;border:1px solid #368d70;padding:9px 12px;border-radius:10px;font-size:12px}
-.site-studio-btn:hover{background:#205846}
-.site-studio-modal{width:min(100%,980px);max-height:94vh;overflow:auto;background:#0d1513;border:1px solid #34765f;border-radius:18px;padding:20px;box-shadow:0 24px 90px #000d;text-align:right}
-.site-studio-modal h2{margin:0 0 8px;color:#8af0bf;font-size:22px}
-.site-studio-modal p{color:#b3c7be;font-size:13px;line-height:1.8}
-.site-studio-modal label{display:block;color:#e0eee7;font-size:13px;margin:12px 0 7px}
-.site-studio-modal textarea{width:100%;min-height:110px;resize:vertical;padding:13px;background:#080e0c;color:#fff;border:1px solid #345b4b;border-radius:10px;font:inherit;font-size:14px;line-height:1.7}
-.site-studio-actions{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
-.site-studio-actions button{padding:11px 15px;border-radius:10px}
-.site-studio-primary{background:#16734e;color:#fff}
-.site-studio-secondary{background:#26342d;color:#e2eee7}
-.site-studio-notice{min-height:24px;color:#a9e8c8;font-size:12px;line-height:1.7}
-.site-studio-preview{width:100%;height:min(62vh,620px);background:#fff;border:1px solid #3b5c4d;border-radius:12px}
-.site-studio-code{width:100%;min-height:220px;max-height:360px;overflow:auto;white-space:pre;direction:ltr;text-align:left;background:#080b0a;color:#d9f5e6;border:1px solid #294737;border-radius:10px;padding:12px;font:12px/1.6 monospace}
-@media(max-width:650px){.site-studio-btn{font-size:10px;padding:8px 7px}.site-studio-modal{padding:13px}.site-studio-preview{height:55vh}}
 </style>
 </head>
 
@@ -436,7 +421,6 @@ line-height:1.7
 <button type="button" class="termux-btn" onclick="openTermuxModal()">اتصال Termux (المالك فقط)</button>
 <button type="button" class="owner-btn" onclick="openOwnerModal()">مكان الأونر</button>
 <button type="button" class="image-gen-btn" onclick="openImageGen()">إنشاء صورة</button>
-<button type="button" class="site-studio-btn" onclick="openSiteStudio()">مصمم المواقع AI</button>
 <button type="button" class="new-chat-btn" onclick="newChat()">＋ محادثة جديدة</button>
 <div class="status" id="status">● الخادم: جاري الاتصال...</div><div class="status" id="termuxStatus" style="color:#ff8585">● Termux: غير مربوط</div>
 </div>
@@ -548,113 +532,7 @@ line-height:1.7
     <button class="site-studio-secondary" type="button" onclick="toggleSiteCode()">عرض/إخفاء الكود</button>
    </div>
    <iframe id="sitePreview" class="site-studio-preview" title="معاينة الموقع الذي أنشأه Ghost" sandbox="allow-scripts"></iframe>
-   <pre id="siteCode" class="site-studio-code" hidden></pre>
-  </div>
- </section>
-</div>
-<main id="main">
-<div class="container">
-
-<div id="welcome">
-<h1>مرحباً بك 👋</h1>
-
-<p>
-أنا Ghost<br>
-مساعدك للكتابة والبرمجة والأسئلة والمحادثة الطبيعية،
-مع إمكانية إرسال الصور وتحليلها.
-</p>
-
-<div class="suggestions">
-
-<button class="suggestion"
-onclick="suggest('اكتب لي برنامج Python احترافي')">
-💻 كتابة الأكواد
-</button>
-
-<button class="suggestion"
-onclick="suggest('اشرح لي كيف تعمل واجهات API')">
-🧠 شرح البرمجة
-</button>
-
-<button class="suggestion"
-onclick="suggest('صمم لي موقع HTML احترافي')">
-🌐 تصميم المواقع
-</button>
-
-<button class="suggestion"
-onclick="document.getElementById('imageInput').click()">
-🖼️ إرسال صورة للتحليل
-</button>
-
-</div>
-</div>
-
-<div id="messages"></div>
-
-</div>
-</main>
-
-<div class="composer-area">
-
-<div class="composer">
-
-<div id="preview">
-
-<img id="previewImg" alt="معاينة الصورة">
-
-<div class="preview-actions">
-<span id="previewName" class="preview-hint"></span>
-
-<button type="button" onclick="removeImage()">
-إزالة الصورة ✕
-</button>
-</div>
-
-<div class="preview-hint">
-اكتب سؤالك عن الصورة ثم اضغط إرسال.
-</div>
-
-</div>
-
-<textarea
-id="input"
-placeholder="اكتب رسالتك إلى NoRestrictions AI..."
-></textarea>
-
-<div class="actions">
-
-<div class="action-left">
-
-<button
-type="button"
-class="icon-btn"
-id="imageBtn"
-onclick="document.getElementById('imageInput').click()">
-🖼️ الصور
-</button>
-
-<input
-type="file"
-id="imageInput"
-accept="image/png,image/jpeg,image/webp"
->
-
-</div>
-
-<button
-class="send-btn"
-id="sendBtn"
-onclick="send()">
-إرسال ↑
-</button>
-
-</div>
-</div>
-
-<div class="footer-note">
-Ghost · AI Assistant<br>
-تُسجّل معلومات الاتصال والمتصفح لأغراض الأمان.
-</div>
+   <pre div>
 
 </div>
 
