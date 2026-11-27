@@ -1302,6 +1302,9 @@ async function requestAI(){
   if(isWebsiteCreationRequest(lastUserText) && !lastUserHasImage){
     return await createWebsiteFromChat(lastUserText);
   }
+  // لا نستهلك استدعاء تخطيط إضافياً في الأسئلة العادية؛ شغّل المخطط فقط عند وجود نية أداة واضحة.
+  const explicitToolIntent=/(?:افحص|تحقق|تأكد من حالة|حالة الخادم|حالة الخدمة|هل الخادم متصل|هل الخدمة تعمل|أنشئ صورة|انشئ صورة|سوي صورة|ولّد صورة|ولد صورة|generate image|check status|service status)/i.test(lastUserText);
+  if(!explicitToolIntent) return await callGhostModel();
   const toolGuide = `
 أنت الآن مخطط أدوات Ghost. قرر هل تحتاج إحدى الأدوات التالية لتنفيذ آخر طلب للمستخدم.
 أعد JSON فقط دون Markdown:
