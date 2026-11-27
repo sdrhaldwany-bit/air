@@ -1500,7 +1500,6 @@ async function loadSecurityDashboard(){
     for(const e of d.events){
       const item=document.createElement("div"); item.className="security-event";
       const when=e.created_at||"وقت غير متاح";
-      item.innerHTML="<strong>"+String(e.event||"EVENT").replace(/[<>]/g,"")+"</strong><br>";
       const details=[when,e.ip||"",[e.city,e.country].filter(Boolean).join("، "),e.method||"",e.path||"",e.user_agent||""].filter(Boolean);
       item.textContent=String(e.event||"EVENT")+" — "+details.join(" | ");
       list.appendChild(item);
