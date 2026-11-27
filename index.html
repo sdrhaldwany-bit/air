@@ -409,6 +409,22 @@ line-height:1.7
 .suggestions{grid-template-columns:1fr}
 .message{max-width:100%}
 }
+
+.site-studio-btn{background:#173b32;color:#d8fff0;border:1px solid #368d70;padding:9px 12px;border-radius:10px;font-size:12px}
+.site-studio-btn:hover{background:#205846}
+.site-studio-modal{width:min(100%,980px);max-height:94vh;overflow:auto;background:#0d1513;border:1px solid #34765f;border-radius:18px;padding:20px;box-shadow:0 24px 90px #000d;text-align:right}
+.site-studio-modal h2{margin:0 0 8px;color:#8af0bf;font-size:22px}
+.site-studio-modal p{color:#b3c7be;font-size:13px;line-height:1.8}
+.site-studio-modal label{display:block;color:#e0eee7;font-size:13px;margin:12px 0 7px}
+.site-studio-modal textarea{width:100%;min-height:110px;resize:vertical;padding:13px;background:#080e0c;color:#fff;border:1px solid #345b4b;border-radius:10px;font:inherit;font-size:14px;line-height:1.7}
+.site-studio-actions{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+.site-studio-actions button{padding:11px 15px;border-radius:10px}
+.site-studio-primary{background:#16734e;color:#fff}
+.site-studio-secondary{background:#26342d;color:#e2eee7}
+.site-studio-notice{min-height:24px;color:#a9e8c8;font-size:12px;line-height:1.7}
+.site-studio-preview{width:100%;height:min(62vh,620px);background:#fff;border:1px solid #3b5c4d;border-radius:12px}
+.site-studio-code{width:100%;min-height:220px;max-height:360px;overflow:auto;white-space:pre;direction:ltr;text-align:left;background:#080b0a;color:#d9f5e6;border:1px solid #294737;border-radius:10px;padding:12px;font:12px/1.6 monospace}
+@media(max-width:650px){.site-studio-btn{font-size:10px;padding:8px 7px}.site-studio-modal{padding:13px}.site-studio-preview{height:55vh}}
 </style>
 </head>
 
@@ -420,6 +436,7 @@ line-height:1.7
 <button type="button" class="termux-btn" onclick="openTermuxModal()">اتصال Termux (المالك فقط)</button>
 <button type="button" class="owner-btn" onclick="openOwnerModal()">مكان الأونر</button>
 <button type="button" class="image-gen-btn" onclick="openImageGen()">إنشاء صورة</button>
+<button type="button" class="site-studio-btn" onclick="openSiteStudio()">مصمم المواقع AI</button>
 <button type="button" class="new-chat-btn" onclick="newChat()">＋ محادثة جديدة</button>
 <div class="status" id="status">● الخادم: جاري الاتصال...</div><div class="status" id="termuxStatus" style="color:#ff8585">● Termux: غير مربوط</div>
 </div>
@@ -512,6 +529,29 @@ line-height:1.7
   </section>
 </div>
 
+
+<div class="modal-backdrop" id="siteStudioModal" role="dialog" aria-modal="true" aria-labelledby="siteStudioTitle" onclick="if(event.target===this)closeSiteStudio()">
+ <section class="site-studio-modal">
+  <div class="owner-tag">GHOST WEBSITE STUDIO</div>
+  <h2 id="siteStudioTitle">مصمم المواقع بالذكاء الاصطناعي</h2>
+  <p>صف الموقع الذي تريده بالتفصيل، وسيبني Ghost صفحة ويب كاملة بتصميم متجاوب ومحتوى حقيقي وتفاعلات تعمل، ثم يعرض معاينة قابلة للتجربة.</p>
+  <label for="siteBrief">وصف الموقع</label>
+  <textarea id="siteBrief" maxlength="7000" placeholder="مثال: أنشئ موقع شركة تقنية باسم Nova، تصميم داكن فاخر بالأسود والأزرق، صفحة رئيسية وخدمات وأعمالنا وآراء العملاء وتواصل معنا، عربي RTL ومتجاوب بالكامل..."></textarea>
+  <div class="site-studio-actions">
+   <button class="site-studio-primary" id="buildSiteBtn" type="button" onclick="buildWebsite()">ابدأ بناء الموقع</button>
+   <button class="site-studio-secondary" type="button" onclick="closeSiteStudio()">إغلاق</button>
+  </div>
+  <div id="siteStudioNotice" class="site-studio-notice" role="status">سيتم إنشاء ملف HTML مستقل قابل للمعاينة والتنزيل. لا تنشر بيانات سرية أو مفاتيح API في وصف الموقع.</div>
+  <div id="siteStudioResult" hidden>
+   <div class="site-studio-actions">
+    <button class="site-studio-primary" type="button" onclick="downloadGeneratedSite()">تنزيل الموقع HTML</button>
+    <button class="site-studio-secondary" type="button" onclick="toggleSiteCode()">عرض/إخفاء الكود</button>
+   </div>
+   <iframe id="sitePreview" class="site-studio-preview" title="معاينة الموقع الذي أنشأه Ghost" sandbox="allow-scripts"></iframe>
+   <pre id="siteCode" class="site-studio-code" hidden></pre>
+  </div>
+ </section>
+</div>
 <main id="main">
 <div class="container">
 
@@ -1631,6 +1671,50 @@ async function generateSiteImage(){
 $("imagePrompt").addEventListener("keydown",e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==="Enter") generateSiteImage();
 });
+
+
+/* Ghost Website Studio — generation, sandboxed preview, and export */
+let generatedSiteHTML = "";
+function openSiteStudio(){
+  $("siteStudioModal").classList.add("open");
+  $("siteStudioNotice").textContent="اكتب وصفك، وسيتولى Ghost بناء الصفحة.";
+  $("siteBrief").focus();
+}
+function closeSiteStudio(){ $("siteStudioModal").classList.remove("open"); }
+function toggleSiteCode(){ $("siteCode").hidden=!$("siteCode").hidden; }
+function downloadGeneratedSite(){
+  if(!generatedSiteHTML) return;
+  const blob=new Blob([generatedSiteHTML],{type:"text/html;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="ghost-generated-website.html";
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+async function buildWebsite(){
+  const brief=$("siteBrief").value.trim();
+  const btn=$("buildSiteBtn"),notice=$("siteStudioNotice");
+  if(!brief){notice.textContent="اكتب وصف الموقع أولاً.";return;}
+  if(brief.length>7000){notice.textContent="الوصف طويل جداً؛ اختصره قليلاً.";return;}
+  btn.disabled=true;btn.textContent="Ghost يبني الموقع...";
+  notice.textContent="جارٍ التخطيط والتصميم وكتابة HTML وCSS وJavaScript. قد يستغرق ذلك دقيقة...";
+  $("siteStudioResult").hidden=true;generatedSiteHTML="";
+  try{
+    const r=await fetch(API+"/site/generate",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({brief})
+    });
+    const d=await r.json();
+    if(!r.ok||!d.success) throw new Error(d.error||"تعذر إنشاء الموقع.");
+    if(typeof d.html!=="string"||!d.html.toLowerCase().includes("<html")) throw new Error("لم يرجع النموذج ملف HTML كاملاً. أعد المحاولة بوصف أقصر.");
+    generatedSiteHTML=d.html;
+    $("sitePreview").srcdoc=generatedSiteHTML;
+    $("siteCode").textContent=generatedSiteHTML;
+    $("siteStudioResult").hidden=false;
+    notice.textContent="اكتمل إنشاء الموقع. افحص المعاينة، ثم نزّل ملف HTML. النشر العام يحتاج ربط خدمة استضافة قبل تفعيله.";
+  }catch(e){notice.textContent=e.message||"حدث خطأ أثناء بناء الموقع.";}
+  finally{btn.disabled=false;btn.textContent="إعادة بناء الموقع";}
+}
 
 /* فحص اتصال الخادم */
 
