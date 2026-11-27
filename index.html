@@ -1254,28 +1254,41 @@ return null;
 /* إرسال الطلب إلى Worker */
 
 async function callGhostModel(extraSystem = ""){
-  const response = await fetch(API + "/chat", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      messages:[
-        {role:"system",content:systemPrompt},
-        ...messages,
-        ...(extraSystem ? [{role:"system",content:extraSystem}] : [])
-      ]
-    })
-  });
-  let data;
-  try { data = await response.json(); }
-  catch { throw new Error("الخادم أرجع استجابة غير مفهومة."); }
-  if(!response.ok || data.success === false)
-    throw new Error(data.error || `فشل الاتصال بالخادم HTTP ${response.status}`);
-  const answer = extractAnswer(data);
-  if(!answer) throw new Error("وصل رد من الخادم لكن لم أجد نص الإجابة.");
-  return answer;
+  const payload={
+    messages:[
+      {role:"system",content:systemPrompt},
+      ...messages,
+      ...(extraSystem ? [{role:"system",content:extraSystem}] : [])
+    ]
+  };
+  const body=JSON.stringify(payload);
+  if(body.length>9*1024*1024) throw new Error("حجم المحادثة كبير جداً. ابدأ محادثة جديدة أو أزل المرفقات القديمة.");
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),65000);
+  try{
+    const response=await fetch(API+"/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body,
+      cache:"no-store",
+      signal:controller.signal
+    });
+    let data;
+    try{data=await response.json();}
+    catch{throw new Error("الخادم أرجع استجابة غير مفهومة.");}
+    if(!response.ok||data.success===false)
+      throw new Error(data.error||("فشل الاتصال بالخادم HTTP "+response.status));
+    const answer=extractAnswer(data);
+    if(!answer) throw new Error("وصل رد من الخادم لكن لم أجد نص الإجابة.");
+    return answer;
+  }catch(error){
+    if(error?.name==="AbortError") throw new Error("تأخر رد الذكاء الاصطناعي أكثر من دقيقة. أعد المحاولة.");
+    throw error;
+  }finally{clearTimeout(timeout);}
 }
 
 /* مخطط الأدوات: النموذج يختار من أدوات محددة فقط، والتنفيذ محصور بقائمة آمنة */
+
 async function requestAI(){
   const lastUserMessage=[...messages].reverse().find(message=>message.role==="user");
   const lastUserText=typeof lastUserMessage?.content==="string"
@@ -1350,18 +1363,28 @@ function isWebsiteCreationRequest(text){
   return site.test(value) && action.test(value);
 }
 async function createWebsiteFromChat(brief){
-  const response=await fetch("https://ghost-site-builder.sdrhaldwany.workers.dev/site/generate",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({brief})
-  });
-  let data;
-  try{data=await response.json();}catch{throw new Error("خدمة إنشاء المواقع أعادت استجابة غير مفهومة.");}
-  if(!response.ok||!data.success) throw new Error(data.error||"تعذر إنشاء الموقع ونشره.");
-  if(typeof data.url!=="string"||!data.url.startsWith("https://ghost-site-builder.sdrhaldwany.workers.dev/p/")) throw new Error("لم يصل رابط نشر صالح.");
-  generatedSiteHTML=typeof data.html==="string"?data.html:"";
-  publishedSiteURL=data.url;
-  return "تم إنشاء موقعك ونشره بنجاح!\n\nرابط الموقع: "+data.url+"\n\nيمكنك فتح الرابط ومشاركة موقعك.";
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),90000);
+  try{
+    const response=await fetch("https://ghost-site-builder.sdrhaldwany.workers.dev/site/generate",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({brief}),
+      signal:controller.signal,
+      cache:"no-store"
+    });
+    let data;
+    try{data=await response.json();}catch{throw new Error("خدمة إنشاء المواقع أعادت استجابة غير مفهومة.");}
+    if(!response.ok||!data.success) throw new Error(data.error||"تعذر إنشاء الموقع ونشره.");
+    if(typeof data.html!=="string"||!data.html.toLowerCase().includes("<html")) throw new Error("الخدمة لم تُرجع ملف موقع كاملاً.");
+    if(typeof data.url!=="string"||!data.url.startsWith("https://ghost-site-builder.sdrhaldwany.workers.dev/p/")) throw new Error("لم يصل رابط نشر صالح.");
+    generatedSiteHTML=data.html;
+    publishedSiteURL=data.url;
+    return "تم إنشاء الموقع ونشره بنجاح!\\n\\nرابط الموقع: "+data.url+"\\n\\nيمكنك فتح الرابط ومشاركته.";
+  }catch(error){
+    if(error?.name==="AbortError") throw new Error("استغرق بناء الموقع وقتاً أطول من المهلة. تحقق من حالة خدمة البناء ثم أعد المحاولة.");
+    throw error;
+  }finally{clearTimeout(timeout);}
 }
 
 /* إرسال الرسالة */
