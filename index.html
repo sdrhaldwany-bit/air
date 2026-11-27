@@ -1852,6 +1852,11 @@ $("status").style.color = "#ff8585";
 
 })();
 
+// استعادة آخر محادثة محفوظة تلقائياً عند فتح Ghost من جديد.
+if(savedChats.length){
+  try{restoreChat(savedChats[0].id);}catch(error){console.warn("تعذر استعادة آخر محادثة.");}
+}
+
 </script>
 
 </body>
