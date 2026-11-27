@@ -78,7 +78,8 @@ font-size:13px;border:1px solid #ef4444
 .image-gen-secondary{background:#293541;color:#e1e9f0}
 .image-gen-notice{min-height:22px;color:#b9d8eb;font-size:12px;margin-top:10px}
 #generatedImageWrap{margin-top:14px}
-#generatedImage{display:block;width:100%;max-height:440px;object-fit:contain;background:#080d12;border-radius:12px;border:1px solid #30485b}
+#generatedImageCanvas{display:block;width:100%;max-height:440px;object-fit:contain;background:#080d12;border-radius:12px;border:1px solid #30485b}
+.image-gen-hint{margin:4px 0 10px;color:#91b5cc;font-size:12px;line-height:1.7}
 .image-gen-download{display:inline-block;margin-top:10px;padding:10px 15px;background:#176b9d;color:#fff;border-radius:9px;text-decoration:none;font-size:13px}
 @media(max-width:500px){.image-gen-btn{font-size:10px;padding:8px 7px}.image-gen-modal{padding:17px}}
 
@@ -472,15 +473,18 @@ line-height:1.7
     <div class="image-gen-tag">GHOST IMAGE STUDIO</div>
     <h2 id="imageGenTitle">إنشاء صورة بالذكاء الاصطناعي</h2>
     <p>اكتب وصفاً واضحاً للصورة التي تريدها، وسيقوم Ghost بإنشائها.</p>
-    <label for="imagePrompt">وصف الصورة</label>
-    <textarea id="imagePrompt" rows="4" maxlength="1800" placeholder="مثال: مدينة مستقبلية هادئة وقت الغروب، أسلوب سينمائي وتفاصيل عالية..."></textarea>
+    <label for="imagePrompt">وصف الخلفية والتصميم</label>
+    <textarea id="imagePrompt" rows="4" maxlength="1800" placeholder="مثال: بطاقة دعوة فخمة بلون كحلي وذهبي، زخارف نجوم وإضاءة ناعمة، بدون أي كتابة أو حروف..."></textarea>
+    <label for="imageOverlayText">النص العربي الحقيقي الذي يظهر على الصورة (اختياري)</label>
+    <textarea id="imageOverlayText" rows="3" maxlength="500" placeholder="اكتب النص كما تريد ظهوره تماماً، مع الاسم والتاريخ..."></textarea>
+    <p class="image-gen-hint">Ghost ينشئ الخلفية أولاً، ثم يطبع النص هنا بخط عربي واضح حتى لا تتشوّه الحروف.</p>
     <div class="image-gen-actions">
       <button class="image-gen-primary" id="generateImageBtn" type="button" onclick="generateSiteImage()">إنشاء الصورة</button>
       <button class="image-gen-secondary" type="button" onclick="closeImageGen()">إغلاق</button>
     </div>
     <div id="imageGenNotice" role="status" class="image-gen-notice"></div>
     <div id="generatedImageWrap" hidden>
-      <img id="generatedImage" alt="الصورة التي أنشأها Ghost">
+      <canvas id="generatedImageCanvas" aria-label="معاينة الصورة النهائية"></canvas>
       <a id="downloadGeneratedImage" class="image-gen-download" download="ghost-image.jpg">حفظ الصورة</a>
     </div>
   </section>
@@ -1481,6 +1485,57 @@ function openImageGen(){
 function closeImageGen(){
   $("imageGenModal").classList.remove("open");
 }
+async function renderGhostImage(src, overlayText){
+  const img=new Image();
+  img.src=src;
+  await img.decode();
+  const canvas=$("generatedImageCanvas");
+  const ctx=canvas.getContext("2d");
+  canvas.width=img.naturalWidth;
+  canvas.height=img.naturalHeight;
+  ctx.drawImage(img,0,0);
+  if(overlayText){
+    const w=canvas.width,h=canvas.height;
+    const pad=Math.round(w*.055);
+    const maxWidth=w-pad*2;
+    let fontSize=Math.max(20,Math.min(54,Math.round(w*.052)));
+    const words=overlayText.split(/\\s+/);
+    let lines=[];
+    const wrap=()=>{
+      lines=[];let line="";
+      for(const word of words){
+        const test=line?line+" "+word:word;
+        ctx.font="600 "+fontSize+"px Tahoma, Arial, sans-serif";
+        if(ctx.measureText(test).width>maxWidth-pad*1.2 && line){lines.push(line);line=word;}
+        else line=test;
+      }
+      if(line)lines.push(line);
+    };
+    wrap();
+    while(lines.length>6 && fontSize>18){fontSize-=2;wrap();}
+    const lineHeight=Math.round(fontSize*1.55);
+    const panelPad=Math.round(fontSize*.8);
+    const panelH=lines.length*lineHeight+panelPad*2;
+    const panelY=Math.round(h*.72-panelH/2);
+    const panelX=Math.round(w*.06),panelW=Math.round(w*.88);
+    ctx.save();
+    ctx.fillStyle="rgba(5,12,25,.78)";
+    ctx.strokeStyle="rgba(232,194,112,.95)";
+    ctx.lineWidth=Math.max(2,Math.round(w*.0025));
+    const radius=Math.round(fontSize*.45);
+    ctx.beginPath();
+    ctx.roundRect(panelX,panelY,panelW,panelH,radius);
+    ctx.fill();ctx.stroke();
+    ctx.direction="rtl";ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.font="600 "+fontSize+"px Tahoma, Arial, sans-serif";
+    ctx.fillStyle="#fff4d6";
+    ctx.shadowColor="rgba(0,0,0,.65)";ctx.shadowBlur=6;
+    lines.forEach((line,i)=>ctx.fillText(line,w/2,panelY+panelPad+lineHeight*(i+.5),maxWidth));
+    ctx.restore();
+  }
+  $("downloadGeneratedImage").href=canvas.toDataURL("image/png");
+  $("downloadGeneratedImage").download="ghost-image.png";
+}
 async function generateSiteImage(){
   const prompt=$("imagePrompt").value.trim();
   const button=$("generateImageBtn");
@@ -1496,16 +1551,17 @@ async function generateSiteImage(){
     const r=await fetch(API+"/generate-image",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({prompt})
+      body:JSON.stringify({prompt:prompt+"\\n\\nIMPORTANT: Generate only the visual background and composition. Do not render any text, letters, numbers, words, logos, signatures, watermarks, or typography anywhere in the image. Leave clean readable negative space for text to be added later."})
     });
     const d=await r.json();
     if(!r.ok||!d.success) throw new Error(d.error||"تعذر إنشاء الصورة.");
     if(typeof d.image!=="string"||!d.image.length) throw new Error("لم تصل الصورة من الخادم.");
     generatedImageData="data:"+(d.mime||"image/jpeg")+";base64,"+d.image;
-    $("generatedImage").src=generatedImageData;
-    $("downloadGeneratedImage").href=generatedImageData;
+    await renderGhostImage(generatedImageData,$("imageOverlayText").value.trim());
     $("generatedImageWrap").hidden=false;
-    notice.textContent="تم إنشاء الصورة بنجاح.";
+    notice.textContent=$("imageOverlayText").value.trim()
+      ?"تم إنشاء الخلفية وإضافة النص العربي الحقيقي بنجاح."
+      :"تم إنشاء الخلفية بنجاح. يمكنك إضافة نص عربي وإعادة الإنشاء إذا أردت.";
   }catch(e){
     notice.textContent=e.message||"حدث خطأ أثناء إنشاء الصورة.";
   }finally{
