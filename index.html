@@ -1208,6 +1208,16 @@ async function callGhostModel(extraSystem = ""){
 
 /* مخطط الأدوات: النموذج يختار من أدوات محددة فقط، والتنفيذ محصور بقائمة آمنة */
 async function requestAI(){
+  const lastUserMessage=[...messages].reverse().find(message=>message.role==="user");
+  const lastUserText=typeof lastUserMessage?.content==="string"
+    ? lastUserMessage.content
+    : Array.isArray(lastUserMessage?.content)
+      ? lastUserMessage.content.find(part=>part.type==="text")?.text||""
+      : "";
+  // طلبات إنشاء المواقع تُرسل مباشرة إلى خدمة النشر بدلاً من الاعتماد على تخمين النموذج للأداة.
+  if(isWebsiteCreationRequest(lastUserText)){
+    return await createWebsiteFromChat(lastUserText);
+  }
   const toolGuide = `
 أنت الآن مخطط أدوات Ghost. قرر هل تحتاج إحدى الأدوات التالية لتنفيذ آخر طلب للمستخدم.
 أعد JSON فقط دون Markdown:
@@ -1262,7 +1272,11 @@ async function requestAI(){
 
 /* إنشاء موقع مباشرة من المحادثة عبر خدمة النشر المخصصة */
 function isWebsiteCreationRequest(text){
-  return /(?:أنشئ|انشئ|سوي|سوّي|اصنع|ابن[يِ]|صمم|صمّم|اعمل|برمج|جهز|جهّز).{0,70}(?:موقع|صفحة ويب|ويب سايت|website|web site)|(?:موقع|صفحة ويب|ويب سايت|website|web site).{0,70}(?:لي|جديد|احترافي|متجر|شركة|مدونة)/i.test(text);
+  const value=String(text||"").trim();
+  if(!value) return false;
+  const site=/(?:موقع(?:\s+إلكتروني)?|صفحة\s*(?:ويب|إنترنت)|ويب\s*سايت|website|web\s*site)/i;
+  const action=/(?:أنشئ|انشئ|إنشاء|انشاء|سوي|سوّي|سو|اصنع|ابن[يِ]|بني|صمم|صمّم|اعمل|برمج|جهز|جهّز|طوّر|طور|أريد|اريد|ابي|أبغى|ابغى|احتاج|أحتاج)/i;
+  return site.test(value) && action.test(value);
 }
 async function createWebsiteFromChat(brief){
   const response=await fetch("https://ghost-site-builder.sdrhaldwany.workers.dev/site/generate",{
