@@ -59,6 +59,26 @@ font-size:13px;border:1px solid #ef4444
 /* نافذة اتصال Termux */
 .termux-btn{background:#7f1d1d;color:#fff;border:1px solid #ef4444;padding:9px 12px;border-radius:10px;font-size:12px}
 .owner-btn{background:#123d30;color:#e4fff4;border:1px solid #2d9c73;padding:9px 12px;border-radius:10px;font-size:12px}
+.image-gen-btn{background:#183b57;color:#e4f4ff;border:1px solid #3c82b6;padding:9px 12px;border-radius:10px;font-size:12px}
+.image-gen-btn:hover{background:#205273}
+.image-gen-modal{width:min(100%,520px);max-height:90vh;overflow:auto;background:#101821;border:1px solid #315a78;border-radius:18px;padding:22px;box-shadow:0 24px 90px #000d;text-align:right}
+.image-gen-modal h2{margin:0 0 8px;color:#8bd0ff;font-size:21px}
+.image-gen-modal p{color:#aebdca;font-size:13px;line-height:1.8}
+.image-gen-tag{display:inline-block;color:#9bd8ff;background:#112b3c;border:1px solid #315a78;border-radius:20px;padding:5px 10px;font-size:10px;letter-spacing:1px;margin-bottom:12px}
+.image-gen-modal label{display:block;color:#dce8f2;font-size:13px;margin-top:12px}
+.image-gen-modal textarea{width:100%;resize:vertical;min-height:105px;padding:12px;margin:9px 0;background:#09121b;color:#fff;border:1px solid #34536b;border-radius:10px;font:inherit;font-size:14px;outline:none}
+.image-gen-modal textarea:focus{border-color:#6ab9ed}
+.image-gen-actions{display:flex;gap:9px;margin-top:10px}
+.image-gen-actions button{flex:1;padding:11px;border-radius:10px;font-size:13px}
+.image-gen-primary{background:#176b9d;color:#fff}
+.image-gen-primary:disabled{opacity:.55}
+.image-gen-secondary{background:#293541;color:#e1e9f0}
+.image-gen-notice{min-height:22px;color:#b9d8eb;font-size:12px;margin-top:10px}
+#generatedImageWrap{margin-top:14px}
+#generatedImage{display:block;width:100%;max-height:440px;object-fit:contain;background:#080d12;border-radius:12px;border:1px solid #30485b}
+.image-gen-download{display:inline-block;margin-top:10px;padding:10px 15px;background:#176b9d;color:#fff;border-radius:9px;text-decoration:none;font-size:13px}
+@media(max-width:500px){.image-gen-btn{font-size:10px;padding:8px 7px}.image-gen-modal{padding:17px}}
+
 .owner-btn:hover{background:#175640}
 .owner-modal{width:min(100%,430px);background:#101a17;border:1px solid #28694f;border-radius:18px;padding:24px;box-shadow:0 24px 90px #000d;text-align:right}
 .owner-modal h2{margin:0 0 8px;color:#72e4b1;font-size:22px}
@@ -385,6 +405,7 @@ line-height:1.7
 <div style="display:flex;align-items:center;gap:12px">
 <button type="button" class="termux-btn" onclick="openTermuxModal()">اتصال Termux (المالك فقط)</button>
 <button type="button" class="owner-btn" onclick="openOwnerModal()">مكان الأونر</button>
+<button type="button" class="image-gen-btn" onclick="openImageGen()">إنشاء صورة</button>
 <button type="button" class="new-chat-btn" onclick="newChat()">＋ محادثة جديدة</button>
 <div class="status" id="status">● الخادم: جاري الاتصال...</div><div class="status" id="termuxStatus" style="color:#ff8585">● Termux: غير مربوط</div>
 </div>
@@ -438,6 +459,26 @@ line-height:1.7
         <button class="owner-secondary" type="button" onclick="ownerLogout()">تسجيل خروج</button>
       </div>
       <div id="ownerPanelNotice" role="status" class="owner-notice"></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="modal-backdrop" id="imageGenModal" role="dialog" aria-modal="true" aria-labelledby="imageGenTitle" onclick="if(event.target===this)closeImageGen()">
+  <section class="image-gen-modal">
+    <div class="image-gen-tag">GHOST IMAGE STUDIO</div>
+    <h2 id="imageGenTitle">إنشاء صورة بالذكاء الاصطناعي</h2>
+    <p>اكتب وصفاً واضحاً للصورة التي تريدها، وسيقوم Ghost بإنشائها.</p>
+    <label for="imagePrompt">وصف الصورة</label>
+    <textarea id="imagePrompt" rows="4" maxlength="1800" placeholder="مثال: مدينة مستقبلية هادئة وقت الغروب، أسلوب سينمائي وتفاصيل عالية..."></textarea>
+    <div class="image-gen-actions">
+      <button class="image-gen-primary" id="generateImageBtn" type="button" onclick="generateSiteImage()">إنشاء الصورة</button>
+      <button class="image-gen-secondary" type="button" onclick="closeImageGen()">إغلاق</button>
+    </div>
+    <div id="imageGenNotice" role="status" class="image-gen-notice"></div>
+    <div id="generatedImageWrap" hidden>
+      <img id="generatedImage" alt="الصورة التي أنشأها Ghost">
+      <a id="downloadGeneratedImage" class="image-gen-download" download="ghost-image.jpg">حفظ الصورة</a>
     </div>
   </section>
 </div>
@@ -1425,6 +1466,53 @@ function ownerLogout(){
   $("ownerPanelNotice").textContent="";
 }
 $("ownerPassword").addEventListener("keydown",e=>{if(e.key==="Enter") ownerLogin();});
+
+
+/* إنشاء الصور عبر Workers AI */
+let generatedImageData = null;
+function openImageGen(){
+  $("imageGenModal").classList.add("open");
+  $("imageGenNotice").textContent="";
+  $("imagePrompt").focus();
+}
+function closeImageGen(){
+  $("imageGenModal").classList.remove("open");
+}
+async function generateSiteImage(){
+  const prompt=$("imagePrompt").value.trim();
+  const button=$("generateImageBtn");
+  const notice=$("imageGenNotice");
+  if(!prompt){notice.textContent="اكتب وصف الصورة أولاً.";return;}
+  if(prompt.length>1800){notice.textContent="الوصف طويل جداً.";return;}
+  button.disabled=true;
+  button.textContent="جارٍ إنشاء الصورة...";
+  notice.textContent="قد يستغرق الإنشاء بعض الوقت، انتظر...";
+  $("generatedImageWrap").hidden=true;
+  generatedImageData=null;
+  try{
+    const r=await fetch(API+"/generate-image",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({prompt})
+    });
+    const d=await r.json();
+    if(!r.ok||!d.success) throw new Error(d.error||"تعذر إنشاء الصورة.");
+    if(typeof d.image!=="string"||!d.image.length) throw new Error("لم تصل الصورة من الخادم.");
+    generatedImageData="data:"+(d.mime||"image/jpeg")+";base64,"+d.image;
+    $("generatedImage").src=generatedImageData;
+    $("downloadGeneratedImage").href=generatedImageData;
+    $("generatedImageWrap").hidden=false;
+    notice.textContent="تم إنشاء الصورة بنجاح.";
+  }catch(e){
+    notice.textContent=e.message||"حدث خطأ أثناء إنشاء الصورة.";
+  }finally{
+    button.disabled=false;
+    button.textContent="إنشاء الصورة";
+  }
+}
+$("imagePrompt").addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter") generateSiteImage();
+});
 
 /* فحص اتصال الخادم */
 
