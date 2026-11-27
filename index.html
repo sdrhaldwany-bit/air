@@ -410,14 +410,50 @@ line-height:1.7
 .message{max-width:100%}
 }
 
+/* Ghost 360 visual workspace */
+:root{--bg:#080b10;--panel:#101722;--card:#151f2c;--border:#243345;--green:#69e6b0;--text:#edf4f7;--muted:#91a1b2}
+body{background:radial-gradient(ellipse at 50% -25%,#17352f 0%,#0b1119 42%,#070a0f 78%);color:var(--text)}
+header{height:72px;background:rgba(8,13,20,.94);border-bottom:1px solid #26394a;backdrop-filter:blur(18px);padding-inline:clamp(12px,3vw,34px)}
+.logo{display:flex;align-items:center;gap:10px;color:#7ce8bb;font-size:23px}.brand-subtitle{font-size:9px;letter-spacing:2px;color:#8298a6}
+.container{max-width:1040px;padding:clamp(14px,3vw,32px) 18px 36px}
+#welcome{padding:clamp(38px,8vh,90px) 12px 42px}
+#welcome h1{font-size:clamp(29px,5vw,46px);background:linear-gradient(100deg,#f5fff9,#75e6b7 62%,#8bc9e8);-webkit-background-clip:text;background-clip:text;color:transparent}
+#welcome p{max-width:620px;margin:12px auto;color:#a5b4c3;font-size:15px}
+.suggestions{max-width:760px;margin:34px auto 0;gap:12px}
+.suggestion{min-height:76px;background:linear-gradient(145deg,#182633,#0d1620);border:1px solid #2a4050;border-radius:16px;padding:18px;color:#dce9ed;transition:transform .18s,border-color .18s}
+.suggestion:hover{border-color:#69e6b0;transform:translateY(-2px)}
+#messages{gap:22px}.message{padding:17px 19px;border-radius:18px;line-height:1.9;font-size:15px}
+.user{background:linear-gradient(140deg,#173c35,#142c2b);border:1px solid #2c6557}
+.ai{background:linear-gradient(145deg,#141f2c,#0d141e);border:1px solid #293c50;box-shadow:0 12px 32px #0003}
+.message pre{background:#080e16;border-color:#2b4054}.code-header{background:#142b2a;color:#a8d9c5}
+.composer-area{background:linear-gradient(180deg,#080d13d9,#090e15);border-top:1px solid #263a49;padding:14px 16px max(14px,env(safe-area-inset-bottom))}
+.composer{max-width:1040px;background:#111b27;border:1px solid #30485a;border-radius:20px;padding:12px;box-shadow:0 12px 40px #0005}
+#input{min-height:54px;color:#f5fbff}#input::placeholder{color:#8093a4}
+.icon-btn{background:#203344;border:1px solid #344e60}.send-btn{background:linear-gradient(120deg,#65e5af,#83d6bd);color:#062019;min-width:104px}
+.new-chat-btn{background:#173d35;color:#dffff1;border:1px solid #357d65}.new-chat-btn:hover{background:#205647}
+.termux-btn{background:#302025;border:1px solid #75434a}.owner-btn{background:#123b30}.image-gen-btn{background:#19384b}
+.history-open-btn{background:#172635;color:#d8e9f0;border:1px solid #344b5e;padding:9px 13px;border-radius:10px;font-size:12px}
+.history-backdrop{position:fixed;inset:0;z-index:1200;background:#02060bd9;backdrop-filter:blur(9px);display:none;justify-content:flex-start}
+.history-backdrop.open{display:flex}.history-panel{width:min(430px,92vw);height:100%;background:#0d1621;border-left:1px solid #2b4053;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:20px 0 70px #0008}
+.history-heading{display:flex;justify-content:space-between;align-items:center}.history-eyebrow{font-size:10px;letter-spacing:2px;color:#72dcb2}
+.history-heading h2{margin:5px 0 0;font-size:22px;color:#f2fbf7}.history-close{width:38px;height:38px;border-radius:12px;background:#1b2a38;color:#d9e9ef;font-size:24px}
+.history-search{width:100%;padding:13px 14px;border-radius:12px;background:#111f2c;border:1px solid #304658;color:#fff;font:inherit;outline:none}
+.history-list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.history-item{display:flex;align-items:center;gap:8px;text-align:right;width:100%;padding:13px;background:#132130;border:1px solid #273c4d;border-radius:12px;color:#e4eff3}
+.history-item:hover{border-color:#69e6b0}.history-item span{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.history-item small{display:block;color:#8298a7;font-size:10px;margin-top:4px}.history-empty{color:#8fa1b0;text-align:center;padding:28px 12px;line-height:1.8}
+.history-footer{display:flex;gap:8px;flex-wrap:wrap}.history-footer button{flex:1;min-width:130px;padding:11px;border-radius:10px;background:#1d3d37;color:#dffbef;border:1px solid #356b5a}
+.history-note{font-size:11px;line-height:1.7;color:#718596;margin:0}
+@media(max-width:700px){header{height:auto;min-height:66px;flex-wrap:wrap;gap:8px;padding:10px}header>div:last-child{flex-wrap:wrap;justify-content:flex-start;gap:6px!important}.brand-subtitle{display:none}.history-open-btn,.termux-btn,.owner-btn,.image-gen-btn,.new-chat-btn{font-size:10px;padding:8px 9px}.status{font-size:10px}.suggestions{grid-template-columns:1fr}.message{max-width:100%;padding:14px}.history-panel{width:min(420px,94vw)}}
 </style>
 </head>
 
 <body>
 
 <header>
-<div class="logo">✦ Ghost</div>
+<div class="logo">✦ Ghost <span class="brand-subtitle">INTELLIGENCE STUDIO</span></div>
 <div style="display:flex;align-items:center;gap:12px">
+<button type="button" class="history-open-btn" onclick="openChatHistory()">المحادثات</button>
 <button type="button" class="termux-btn" onclick="openTermuxModal()">اتصال Termux (المالك فقط)</button>
 <button type="button" class="owner-btn" onclick="openOwnerModal()">مكان الأونر</button>
 <button type="button" class="image-gen-btn" onclick="openImageGen()">إنشاء صورة</button>
@@ -581,6 +617,14 @@ line-height:1.7
 </section>
 </div>
 
+<div class="history-backdrop" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle" onclick="if(event.target===this)closeChatHistory()">
+<section class="history-panel">
+ <div class="history-heading"><div><span class="history-eyebrow">GHOST WORKSPACE</span><h2 id="historyTitle">مكتبة المحادثات</h2></div><button type="button" class="history-close" onclick="closeChatHistory()" aria-label="إغلاق">×</button></div>
+ <input id="historySearch" class="history-search" type="search" placeholder="ابحث في محادثاتك..." aria-label="ابحث في المحادثات">
+ <div id="historyList" class="history-list"></div>
+ <div class="history-footer"><button type="button" onclick="exportCurrentChat()">تصدير المحادثة الحالية</button><button type="button" onclick="newChat();closeChatHistory()">＋ محادثة جديدة</button></div>
+ <p class="history-note">تُحفظ المحادثات محلياً في هذا المتصفح فقط ولا تُرفع إلى الخادم.</p>
+</section></div>
 <script>
 "use strict";
 
@@ -592,6 +636,18 @@ const $ = id => document.getElementById(id);
 
 let messages = [];
 let busy = false;
+const GHOST_HISTORY_KEY="ghost.workspace.history.v1";
+let activeChatId=null;
+let savedChats=loadSavedChats();
+function loadSavedChats(){try{const x=JSON.parse(localStorage.getItem(GHOST_HISTORY_KEY)||"[]");return Array.isArray(x)?x.filter(v=>v&&typeof v.id==="string"&&Array.isArray(v.messages)).slice(0,60):[]}catch{return [];}}
+function safeChatMessages(list){return (Array.isArray(list)?list:[]).slice(-80).map(m=>{let content=m.content;if(Array.isArray(content))content=content.filter(p=>p&&p.type==="text").map(p=>p.text||"").join("\n")||"[مرفق صورة]";return {role:m.role==="assistant"?"assistant":"user",content:String(content||"").slice(0,12000)}}).filter(m=>m.content.trim());}
+function saveCurrentChat(){const clean=safeChatMessages(messages);if(!clean.length)return;const first=clean.find(m=>m.role==="user");const title=(first?.content||"محادثة جديدة").replace(/\s+/g," ").slice(0,54);const id=activeChatId||("chat-"+Date.now().toString(36));activeChatId=id;savedChats=[{id,title,messages:clean,updatedAt:Date.now()},...savedChats.filter(x=>x.id!==id)].slice(0,60);try{localStorage.setItem(GHOST_HISTORY_KEY,JSON.stringify(savedChats))}catch{console.warn("تعذر حفظ المحادثات محلياً")}}
+function openChatHistory(){saveCurrentChat();renderChatHistory();$("historyModal").classList.add("open");$("historySearch").value="";$("historySearch").focus();}
+function closeChatHistory(){$("historyModal").classList.remove("open")}
+function renderChatHistory(query=""){const list=$("historyList");list.innerHTML="";const q=String(query||"").trim().toLowerCase();const items=savedChats.filter(x=>!q||(x.title+" "+x.messages.map(m=>m.content).join(" ")).toLowerCase().includes(q));if(!items.length){const e=document.createElement("div");e.className="history-empty";e.textContent="لا توجد محادثات محفوظة تطابق البحث.";list.appendChild(e);return;}for(const item of items){const b=document.createElement("button");b.type="button";b.className="history-item";const title=document.createElement("span");title.textContent=item.title||"محادثة";const meta=document.createElement("small");meta.textContent=new Date(item.updatedAt||Date.now()).toLocaleString("ar");const wrap=document.createElement("span");wrap.append(title,meta);const arrow=document.createElement("b");arrow.textContent="›";b.append(wrap,arrow);b.addEventListener("click",()=>restoreChat(item.id));list.appendChild(b)}}
+function restoreChat(id){const item=savedChats.find(x=>x.id===id);if(!item)return;activeChatId=item.id;messages=safeChatMessages(item.messages);$("messages").innerHTML="";$("welcome").style.display="none";for(const m of messages)addMessage(m.role==="user"?"user":"ai",m.content);closeChatHistory();$("main").scrollTop=$("main").scrollHeight;}
+function exportCurrentChat(){const clean=safeChatMessages(messages);if(!clean.length)return;const txt=clean.map(m=>(m.role==="user"?"أنت":"Ghost")+":\n"+m.content).join("\n\n---\n\n");const blob=new Blob([txt],{type:"text/plain;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="ghost-conversation.txt";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);}
+
 let selectedImage = null;
 let selectedImageUrl = null;
 let termuxDeviceToken = null;
@@ -644,9 +700,13 @@ console.error("Visit registration failed");
 })();
 
 
+$("historySearch").addEventListener("input",e=>renderChatHistory(e.target.value));
+
 /* بدء محادثة جديدة */
 function newChat(){
 if(busy) return;
+saveCurrentChat();
+activeChatId=null;
 messages = [];
 $("messages").innerHTML = "";
 $("welcome").style.display = "block";
@@ -1386,7 +1446,7 @@ role:"user",
 
 content:content
 
-});
+});\nsaveCurrentChat();
 
 /* مؤشر التفكير */
 
@@ -1414,7 +1474,7 @@ role:"assistant",
 
 content:answer && typeof answer === "object" ? (answer.text || "تم إنشاء صورة.") : answer
 
-});
+});\nsaveCurrentChat();
 
 if(answer && typeof answer === "object" && answer.image){
   addMessage("ai",answer.text || "تم تنفيذ أداة إنشاء الصور.",answer.image);
