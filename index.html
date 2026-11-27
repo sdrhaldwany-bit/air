@@ -1578,7 +1578,7 @@ async function buildWebsite(){
   notice.textContent="جارٍ التخطيط والتصميم وكتابة HTML وCSS وJavaScript. قد يستغرق ذلك دقيقة...";
   $("siteStudioResult").hidden=true;generatedSiteHTML="";
   try{
-    const r=await fetch(API+"/site/generate",{
+    const r=await fetch("https://ghost-site-builder.sdrhaldwany.workers.dev/site/generate",{
       method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({brief})
     });
