@@ -1302,6 +1302,9 @@ async function requestAI(){
   if(isWebsiteCreationRequest(lastUserText) && !lastUserHasImage){
     return await createWebsiteFromChat(lastUserText);
   }
+  if(isAnythingCreationRequest(lastUserText) && !lastUserHasImage && !isWebsiteCreationRequest(lastUserText) && !/(?:صورة|ارسم|رسم|image|draw)/i.test(lastUserText)){
+    return await createAnythingFromChat(lastUserText);
+  }
   // لا نستهلك استدعاء تخطيط إضافياً في الأسئلة العادية؛ شغّل المخطط فقط عند وجود نية أداة واضحة.
   const explicitToolIntent=/(?:افحص|تحقق|تأكد من حالة|حالة الخادم|حالة الخدمة|هل الخادم متصل|هل الخدمة تعمل|أنشئ صورة|انشئ صورة|سوي صورة|ولّد صورة|ولد صورة|generate image|check status|service status)/i.test(lastUserText);
   if(!explicitToolIntent) return await callGhostModel();
@@ -1365,6 +1368,31 @@ function isWebsiteCreationRequest(text){
   const action=/(?:أنشئ|انشئ|إنشاء|انشاء|سوي|سوّي|سو|اصنع|ابن[يِ]|بني|صمم|صمّم|اعمل|برمج|جهز|جهّز|طوّر|طور|أريد|اريد|ابي|أبغى|ابغى|احتاج|أحتاج)/i;
   return site.test(value) && action.test(value);
 }
+function isAnythingCreationRequest(text){
+  const value=String(text||"").trim();
+  if(value.length<5) return false;
+  const action=/(?:أنشئ|انشئ|إنشاء|انشاء|سوي|سوّي|اصنع|ابن[يِ]|صمم|صمّم|اعمل|برمج|اكتب لي|جهز|جهّز|طور|طوّر|build|create|make|generate|write)/i;
+  const object=/(?:كود|سكربت|برنامج|أداة|اداة|تطبيق|بوت|ملف|وثيقة|مستند|خطة|جدول|واجهة|تصميم|مخطط|json|html|css|javascript|python|script|code|app|tool|document|svg|config|api)/i;
+  return action.test(value)&&object.test(value);
+}
+async function createAnythingFromChat(brief){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),90000);
+  try{
+    const response=await fetch("https://ghost-site-builder.sdrhaldwany.workers.dev/create/generate",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({brief}),signal:controller.signal,cache:"no-store"
+    });
+    let data;
+    try{data=await response.json();}catch{throw new Error("خدمة الإنشاء أعادت استجابة غير مفهومة.");}
+    if(!response.ok||!data.success||typeof data.content!=="string") throw new Error(data.error||"تعذر إنشاء المطلوب.");
+    return "تم إنشاء المطلوب بواسطة Ghost Creation Studio:\\n\\n"+data.content;
+  }catch(error){
+    if(error?.name==="AbortError") throw new Error("استغرق الإنشاء وقتاً أطول من المهلة. أعد المحاولة.");
+    throw error;
+  }finally{clearTimeout(timeout);}
+}
+
 async function createWebsiteFromChat(brief){
   const controller=new AbortController();
   const timeout=setTimeout(()=>controller.abort(),90000);
