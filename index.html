@@ -1244,6 +1244,25 @@ return answer;
 }
 
 
+/* إنشاء موقع مباشرة من المحادثة عبر خدمة النشر المخصصة */
+function isWebsiteCreationRequest(text){
+  return /(?:أنشئ|انشئ|سوي|سوّي|اصنع|ابن[يِ]|صمم|صمّم|اعمل|برمج|جهز|جهّز).{0,70}(?:موقع|صفحة ويب|ويب سايت|website|web site)|(?:موقع|صفحة ويب|ويب سايت|website|web site).{0,70}(?:لي|جديد|احترافي|متجر|شركة|مدونة)/i.test(text);
+}
+async function createWebsiteFromChat(brief){
+  const response=await fetch("https://ghost-site-builder.sdrhaldwany.workers.dev/site/generate",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({brief})
+  });
+  let data;
+  try{data=await response.json();}catch{throw new Error("خدمة إنشاء المواقع أعادت استجابة غير مفهومة.");}
+  if(!response.ok||!data.success) throw new Error(data.error||"تعذر إنشاء الموقع ونشره.");
+  if(typeof data.url!=="string"||!data.url.startsWith("https://ghost-site-builder.sdrhaldwany.workers.dev/p/")) throw new Error("لم يصل رابط نشر صالح.");
+  generatedSiteHTML=typeof data.html==="string"?data.html:"";
+  publishedSiteURL=data.url;
+  return "تم إنشاء موقعك ونشره بنجاح!\n\nرابط الموقع: "+data.url+"\n\nيمكنك فتح الرابط ومشاركة موقعك.";
+}
+
 /* إرسال الرسالة */
 
 async function send(){
@@ -1332,7 +1351,9 @@ scrollBottom();
 
 /* طلب الإجابة */
 
-const answer = await requestAI();
+const answer = (!imageFile && isWebsiteCreationRequest(text))
+  ? await createWebsiteFromChat(text)
+  : await requestAI();
 
 typing.remove();
 
