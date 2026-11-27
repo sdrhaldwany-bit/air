@@ -1472,7 +1472,8 @@ role:"user",
 
 content:content
 
-});\nsaveCurrentChat();
+});
+saveCurrentChat();
 
 /* مؤشر التفكير */
 
@@ -1500,7 +1501,8 @@ role:"assistant",
 
 content:answer && typeof answer === "object" ? (answer.text || "تم إنشاء صورة.") : answer
 
-});\nsaveCurrentChat();
+});
+saveCurrentChat();
 
 if(answer && typeof answer === "object" && answer.image){
   addMessage("ai",answer.text || "تم تنفيذ أداة إنشاء الصور.",answer.image);
