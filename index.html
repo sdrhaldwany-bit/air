@@ -58,6 +58,25 @@ font-size:13px;border:1px solid #ef4444
 
 /* نافذة اتصال Termux */
 .termux-btn{background:#7f1d1d;color:#fff;border:1px solid #ef4444;padding:9px 12px;border-radius:10px;font-size:12px}
+.owner-btn{background:#123d30;color:#e4fff4;border:1px solid #2d9c73;padding:9px 12px;border-radius:10px;font-size:12px}
+.owner-btn:hover{background:#175640}
+.owner-modal{width:min(100%,430px);background:#101a17;border:1px solid #28694f;border-radius:18px;padding:24px;box-shadow:0 24px 90px #000d;text-align:right}
+.owner-modal h2{margin:0 0 8px;color:#72e4b1;font-size:22px}
+.owner-modal p{color:#a9bdb4;font-size:13px;line-height:1.8}
+.owner-modal label{display:block;color:#dcece4;font-size:13px;margin-top:12px}
+.owner-modal input{width:100%;padding:13px;margin:10px 0;background:#08100d;color:#fff;border:1px solid #315b49;border-radius:10px;font-size:16px;outline:none}
+.owner-modal input:focus{border-color:#65e6ad}
+.owner-tag{display:inline-block;color:#8af0bf;background:#102b20;border:1px solid #28694f;border-radius:20px;padding:5px 10px;font-size:10px;letter-spacing:1px;margin-bottom:12px}
+.owner-actions{display:flex;gap:9px;margin-top:12px}
+.owner-actions button{flex:1;padding:11px;border-radius:10px;font-size:12px}
+.owner-primary{background:#16734e;color:white}
+.owner-danger{background:#a82c35;color:white}
+.owner-secondary{background:#293630;color:#e1e9e4}
+.owner-notice{min-height:20px;color:#f0b2b2;font-size:12px;margin-top:10px}
+.owner-state{padding:13px;border:1px solid #315b49;background:#0a1510;border-radius:10px;color:#c7f6dc;font-size:14px;margin:14px 0}
+.owner-state.off{border-color:#8e3038;color:#ffb8bd}
+@media(max-width:500px){.owner-btn{font-size:10px;padding:8px 7px}.owner-actions{flex-wrap:wrap}}
+
 .termux-btn:hover{background:#991b1b}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:18px;z-index:1000}
 .modal-backdrop.open{display:flex}
@@ -365,6 +384,7 @@ line-height:1.7
 <div class="logo">✦ Ghost</div>
 <div style="display:flex;align-items:center;gap:12px">
 <button type="button" class="termux-btn" onclick="openTermuxModal()">اتصال Termux (المالك فقط)</button>
+<button type="button" class="owner-btn" onclick="openOwnerModal()">مكان الأونر</button>
 <button type="button" class="new-chat-btn" onclick="newChat()">＋ محادثة جديدة</button>
 <div class="status" id="status">● الخادم: جاري الاتصال...</div><div class="status" id="termuxStatus" style="color:#ff8585">● Termux: غير مربوط</div>
 </div>
@@ -386,6 +406,39 @@ line-height:1.7
       <button class="termux-cancel" type="button" onclick="closeTermuxModal()">إغلاق</button>
     </div>
     <div class="termux-notice" id="termuxNotice" role="status">لم يتم فحص الخدمة بعد.</div>
+  </section>
+
+</div>
+
+<div class="modal-backdrop" id="ownerModal" role="dialog" aria-modal="true" aria-labelledby="ownerTitle" onclick="if(event.target===this)closeOwnerModal()">
+  <section class="owner-modal">
+    <div id="ownerLogin">
+      <div class="owner-tag">OWNER CONTROL</div>
+      <h2 id="ownerTitle">مكان الأونر</h2>
+      <p>أدخل كلمة مرور المالك للتحقق من هويتك.</p>
+      <label for="ownerPassword">كلمة المرور</label>
+      <input id="ownerPassword" type="password" autocomplete="current-password" placeholder="كلمة مرور المالك">
+      <div class="owner-actions">
+        <button class="owner-primary" type="button" onclick="ownerLogin()">دخول</button>
+        <button class="owner-secondary" type="button" onclick="closeOwnerModal()">إغلاق</button>
+      </div>
+      <div id="ownerNotice" role="status" class="owner-notice"></div>
+    </div>
+    <div id="ownerPanel" hidden>
+      <div class="owner-tag">OWNER PANEL</div>
+      <h2>إدارة الموقع</h2>
+      <p>تحكم بحالة الذكاء الاصطناعي من الخادم لجميع زوار الموقع.</p>
+      <div class="owner-state" id="ownerState">جارٍ قراءة الحالة...</div>
+      <div class="owner-actions">
+        <button class="owner-primary" type="button" onclick="setOwnerAI(true)">تشغيل الذكاء الاصطناعي</button>
+        <button class="owner-danger" type="button" onclick="setOwnerAI(false)">إطفاء الذكاء الاصطناعي</button>
+      </div>
+      <div class="owner-actions">
+        <button class="owner-secondary" type="button" onclick="refreshOwnerStatus()">تحديث الحالة</button>
+        <button class="owner-secondary" type="button" onclick="ownerLogout()">تسجيل خروج</button>
+      </div>
+      <div id="ownerPanelNotice" role="status" class="owner-notice"></div>
+    </div>
   </section>
 </div>
 
@@ -1301,6 +1354,77 @@ Math.min(this.scrollHeight,150) + "px";
 
 });
 
+
+
+/* لوحة الأونر — المصادقة والتحكم تتم على Worker */
+let ownerToken = null;
+function openOwnerModal(){
+  $("ownerModal").classList.add("open");
+  $("ownerLogin").hidden = !ownerToken;
+  $("ownerPanel").hidden = !ownerToken;
+  $("ownerNotice").textContent = "";
+  if(ownerToken) refreshOwnerStatus();
+  else $("ownerPassword").focus();
+}
+function closeOwnerModal(){
+  $("ownerModal").classList.remove("open");
+  $("ownerPassword").value = "";
+}
+async function ownerLogin(){
+  const password = $("ownerPassword").value;
+  if(!password){ $("ownerNotice").textContent = "أدخل كلمة المرور."; return; }
+  $("ownerNotice").textContent = "جارٍ التحقق...";
+  try{
+    const r = await fetch(API + "/owner/status",{headers:{Authorization:"Bearer " + password},cache:"no-store"});
+    const d = await r.json();
+    if(r.status===401) throw new Error("كلمة المرور غير صحيحة.");
+    if(!r.ok || !d.success) throw new Error(d.error || "تعذر التحقق من المالك.");
+    ownerToken = password;
+    $("ownerPassword").value = "";
+    $("ownerLogin").hidden = true;
+    $("ownerPanel").hidden = false;
+    renderOwnerState(d.enabled);
+    $("ownerPanelNotice").textContent = "تم التحقق بنجاح.";
+  }catch(e){ $("ownerNotice").textContent = e.message; }
+}
+function renderOwnerState(enabled){
+  const el=$("ownerState");
+  el.textContent=enabled ? "● الذكاء الاصطناعي يعمل لجميع زوار الموقع" : "● الذكاء الاصطناعي مطفأ لجميع زوار الموقع";
+  el.classList.toggle("off",!enabled);
+}
+async function refreshOwnerStatus(){
+  if(!ownerToken) return;
+  $("ownerPanelNotice").textContent="جارٍ تحديث الحالة...";
+  try{
+    const r=await fetch(API+"/owner/status",{headers:{Authorization:"Bearer "+ownerToken},cache:"no-store"});
+    const d=await r.json();
+    if(r.status===401){ownerLogout();throw new Error("انتهت صلاحية التحقق.");}
+    if(!r.ok||!d.success) throw new Error(d.error||"تعذر قراءة الحالة.");
+    renderOwnerState(d.enabled);
+    $("ownerPanelNotice").textContent="تم تحديث الحالة.";
+  }catch(e){$("ownerPanelNotice").textContent=e.message;}
+}
+async function setOwnerAI(enabled){
+  if(!ownerToken) return;
+  $("ownerPanelNotice").textContent="جارٍ تنفيذ الأمر...";
+  try{
+    const r=await fetch(API+"/owner/toggle",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+ownerToken},body:JSON.stringify({enabled})});
+    const d=await r.json();
+    if(r.status===401){ownerLogout();throw new Error("انتهت صلاحية التحقق.");}
+    if(!r.ok||!d.success) throw new Error(d.error||"تعذر تغيير حالة الذكاء الاصطناعي.");
+    renderOwnerState(d.enabled);
+    $("ownerPanelNotice").textContent=d.enabled?"تم تشغيل الذكاء الاصطناعي.":"تم إطفاء الذكاء الاصطناعي على مستوى الموقع.";
+  }catch(e){$("ownerPanelNotice").textContent=e.message;}
+}
+function ownerLogout(){
+  ownerToken=null;
+  $("ownerLogin").hidden=false;
+  $("ownerPanel").hidden=true;
+  $("ownerPassword").value="";
+  $("ownerNotice").textContent="تم تسجيل الخروج.";
+  $("ownerPanelNotice").textContent="";
+}
+$("ownerPassword").addEventListener("keydown",e=>{if(e.key==="Enter") ownerLogin();});
 
 /* فحص اتصال الخادم */
 
