@@ -1408,7 +1408,7 @@ Math.min(this.scrollHeight,150) + "px";
 let ownerToken = null;
 function openOwnerModal(){
   $("ownerModal").classList.add("open");
-  $("ownerLogin").hidden = !ownerToken;
+  $("ownerLogin").hidden = !!ownerToken;
   $("ownerPanel").hidden = !ownerToken;
   $("ownerNotice").textContent = "";
   if(ownerToken) refreshOwnerStatus();
