@@ -1184,63 +1184,76 @@ return null;
 
 /* إرسال الطلب إلى Worker */
 
+async function callGhostModel(extraSystem = ""){
+  const response = await fetch(API + "/chat", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      messages:[
+        {role:"system",content:systemPrompt},
+        ...messages,
+        ...(extraSystem ? [{role:"system",content:extraSystem}] : [])
+      ]
+    })
+  });
+  let data;
+  try { data = await response.json(); }
+  catch { throw new Error("الخادم أرجع استجابة غير مفهومة."); }
+  if(!response.ok || data.success === false)
+    throw new Error(data.error || `فشل الاتصال بالخادم HTTP ${response.status}`);
+  const answer = extractAnswer(data);
+  if(!answer) throw new Error("وصل رد من الخادم لكن لم أجد نص الإجابة.");
+  return answer;
+}
+
+/* مخطط الأدوات: النموذج يختار من أدوات محددة فقط، والتنفيذ محصور بقائمة آمنة */
 async function requestAI(){
-
-/* المسار /chat متوافق مع Worker 17.0 */
-
-const response = await fetch(API + "/chat",{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-messages:[
-{role:"system",content:systemPrompt},
-...messages
-]
-
-})
-
-});
-
-let data;
-
-try{
-
-data = await response.json();
-
-}catch{
-
-throw new Error(
-"الخادم أرجع استجابة غير مفهومة. تحقق من Worker."
-);
-
-}
-
-if(!response.ok || data.success === false){
-
-throw new Error(
-data.error || `فشل الاتصال بالخادم HTTP ${response.status}`
-);
-
-}
-
-const answer = extractAnswer(data);
-
-if(!answer){
-
-throw new Error(
-"وصل رد من الخادم لكن لم أجد نص الإجابة."
-);
-
-}
-
-return answer;
-
+  const toolGuide = `
+أنت الآن مخطط أدوات Ghost. قرر هل تحتاج إحدى الأدوات التالية لتنفيذ آخر طلب للمستخدم.
+أعد JSON فقط دون Markdown:
+{"tool":"none"}
+أو:
+{"tool":"create_website","brief":"وصف كامل للموقع"}
+{"tool":"generate_image","prompt":"وصف الصورة"}
+{"tool":"check_api_status"}
+{"tool":"check_site_builder_status"}
+اختر أداة فقط إذا طلب المستخدم تنفيذها صراحة أو كان ذلك ضرورياً بوضوح. لا تختر أداة لمجرد سؤال معلوماتي. لا تخترع أدوات أو خصائص أو معاملات. لا تطلب أو تنفذ أوامر نظام أو Termux أو ملفات أو حسابات أو مفاتيح. إذا لم تنطبق أداة، أعد {"tool":"none"}.
+`;
+  let planText = "";
+  try { planText = await callGhostModel(toolGuide); } catch { return await callGhostModel(); }
+  let plan = null;
+  try {
+    const clean = planText.trim().replace(/^\`\`\`(?:json)?\s*/i,"").replace(/\s*\`\`\`$/,"");
+    plan = JSON.parse(clean);
+  } catch { return planText; }
+  if(!plan || typeof plan !== "object" || typeof plan.tool !== "string") return planText;
+  if(plan.tool === "none") return await callGhostModel();
+  let result;
+  if(plan.tool === "create_website"){
+    const brief = typeof plan.brief === "string" ? plan.brief.trim() : "";
+    if(brief.length < 10 || brief.length > 7000) return "لم أستطع تحديد وصف كافٍ للموقع. اكتب وصف الموقع بشكل أوضح.";
+    result = await createWebsiteFromChat(brief);
+  } else if(plan.tool === "generate_image"){
+    const prompt = typeof plan.prompt === "string" ? plan.prompt.trim() : "";
+    if(prompt.length < 5 || prompt.length > 1800) return "أحتاج وصفاً أوضح للصورة قبل إنشائها.";
+    const r = await fetch(API + "/generate-image", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({prompt:prompt + "\\n\\nGenerate only the visual composition. Do not render text, letters, logos, or watermarks."})
+    });
+    const d = await r.json();
+    if(!r.ok || !d.success || typeof d.image !== "string") throw new Error(d.error || "تعذر إنشاء الصورة.");
+    const imageUrl = "data:" + (d.mime || "image/jpeg") + ";base64," + d.image;
+    return {text:"تم إنشاء الصورة بناءً على طلبك.", image:imageUrl};
+  } else if(plan.tool === "check_api_status" || plan.tool === "check_site_builder_status"){
+    const target = plan.tool === "check_api_status" ? API + "/health" : "https://ghost-site-builder.sdrhaldwany.workers.dev/health";
+    const r = await fetch(target,{cache:"no-store"});
+    const d = await r.json();
+    if(!r.ok) throw new Error("فشل فحص الخدمة: HTTP " + r.status);
+    result = "نتيجة فحص الخدمة:\\n" + JSON.stringify(d,null,2);
+  } else {
+    return await callGhostModel();
+  }
+  return await callGhostModel("نتيجة تنفيذ الأداة المسموح بها (بيانات موثوقة من الخدمة):\\n" + String(result) + "\\nاكتب للمستخدم ملخصاً دقيقاً للنتيجة. لا تدّعِ نجاحاً يتجاوز هذه النتيجة.");
 }
 
 
@@ -1351,9 +1364,7 @@ scrollBottom();
 
 /* طلب الإجابة */
 
-const answer = (!imageFile && isWebsiteCreationRequest(text))
-  ? await createWebsiteFromChat(text)
-  : await requestAI();
+const answer = imageFile ? await callGhostModel() : await requestAI();
 
 typing.remove();
 
@@ -1367,7 +1378,11 @@ content:answer
 
 });
 
-addMessage("ai",answer);
+if(answer && typeof answer === "object" && answer.image){
+  addMessage("ai",answer.text || "تم تنفيذ أداة إنشاء الصور.",answer.image);
+}else{
+  addMessage("ai",typeof answer === "string" ? answer : String(answer));
+}
 
 }catch(error){
 
