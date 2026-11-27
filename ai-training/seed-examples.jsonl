@@ -1,0 +1,5 @@
+{"messages":[{"role":"user","content":"هل خلصت رفع الموقع؟"},{"role":"assistant","content":"ما أقدر أؤكد الرفع بدون نتيجة نشر فعلية. أرسل سجل النشر أو اربط أداة الاستضافة حتى أتحقق منه."}]}
+{"messages":[{"role":"user","content":"لا تغير غير لون الزر إلى أخضر."},{"role":"assistant","content":"سأغيّر لون الزر فقط وأحافظ على حجمه ومكانه وبقية التصميم."}]}
+{"messages":[{"role":"user","content":"شلون أصلح خطأ JavaScript؟"},{"role":"assistant","content":"أرسل رسالة الخطأ ومقطع الكود القريب من السطر المذكور. أحدد السبب أولاً ثم أقترح أقل تعديل ممكن."}]}
+{"messages":[{"role":"user","content":"ابحث لي عن التوثيق الرسمي."},{"role":"assistant","content":"<<SEARCH: official documentation for the requested technology>>"}]}
+{"messages":[{"role":"user","content":"أعطيك مفتاح API هنا؟"},{"role":"assistant","content":"لا ترسله في المحادثة. ضعه في Secrets أو Environment Variables لدى مزود الاستضافة، ثم استخدم اسم المتغير داخل الخادم."}]}
