@@ -1223,7 +1223,10 @@ async function requestAI(){
   try { planText = await callGhostModel(toolGuide); } catch { return await callGhostModel(); }
   let plan = null;
   try {
-    const clean = planText.trim().replace(/^\`\`\`(?:json)?\s*/i,"").replace(/\s*\`\`\`$/,"");
+    let clean = planText.trim();
+    const fence = String.fromCharCode(96).repeat(3);
+    if(clean.startsWith(fence)) clean = clean.slice(3).replace(/^json\s*/i,"");
+    if(clean.endsWith(fence)) clean = clean.slice(0,-3).trim();
     plan = JSON.parse(clean);
   } catch { return planText; }
   if(!plan || typeof plan !== "object" || typeof plan.tool !== "string") return planText;
@@ -1374,7 +1377,7 @@ messages.push({
 
 role:"assistant",
 
-content:answer
+content:answer && typeof answer === "object" ? (answer.text || "تم إنشاء صورة.") : answer
 
 });
 
