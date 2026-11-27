@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://norestrictions-api.sdrhaldwane.workers.dev https://norestrictions-agent.sdrhaldwane.workers.dev; font-src 'self' data:; media-src 'self' blob:; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://norestrictions-api.sdrhaldwane.workers.dev https://norestrictions-agent.sdrhaldwane.workers.dev https://ghost-site-builder.sdrhaldwany.workers.dev; font-src 'self' data:; media-src 'self' blob:; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="dark">
 <title>Ghost</title>
@@ -1228,8 +1228,8 @@ async function requestAI(){
     if(clean.startsWith(fence)) clean = clean.slice(3).replace(/^json\s*/i,"");
     if(clean.endsWith(fence)) clean = clean.slice(0,-3).trim();
     plan = JSON.parse(clean);
-  } catch { return planText; }
-  if(!plan || typeof plan !== "object" || typeof plan.tool !== "string") return planText;
+  } catch { return await callGhostModel(); }
+  if(!plan || typeof plan !== "object" || typeof plan.tool !== "string") return await callGhostModel();
   if(plan.tool === "none") return await callGhostModel();
   let result;
   if(plan.tool === "create_website"){
