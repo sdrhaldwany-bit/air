@@ -527,12 +527,18 @@ line-height:1.7
   </div>
   <div id="siteStudioNotice" class="site-studio-notice" role="status">سيتم إنشاء ملف HTML مستقل قابل للمعاينة والتنزيل. لا تنشر بيانات سرية أو مفاتيح API في وصف الموقع.</div>
   <div id="siteStudioResult" hidden>
+   <div id="publishedSiteBox" class="site-studio-notice" hidden>
+    <strong>تم نشر موقعك على حساب الاستضافة المخصص.</strong>
+    <p><a id="publishedSiteLink" href="#" target="_blank" rel="noopener noreferrer">فتح الموقع المنشور</a></p>
+    <button class="site-studio-secondary" type="button" onclick="copyPublishedSite()">نسخ رابط الموقع</button>
+    <small>الرابط عام، والموقع محفوظ لمدة سنة من تاريخ الإنشاء.</small>
+   </div>
    <div class="site-studio-actions">
     <button class="site-studio-primary" type="button" onclick="downloadGeneratedSite()">تنزيل الموقع HTML</button>
     <button class="site-studio-secondary" type="button" onclick="toggleSiteCode()">عرض/إخفاء الكود</button>
    </div>
    <iframe id="sitePreview" class="site-studio-preview" title="معاينة الموقع الذي أنشأه Ghost" sandbox="allow-scripts"></iframe>
-   <pre div>
+   <pre id="siteCode" hidden></pre>
 
 </div>
 
@@ -1551,15 +1557,21 @@ $("imagePrompt").addEventListener("keydown",e=>{
 });
 
 
-/* Ghost Website Studio — generation, sandboxed preview, and export */
+/* Ghost Website Studio — generate, preview, publish and export */
 let generatedSiteHTML = "";
+let publishedSiteURL = "";
 function openSiteStudio(){
   $("siteStudioModal").classList.add("open");
-  $("siteStudioNotice").textContent="اكتب وصفك، وسيتولى Ghost بناء الصفحة.";
+  $("siteStudioNotice").textContent="اكتب وصفك، وسيبني Ghost موقعك وينشره تلقائياً.";
   $("siteBrief").focus();
 }
 function closeSiteStudio(){ $("siteStudioModal").classList.remove("open"); }
 function toggleSiteCode(){ $("siteCode").hidden=!$("siteCode").hidden; }
+async function copyPublishedSite(){
+  if(!publishedSiteURL) return;
+  try{ await navigator.clipboard.writeText(publishedSiteURL); $("siteStudioNotice").textContent="تم نسخ رابط موقعك."; }
+  catch{ $("siteStudioNotice").textContent="تعذر النسخ تلقائياً؛ اضغط مطولاً على الرابط لنسخه."; }
+}
 function downloadGeneratedSite(){
   if(!generatedSiteHTML) return;
   const blob=new Blob([generatedSiteHTML],{type:"text/html;charset=utf-8"});
@@ -1574,24 +1586,30 @@ async function buildWebsite(){
   const btn=$("buildSiteBtn"),notice=$("siteStudioNotice");
   if(!brief){notice.textContent="اكتب وصف الموقع أولاً.";return;}
   if(brief.length>7000){notice.textContent="الوصف طويل جداً؛ اختصره قليلاً.";return;}
-  btn.disabled=true;btn.textContent="Ghost يبني الموقع...";
-  notice.textContent="جارٍ التخطيط والتصميم وكتابة HTML وCSS وJavaScript. قد يستغرق ذلك دقيقة...";
-  $("siteStudioResult").hidden=true;generatedSiteHTML="";
+  btn.disabled=true;btn.textContent="Ghost يبني وينشر...";
+  notice.textContent="جارٍ إنشاء الموقع وحفظه على حساب الاستضافة المخصص...";
+  $("siteStudioResult").hidden=true;generatedSiteHTML="";publishedSiteURL="";
+  $("publishedSiteBox").hidden=true;
   try{
     const r=await fetch("https://ghost-site-builder.sdrhaldwany.workers.dev/site/generate",{
       method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({brief})
     });
     const d=await r.json();
-    if(!r.ok||!d.success) throw new Error(d.error||"تعذر إنشاء الموقع.");
-    if(typeof d.html!=="string"||!d.html.toLowerCase().includes("<html")) throw new Error("لم يرجع النموذج ملف HTML كاملاً. أعد المحاولة بوصف أقصر.");
+    if(!r.ok||!d.success) throw new Error(d.error||"تعذر إنشاء الموقع أو نشره.");
+    if(typeof d.html!=="string"||!d.html.toLowerCase().includes("<html")) throw new Error("لم يرجع النموذج ملف HTML كاملاً. أعد المحاولة بوصف أوضح.");
+    if(typeof d.url!=="string"||!d.url.startsWith("https://ghost-site-builder.sdrhaldwany.workers.dev/p/")) throw new Error("تم إنشاء HTML لكن لم يصل رابط النشر.");
     generatedSiteHTML=d.html;
+    publishedSiteURL=d.url;
     $("sitePreview").srcdoc=generatedSiteHTML;
     $("siteCode").textContent=generatedSiteHTML;
+    $("publishedSiteLink").href=publishedSiteURL;
+    $("publishedSiteLink").textContent=publishedSiteURL;
+    $("publishedSiteBox").hidden=false;
     $("siteStudioResult").hidden=false;
-    notice.textContent="اكتمل إنشاء الموقع. افحص المعاينة، ثم نزّل ملف HTML. النشر العام يحتاج ربط خدمة استضافة قبل تفعيله.";
+    notice.textContent="اكتمل إنشاء موقعك ونشره. افتح الرابط العام أو انسخه وشاركه.";
   }catch(e){notice.textContent=e.message||"حدث خطأ أثناء بناء الموقع.";}
-  finally{btn.disabled=false;btn.textContent="إعادة بناء الموقع";}
+  finally{btn.disabled=false;btn.textContent="إنشاء موقع جديد";}
 }
 
 /* فحص اتصال الخادم */
